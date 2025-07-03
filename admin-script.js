@@ -1531,29 +1531,63 @@ class AdminDashboard {
         const vanName = van ? van.name : 'Unassigned';
         const fileSize = (item.size / 1024 / 1024).toFixed(1);
         
-        return `
-            <div class="media-item" data-item-id="${item.id}">
-                <img src="${item.dataUrl}" alt="${item.name}" class="media-item-image">
-                <div class="media-item-actions">
-                    <button class="media-action-btn" onclick="event.stopPropagation(); adminDashboard.openMediaModal('${item.id}')">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                </div>
-                <div class="media-item-info">
-                    <div class="media-item-name">${item.name}</div>
-                    <div class="media-item-details">${fileSize}MB</div>
-                    <div class="media-item-assignment">
-                        <span class="assignment-badge ${item.assignedVan ? (item.isPrimary ? 'primary' : '') : 'unassigned'}">
-                            ${item.isPrimary ? '★ ' : ''}${vanName}
-                        </span>
-                    </div>
-                    ${item.category ? `<div class="media-item-category">
-                        <i class="fas fa-tag"></i>
-                        ${item.category}
-                    </div>` : ''}
-                </div>
-            </div>
-        `;
+        const mediaItem = document.createElement('div');
+        mediaItem.className = 'media-item';
+        mediaItem.dataset.itemId = item.id;
+
+        const img = document.createElement('img');
+        img.src = item.dataUrl;
+        img.alt = item.name; // Safe assignment
+        img.className = 'media-item-image';
+        mediaItem.appendChild(img);
+
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'media-item-actions';
+        const actionButton = document.createElement('button');
+        actionButton.className = 'media-action-btn';
+        actionButton.onclick = (event) => {
+            event.stopPropagation();
+            adminDashboard.openMediaModal(item.id);
+        };
+        const actionIcon = document.createElement('i');
+        actionIcon.className = 'fas fa-edit';
+        actionButton.appendChild(actionIcon);
+        actionsDiv.appendChild(actionButton);
+        mediaItem.appendChild(actionsDiv);
+
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'media-item-info';
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'media-item-name';
+        nameDiv.textContent = item.name; // Safe assignment
+        infoDiv.appendChild(nameDiv);
+
+        const detailsDiv = document.createElement('div');
+        detailsDiv.className = 'media-item-details';
+        detailsDiv.textContent = `${fileSize}MB`;
+        infoDiv.appendChild(detailsDiv);
+
+        const assignmentDiv = document.createElement('div');
+        assignmentDiv.className = 'media-item-assignment';
+        const assignmentBadge = document.createElement('span');
+        assignmentBadge.className = `assignment-badge ${item.assignedVan ? (item.isPrimary ? 'primary' : '') : 'unassigned'}`;
+        assignmentBadge.textContent = `${item.isPrimary ? '★ ' : ''}${vanName}`;
+        assignmentDiv.appendChild(assignmentBadge);
+        infoDiv.appendChild(assignmentDiv);
+
+        if (item.category) {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'media-item-category';
+            const categoryIcon = document.createElement('i');
+            categoryIcon.className = 'fas fa-tag';
+            categoryDiv.appendChild(categoryIcon);
+            const categoryText = document.createTextNode(item.category);
+            categoryDiv.appendChild(categoryText);
+            infoDiv.appendChild(categoryDiv);
+        }
+
+        mediaItem.appendChild(infoDiv);
+        return mediaItem.outerHTML;
     }
 
     openMediaModal(itemId) {
