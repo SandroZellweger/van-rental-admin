@@ -64,6 +64,12 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a href="#media" class="nav-link" data-section="media">
+                        <i class="fas fa-images"></i>
+                        <span>Media Manager</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="#pricing" class="nav-link" data-section="pricing">
                         <i class="fas fa-tags"></i>
                         <span>Pricing Profiles</span>
@@ -647,6 +653,75 @@
             </div>
         </section>
 
+        <!-- Media Manager Section -->
+        <section id="media" class="content-section">
+            <div class="section-header">
+                <h3>Media Manager</h3>
+                <button class="btn btn-primary" id="upload-media-btn">
+                    <i class="fas fa-upload"></i>
+                    Upload Images
+                </button>
+            </div>
+
+            <div class="media-manager-container">
+                <!-- Upload Area -->
+                <div class="media-upload-section">
+                    <div class="upload-dropzone" id="upload-dropzone">
+                        <div class="upload-content">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <h4>Drop images here or click to browse</h4>
+                            <p>Supports JPG, PNG, GIF, WebP (max 5MB each)</p>
+                            <input type="file" id="file-input" multiple accept="image/*" style="display: none;">
+                        </div>
+                    </div>
+                    
+                    <div class="upload-progress" id="upload-progress" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill"></div>
+                        </div>
+                        <span class="progress-text" id="progress-text">0%</span>
+                    </div>
+                </div>
+
+                <!-- Media Gallery -->
+                <div class="media-gallery-section">
+                    <div class="media-filters">
+                        <div class="filter-group">
+                            <label for="van-filter">Filter by Van:</label>
+                            <select id="van-filter">
+                                <option value="">All Vans</option>
+                                <option value="unassigned">Unassigned</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="category-filter">Category:</label>
+                            <select id="category-filter">
+                                <option value="">All Categories</option>
+                                <option value="exterior">Exterior</option>
+                                <option value="interior">Interior</option>
+                                <option value="features">Features</option>
+                                <option value="360">360° View</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <button class="btn btn-secondary" id="clear-filters-btn">Clear Filters</button>
+                        </div>
+                    </div>
+
+                    <div class="media-grid" id="media-grid">
+                        <!-- Media items will be populated here -->
+                    </div>
+                </div>
+
+                <!-- No Media Message -->
+                <div class="no-media-message" id="no-media-message" style="display: none;">
+                    <i class="fas fa-image"></i>
+                    <h4>No images uploaded yet</h4>
+                    <p>Upload your first van images to get started</p>
+                </div>
+            </div>
+        </section>
+
         <!-- Pricing Profiles Section -->
         <section id="pricing" class="content-section">
             <div class="section-header">
@@ -867,6 +942,76 @@
             </div>
             <div class="modal-body" id="van-modal-body">
                 <!-- Van details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Media Assignment Modal -->
+    <div id="media-modal" class="modal">
+        <div class="modal-content media-modal-content">
+            <div class="modal-header">
+                <h3>Manage Image</h3>
+                <span class="close" id="close-media-modal">&times;</span>
+            </div>
+            <div class="modal-body" id="media-modal-body">
+                <div class="media-preview-section">
+                    <div class="media-preview-container">
+                        <img id="media-preview-image" src="" alt="Preview" />
+                        <div class="media-info">
+                            <h4 id="media-filename">filename.jpg</h4>
+                            <p id="media-details">Size: 1.2MB | 1920x1080</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="media-assignment-section">
+                    <div class="assignment-form">
+                        <div class="form-group">
+                            <label for="assign-van">Assign to Van:</label>
+                            <select id="assign-van">
+                                <option value="">Select Van</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="image-category">Category:</label>
+                            <select id="image-category">
+                                <option value="">Select Category</option>
+                                <option value="exterior">Exterior</option>
+                                <option value="interior">Interior</option>
+                                <option value="features">Features</option>
+                                <option value="360">360° View</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="image-description">Description:</label>
+                            <textarea id="image-description" placeholder="Optional description for this image"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="set-as-primary">
+                                Set as primary image for this van
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="media-actions">
+                    <button class="btn btn-primary" id="save-media-assignment">
+                        <i class="fas fa-save"></i>
+                        Save Assignment
+                    </button>
+                    <button class="btn btn-danger" id="delete-media-item">
+                        <i class="fas fa-trash"></i>
+                        Delete Image
+                    </button>
+                    <button class="btn btn-secondary" id="download-media-item">
+                        <i class="fas fa-download"></i>
+                        Download
+                    </button>
+                </div>
             </div>
         </div>
     </div>

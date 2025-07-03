@@ -9,6 +9,7 @@ class AdminDashboard {
         this.pricingRules = this.initializePricingRules();
         this.seasonalPricing = this.initializeSeasonalPricing();
         this.displayConfig = this.initializeDisplayConfiguration();
+        this.mediaItems = this.initializeMediaData();
         this.init();
     }
 
@@ -25,6 +26,7 @@ class AdminDashboard {
         this.renderGoogleSheetsSection();
         this.setupGoogleSheetsHandlers();
         this.setupVanManagementTabs();
+        this.setupMediaManager();
     }
 
     initializeVanData() {
@@ -1300,6 +1302,371 @@ class AdminDashboard {
         // Initialize display config tab on first load
         this.initializeDisplayConfigTab();
         this.updateDisplayPreview();
+    }
+
+    // Media Manager Methods
+    initializeMediaData() {
+        const stored = localStorage.getItem('vanRental_mediaItems');
+        return stored ? JSON.parse(stored) : [];
+    }
+
+    saveMediaData() {
+        localStorage.setItem('vanRental_mediaItems', JSON.stringify(this.mediaItems));
+    }
+
+    setupMediaManager() {
+        // Upload button click handler
+        document.getElementById('upload-media-btn')?.addEventListener('click', () => {
+            document.getElementById('file-input').click();
+        });
+
+        // File input change handler
+        document.getElementById('file-input')?.addEventListener('change', (e) => {
+            this.handleFileUpload(e.target.files);
+        });
+
+        // Setup drag and drop
+        this.setupDragAndDrop();
+
+        // Setup filters
+        this.setupMediaFilters();
+
+        // Setup modal handlers
+        this.setupMediaModal();
+
+        // Initial render
+        this.renderMediaGallery();
+        this.populateVanFilterOptions();
+    }
+
+    setupDragAndDrop() {
+        const dropzone = document.getElementById('upload-dropzone');
+        if (!dropzone) return;
+
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, this.preventDefaults, false);
+        });
+
+        // Highlight drop area when item is dragged over it
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, () => {
+                dropzone.classList.add('dragover');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, () => {
+                dropzone.classList.remove('dragover');
+            }, false);
+        });
+
+        // Handle dropped files
+        dropzone.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            this.handleFileUpload(files);
+        }, false);
+    }
+
+    preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    setupMediaFilters() {
+        const vanFilter = document.getElementById('van-filter');
+        const categoryFilter = document.getElementById('category-filter');
+        const clearFilters = document.getElementById('clear-filters-btn');
+
+        [vanFilter, categoryFilter].forEach(filter => {
+            filter?.addEventListener('change', () => {
+                this.renderMediaGallery();
+            });
+        });
+
+        clearFilters?.addEventListener('click', () => {
+            if (vanFilter) vanFilter.value = '';
+            if (categoryFilter) categoryFilter.value = '';
+            this.renderMediaGallery();
+        });
+    }
+
+    setupMediaModal() {
+        const modal = document.getElementById('media-modal');
+        const closeBtn = document.getElementById('close-media-modal');
+        const saveBtn = document.getElementById('save-media-assignment');
+        const deleteBtn = document.getElementById('delete-media-item');
+        const downloadBtn = document.getElementById('download-media-item');
+
+        closeBtn?.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+
+        modal?.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+
+        saveBtn?.addEventListener('click', () => {
+            this.saveMediaAssignment();
+        });
+
+        deleteBtn?.addEventListener('click', () => {
+            this.deleteMediaItem();
+        });
+
+        downloadBtn?.addEventListener('click', () => {
+            this.downloadMediaItem();
+        });
+    }
+
+    async handleFileUpload(files) {
+        const fileArray = Array.from(files);
+        const validFiles = fileArray.filter(file => {
+            const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            return validTypes.includes(file.type) && file.size <= maxSize;
+        });
+
+        if (validFiles.length === 0) {
+            this.showNotification('No valid image files selected', 'error');
+            return;
+        }
+
+        const progressSection = document.getElementById('upload-progress');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+
+        progressSection.style.display = 'flex';
+        
+        for (let i = 0; i < validFiles.length; i++) {
+            const file = validFiles[i];
+            const progress = ((i + 1) / validFiles.length) * 100;
+            
+            progressFill.style.width = `${progress}%`;
+            progressText.textContent = `${Math.round(progress)}%`;
+
+            await this.processFile(file);
+        }
+
+        progressSection.style.display = 'none';
+        this.renderMediaGallery();
+        this.showNotification(`${validFiles.length} image(s) uploaded successfully`, 'success');
+    }
+
+    async processFile(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const mediaItem = {
+                    id: Date.now() + Math.random(),
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    dataUrl: e.target.result,
+                    uploadDate: new Date().toISOString(),
+                    assignedVan: null,
+                    category: null,
+                    description: '',
+                    isPrimary: false
+                };
+
+                this.mediaItems.push(mediaItem);
+                this.saveMediaData();
+                
+                // Simulate processing time
+                setTimeout(() => resolve(), 100);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    renderMediaGallery() {
+        const mediaGrid = document.getElementById('media-grid');
+        const noMediaMessage = document.getElementById('no-media-message');
+
+        if (!mediaGrid) return;
+
+        const vanFilter = document.getElementById('van-filter')?.value;
+        const categoryFilter = document.getElementById('category-filter')?.value;
+
+        // Filter media items
+        let filteredItems = this.mediaItems;
+
+        if (vanFilter) {
+            if (vanFilter === 'unassigned') {
+                filteredItems = filteredItems.filter(item => !item.assignedVan);
+            } else {
+                filteredItems = filteredItems.filter(item => item.assignedVan === vanFilter);
+            }
+        }
+
+        if (categoryFilter) {
+            filteredItems = filteredItems.filter(item => item.category === categoryFilter);
+        }
+
+        if (filteredItems.length === 0) {
+            mediaGrid.innerHTML = '';
+            noMediaMessage.style.display = 'block';
+            return;
+        }
+
+        noMediaMessage.style.display = 'none';
+        mediaGrid.innerHTML = filteredItems.map(item => this.createMediaItemHTML(item)).join('');
+
+        // Add click handlers
+        mediaGrid.querySelectorAll('.media-item').forEach(element => {
+            element.addEventListener('click', (e) => {
+                if (!e.target.closest('.media-action-btn')) {
+                    const itemId = element.dataset.itemId;
+                    this.openMediaModal(itemId);
+                }
+            });
+        });
+    }
+
+    createMediaItemHTML(item) {
+        const van = item.assignedVan ? this.vans.find(v => v.id.toString() === item.assignedVan) : null;
+        const vanName = van ? van.name : 'Unassigned';
+        const fileSize = (item.size / 1024 / 1024).toFixed(1);
+        
+        return `
+            <div class="media-item" data-item-id="${item.id}">
+                <img src="${item.dataUrl}" alt="${item.name}" class="media-item-image">
+                <div class="media-item-actions">
+                    <button class="media-action-btn" onclick="event.stopPropagation(); adminDashboard.openMediaModal('${item.id}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+                <div class="media-item-info">
+                    <div class="media-item-name">${item.name}</div>
+                    <div class="media-item-details">${fileSize}MB</div>
+                    <div class="media-item-assignment">
+                        <span class="assignment-badge ${item.assignedVan ? (item.isPrimary ? 'primary' : '') : 'unassigned'}">
+                            ${item.isPrimary ? '★ ' : ''}${vanName}
+                        </span>
+                    </div>
+                    ${item.category ? `<div class="media-item-category">
+                        <i class="fas fa-tag"></i>
+                        ${item.category}
+                    </div>` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    openMediaModal(itemId) {
+        const item = this.mediaItems.find(i => i.id.toString() === itemId);
+        if (!item) return;
+
+        const modal = document.getElementById('media-modal');
+        const previewImage = document.getElementById('media-preview-image');
+        const filename = document.getElementById('media-filename');
+        const details = document.getElementById('media-details');
+        const assignVan = document.getElementById('assign-van');
+        const imageCategory = document.getElementById('image-category');
+        const imageDescription = document.getElementById('image-description');
+        const setPrimary = document.getElementById('set-as-primary');
+
+        // Set preview
+        previewImage.src = item.dataUrl;
+        filename.textContent = item.name;
+        details.textContent = `Size: ${(item.size / 1024 / 1024).toFixed(1)}MB | Uploaded: ${new Date(item.uploadDate).toLocaleDateString()}`;
+
+        // Set form values
+        assignVan.value = item.assignedVan || '';
+        imageCategory.value = item.category || '';
+        imageDescription.value = item.description || '';
+        setPrimary.checked = item.isPrimary;
+
+        // Store current item ID
+        modal.dataset.currentItemId = itemId;
+
+        // Populate van options
+        this.populateVanOptions(assignVan);
+
+        modal.classList.add('active');
+    }
+
+    populateVanOptions(selectElement) {
+        if (!selectElement) return;
+
+        const options = ['<option value="">Select Van</option>'];
+        this.vans.forEach(van => {
+            options.push(`<option value="${van.id}">${van.name}</option>`);
+        });
+        selectElement.innerHTML = options.join('');
+    }
+
+    populateVanFilterOptions() {
+        const vanFilter = document.getElementById('van-filter');
+        if (!vanFilter) return;
+
+        const options = ['<option value="">All Vans</option>', '<option value="unassigned">Unassigned</option>'];
+        this.vans.forEach(van => {
+            options.push(`<option value="${van.id}">${van.name}</option>`);
+        });
+        vanFilter.innerHTML = options.join('');
+    }
+
+    saveMediaAssignment() {
+        const modal = document.getElementById('media-modal');
+        const itemId = modal.dataset.currentItemId;
+        const item = this.mediaItems.find(i => i.id.toString() === itemId);
+        
+        if (!item) return;
+
+        const assignVan = document.getElementById('assign-van').value;
+        const imageCategory = document.getElementById('image-category').value;
+        const imageDescription = document.getElementById('image-description').value;
+        const setPrimary = document.getElementById('set-as-primary').checked;
+
+        // If setting as primary, remove primary flag from other images of the same van
+        if (setPrimary && assignVan) {
+            this.mediaItems.forEach(mediaItem => {
+                if (mediaItem.assignedVan === assignVan && mediaItem.id !== item.id) {
+                    mediaItem.isPrimary = false;
+                }
+            });
+        }
+
+        // Update item
+        item.assignedVan = assignVan;
+        item.category = imageCategory;
+        item.description = imageDescription;
+        item.isPrimary = setPrimary;
+
+        this.saveMediaData();
+        this.renderMediaGallery();
+        modal.classList.remove('active');
+        this.showNotification('Image assignment saved successfully', 'success');
+    }
+
+    deleteMediaItem() {
+        const modal = document.getElementById('media-modal');
+        const itemId = modal.dataset.currentItemId;
+        
+        if (!confirm('Are you sure you want to delete this image?')) return;
+
+        this.mediaItems = this.mediaItems.filter(item => item.id.toString() !== itemId);
+        this.saveMediaData();
+        this.renderMediaGallery();
+        modal.classList.remove('active');
+        this.showNotification('Image deleted successfully', 'success');
+    }
+
+    downloadMediaItem() {
+        const modal = document.getElementById('media-modal');
+        const itemId = modal.dataset.currentItemId;
+        const item = this.mediaItems.find(i => i.id.toString() === itemId);
+        
+        if (!item) return;
+
+        const link = document.createElement('a');
+        link.href = item.dataUrl;
+        link.download = item.name;
+        link.click();
     }
 
     setupPricingTabs() {

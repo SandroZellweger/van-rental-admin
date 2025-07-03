@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Manager Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .test-image {
+            width: 100%;
+            height: 150px;
+            background: linear-gradient(45deg, #85b545, #a8d064);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .test-image:hover {
+            transform: scale(1.05);
+        }
+        .instructions {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #85b545;
+            margin-bottom: 20px;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        .feature-list li i {
+            color: #85b545;
+            margin-right: 10px;
+        }
+        .btn {
+            background: #85b545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #73a03d;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="test-container">
+        <h1><i class="fas fa-images"></i> Media Manager Test Page</h1>
+        
+        <div class="instructions">
+            <h3>🎯 Testing Instructions</h3>
+            <p>The Media Manager has been successfully implemented! Here's what you can test:</p>
+        </div>
+
+        <div class="test-container">
+            <h2>📋 Features Implemented</h2>
+            <ul class="feature-list">
+                <li><i class="fas fa-check"></i> <strong>File Upload:</strong> Drag & drop or click to upload images</li>
+                <li><i class="fas fa-check"></i> <strong>Image Preview:</strong> View uploaded images in a grid layout</li>
+                <li><i class="fas fa-check"></i> <strong>Van Assignment:</strong> Assign images to specific vans</li>
+                <li><i class="fas fa-check"></i> <strong>Category System:</strong> Organize images by exterior, interior, features, 360°</li>
+                <li><i class="fas fa-check"></i> <strong>Primary Image:</strong> Set primary images for each van</li>
+                <li><i class="fas fa-check"></i> <strong>Filtering:</strong> Filter images by van or category</li>
+                <li><i class="fas fa-check"></i> <strong>Image Management:</strong> Edit, delete, and download images</li>
+                <li><i class="fas fa-check"></i> <strong>Local Storage:</strong> Images persist in browser storage</li>
+                <li><i class="fas fa-check"></i> <strong>Responsive Design:</strong> Works on desktop and mobile</li>
+                <li><i class="fas fa-check"></i> <strong>Accessibility:</strong> Keyboard navigation and screen reader support</li>
+            </ul>
+        </div>
+
+        <div class="test-container">
+            <h2>🧪 Test Steps</h2>
+            <ol>
+                <li><strong>Open Admin Dashboard:</strong> Click the button below to access the media manager</li>
+                <li><strong>Upload Images:</strong> Try uploading sample van images (JPG, PNG, GIF, WebP)</li>
+                <li><strong>Assign to Vans:</strong> Click on uploaded images to assign them to specific vans</li>
+                <li><strong>Set Categories:</strong> Organize images by exterior, interior, features, etc.</li>
+                <li><strong>Test Filtering:</strong> Use the filter dropdowns to sort images</li>
+                <li><strong>Set Primary Images:</strong> Mark images as primary for each van</li>
+                <li><strong>Test Drag & Drop:</strong> Drag images directly onto the upload area</li>
+                <li><strong>Mobile Testing:</strong> Test on mobile devices for responsiveness</li>
+            </ol>
+        </div>
+
+        <div class="test-container">
+            <h2>📱 Navigation</h2>
+            <p>In the admin dashboard, look for the <strong>"Media Manager"</strong> tab in the sidebar with the <i class="fas fa-images"></i> icon.</p>
+            <a href="admin.html" class="btn">
+                <i class="fas fa-external-link-alt"></i> Open Admin Dashboard
+            </a>
+        </div>
+
+        <div class="test-container">
+            <h2>🖼️ Sample Test Images</h2>
+            <p>You can use these placeholder images for testing (right-click and save):</p>
+            <div class="test-images">
+                <div class="test-image">
+                    <div>
+                        <i class="fas fa-truck" style="font-size: 2rem; margin-bottom: 10px;"></i><br>
+                        Van Exterior<br>
+                        <small>Test Image 1</small>
+                    </div>
+                </div>
+                <div class="test-image">
+                    <div>
+                        <i class="fas fa-bed" style="font-size: 2rem; margin-bottom: 10px;"></i><br>
+                        Van Interior<br>
+                        <small>Test Image 2</small>
+                    </div>
+                </div>
+                <div class="test-image">
+                    <div>
+                        <i class="fas fa-cog" style="font-size: 2rem; margin-bottom: 10px;"></i><br>
+                        Van Features<br>
+                        <small>Test Image 3</small>
+                    </div>
+                </div>
+                <div class="test-image">
+                    <div>
+                        <i class="fas fa-sync-alt" style="font-size: 2rem; margin-bottom: 10px;"></i><br>
+                        360° View<br>
+                        <small>Test Image 4</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-container">
+            <h2>⚙️ Technical Details</h2>
+            <ul class="feature-list">
+                <li><i class="fas fa-database"></i> <strong>Storage:</strong> Local Storage (browser-based)</li>
+                <li><i class="fas fa-file-image"></i> <strong>Formats:</strong> JPG, PNG, GIF, WebP</li>
+                <li><i class="fas fa-weight"></i> <strong>Max Size:</strong> 5MB per image</li>
+                <li><i class="fas fa-mobile-alt"></i> <strong>Responsive:</strong> Works on all device sizes</li>
+                <li><i class="fas fa-shield-alt"></i> <strong>Security:</strong> Client-side processing only</li>
+                <li><i class="fas fa-sync"></i> <strong>Persistence:</strong> Data survives browser refresh</li>
+            </ul>
+        </div>
+
+        <div class="test-container">
+            <h2>🔄 Next Steps</h2>
+            <p>After testing the media manager, consider these enhancements:</p>
+            <ul class="feature-list">
+                <li><i class="fas fa-cloud"></i> <strong>Cloud Storage:</strong> AWS S3 or Google Cloud integration</li>
+                <li><i class="fas fa-compress"></i> <strong>Image Optimization:</strong> Automatic resizing and compression</li>
+                <li><i class="fas fa-users"></i> <strong>Multi-user Support:</strong> User permissions and access control</li>
+                <li><i class="fas fa-search"></i> <strong>Search Function:</strong> Find images by name or description</li>
+                <li><i class="fas fa-tags"></i> <strong>Advanced Tagging:</strong> Custom tags and metadata</li>
+                <li><i class="fas fa-history"></i> <strong>Version Control:</strong> Track image changes and history</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
