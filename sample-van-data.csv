@@ -1,0 +1,10 @@
+id,name,type,enabled,location,base_price,capacity,pricing_profile,calendar_id,features,description,image_url
+1,Compact Van #1,compact,TRUE,City Center,80,2,standard,compact-van-1@example.com,"GPS,AC,Bluetooth",Perfect for city trips and short getaways,images/compact-van-1.svg
+2,Compact Van #2,compact,TRUE,Airport,80,2,standard,compact-van-2@example.com,"GPS,AC,Bluetooth",Perfect for city trips and short getaways,images/compact-van-2.svg
+3,Standard Van #1,standard,TRUE,Downtown,120,4,premium,standard-van-1@example.com,"GPS,AC,Bluetooth,Kitchen,Bed",Great for family adventures and weekend trips,images/standard-van-1.svg
+4,Standard Van #2,standard,FALSE,Workshop,120,4,premium,standard-van-2@example.com,"GPS,AC,Bluetooth,Kitchen,Bed",Great for family adventures and weekend trips,images/standard-van-2.svg
+5,Standard Van #3,standard,TRUE,Train Station,120,4,standard,standard-van-3@example.com,"GPS,AC,Bluetooth,Kitchen,Bed",Great for family adventures and weekend trips,images/standard-van-3.svg
+6,Luxury Van #1,luxury,TRUE,Hotel District,180,4,luxury,luxury-van-1@example.com,"GPS,AC,Bluetooth,Kitchen,Bed,Solar,Premium Interior",Ultimate comfort for long-distance travel,images/luxury-van-1.svg
+7,Luxury Van #2,luxury,TRUE,City Center,180,4,luxury,luxury-van-2@example.com,"GPS,AC,Bluetooth,Kitchen,Bed,Solar,Premium Interior",Ultimate comfort for long-distance travel,images/luxury-van-2.svg
+8,Family Van #1,family,TRUE,Suburbs,150,6,family,family-van-1@example.com,"GPS,AC,Bluetooth,Kitchen,Double Bed,Storage",Spacious van perfect for family vacations,images/family-van-1.svg
+9,Family Van #2,family,TRUE,Airport,150,6,family,family-van-2@example.com,"GPS,AC,Bluetooth,Kitchen,Double Bed,Storage",Spacious van perfect for family vacations,images/family-van-2.svg

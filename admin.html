@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VanLife Admin Dashboard</title>
+    
+    <!-- Content Security Policy for Google OAuth -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self'; 
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.gstatic.com https://accounts.google.com https://cdnjs.cloudflare.com; 
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; 
+        font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; 
+        img-src 'self' data: blob: https:; 
+        connect-src 'self' https://www.googleapis.com https://accounts.google.com https://content.googleapis.com; 
+        frame-src 'self' https://accounts.google.com https://content.googleapis.com;
+        object-src 'none';
+    ">
+    
+    <link rel="stylesheet" href="admin-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-road"></i>
+                <span>VanLife Admin</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="nav-item active">
+                    <a href="#dashboard" class="nav-link" data-section="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#availability" class="nav-link" data-section="availability">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Availability Calendar</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#bookings" class="nav-link" data-section="bookings">
+                        <i class="fas fa-book-open"></i>
+                        <span>Bookings</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#search" class="nav-link" data-section="search">
+                        <i class="fas fa-search"></i>
+                        <span>Van Search</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#vans" class="nav-link" data-section="vans">
+                        <i class="fas fa-truck"></i>
+                        <span>Van Management</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#pricing" class="nav-link" data-section="pricing">
+                        <i class="fas fa-tags"></i>
+                        <span>Pricing Profiles</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#sheets" class="nav-link" data-section="sheets">
+                        <i class="fas fa-table"></i>
+                        <span>Google Sheets</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#customers" class="nav-link" data-section="customers">
+                        <i class="fas fa-users"></i>
+                        <span>Customers</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#reports" class="nav-link" data-section="reports">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Reports</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#settings" class="nav-link" data-section="settings">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-details">
+                    <span class="user-name">Admin User</span>
+                    <span class="user-role">Administrator</span>
+                </div>
+            </div>
+            <button class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <button class="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 id="page-title">Dashboard</h1>
+            </div>
+            
+            <div class="header-right">
+                <div class="search-box">
+                    <input type="text" placeholder="Search bookings, customers..." id="global-search" name="global-search">
+                    <i class="fas fa-search"></i>
+                </div>
+                
+                <div class="notifications">
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-count">3</span>
+                    </button>
+                </div>
+                
+                <div class="user-menu">
+                    <button class="user-menu-btn">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="content-section active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>9</h3>
+                        <p>Total Vans</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>12</h3>
+                        <p>Active Bookings</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>$3,240</h3>
+                        <p>Revenue This Month</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>78%</h3>
+                        <p>Occupancy Rate</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Recent Bookings</h3>
+                        <a href="#bookings" class="view-all">View All</a>
+                    </div>
+                    <div class="recent-bookings">
+                        <div class="booking-item">
+                            <div class="booking-info">
+                                <span class="customer-name">John Smith</span>
+                                <span class="van-type">Luxury Van</span>
+                                <span class="booking-dates">July 15-20, 2025</span>
+                            </div>
+                            <div class="booking-status confirmed">Confirmed</div>
+                        </div>
+                        
+                        <div class="booking-item">
+                            <div class="booking-info">
+                                <span class="customer-name">Sarah Johnson</span>
+                                <span class="van-type">Family Van</span>
+                                <span class="booking-dates">July 22-25, 2025</span>
+                            </div>
+                            <div class="booking-status pending">Pending</div>
+                        </div>
+                        
+                        <div class="booking-item">
+                            <div class="booking-info">
+                                <span class="customer-name">Mike Davis</span>
+                                <span class="van-type">Compact Van</span>
+                                <span class="booking-dates">July 18-21, 2025</span>
+                            </div>
+                            <div class="booking-status confirmed">Confirmed</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Van Status Overview</h3>
+                    </div>
+                    <div class="van-status-grid">
+                        <div class="van-status-item available">
+                            <span class="van-name">Compact Van #1</span>
+                            <span class="status">Available</span>
+                        </div>
+                        <div class="van-status-item rented">
+                            <span class="van-name">Luxury Van #1</span>
+                            <span class="status">Rented</span>
+                        </div>
+                        <div class="van-status-item maintenance">
+                            <span class="van-name">Standard Van #2</span>
+                            <span class="status">Maintenance</span>
+                        </div>
+                        <div class="van-status-item available">
+                            <span class="van-name">Family Van #1</span>
+                            <span class="status">Available</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Availability Calendar Section -->
+        <section id="availability" class="content-section">
+            <div class="calendar-controls">
+                <div class="calendar-nav">
+                    <button id="prevCalendarMonth" class="nav-btn">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <h3 id="calendarMonthYear">July 2025</h3>
+                    <button id="nextCalendarMonth" class="nav-btn">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                
+                <div class="view-options">
+                    <button class="view-btn active" data-view="month">Month</button>
+                    <button class="view-btn" data-view="week">Week</button>
+                </div>
+            </div>
+
+            <div class="vans-calendar-container">
+                <div class="van-calendars-grid" id="vanCalendarsGrid">
+                    <!-- Van calendars will be generated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Van Search Section -->
+        <section id="search" class="content-section">
+            <div class="search-container">
+                <div class="search-form">
+                    <h3>Find Available Vans</h3>
+                    <div class="search-inputs">
+                        <div class="input-group">
+                            <label for="search-checkin">Check-in Date</label>
+                            <input type="date" id="search-checkin" name="search-checkin" min="">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="search-checkout">Check-out Date</label>
+                            <input type="date" id="search-checkout" name="search-checkout" min="">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="search-van-type">Van Type</label>
+                            <select id="search-van-type" name="search-van-type">
+                                <option value="">All Types</option>
+                                <option value="compact">Compact</option>
+                                <option value="standard">Standard</option>
+                                <option value="luxury">Luxury</option>
+                                <option value="family">Family</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="search-guests">Guests</label>
+                            <select id="search-guests" name="search-guests">
+                                <option value="">Any</option>
+                                <option value="2">2 Guests</option>
+                                <option value="4">4 Guests</option>
+                                <option value="6">6+ Guests</option>
+                            </select>
+                        </div>
+                        
+                        <button class="search-btn" id="search-vans-btn">
+                            <i class="fas fa-search"></i>
+                            Search Vans
+                        </button>
+                    </div>
+                </div>
+
+                <div class="search-results" id="search-results">
+                    <h4>Available Vans</h4>
+                    <div class="results-grid" id="results-grid">
+                        <!-- Search results will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bookings Section -->
+        <section id="bookings" class="content-section">
+            <div class="section-header">
+                <h3>All Bookings</h3>
+                <div class="section-actions">
+                    <button class="btn btn-primary" id="add-booking-btn">
+                        <i class="fas fa-plus"></i>
+                        Add Booking
+                    </button>
+                    <button class="btn btn-secondary" id="export-bookings-btn">
+                        <i class="fas fa-download"></i>
+                        Export
+                    </button>
+                </div>
+            </div>
+
+            <div class="bookings-filters">
+                <label for="booking-status-filter" class="sr-only">Booking Status Filter</label>
+                <select id="booking-status-filter" name="booking-status-filter">
+                    <option value="">All Status</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="pending">Pending</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="completed">Completed</option>
+                </select>
+                
+                <label for="booking-van-filter" class="sr-only">Van Filter</label>
+                <select id="booking-van-filter" name="booking-van-filter">
+                    <option value="">All Vans</option>
+                    <option value="compact">Compact Vans</option>
+                    <option value="standard">Standard Vans</option>
+                    <option value="luxury">Luxury Vans</option>
+                    <option value="family">Family Vans</option>
+                </select>
+                
+                <label for="booking-date-filter" class="sr-only">Date Filter</label>
+                <input type="date" id="booking-date-filter" name="booking-date-filter" placeholder="Filter by date">
+            </div>
+
+            <div class="bookings-table-container">
+                <table class="bookings-table" id="bookings-table">
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Customer</th>
+                            <th>Van</th>
+                            <th>Dates</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Bookings will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Van Management Section -->
+        <section id="vans" class="content-section">
+            <div class="section-header">
+                <h3>Van Fleet Management</h3>
+                <div class="section-actions">
+                    <button class="btn btn-secondary" id="sync-vans-btn">
+                        <i class="fas fa-sync"></i>
+                        Sync from Sheets
+                    </button>
+                    <button class="btn btn-primary" id="add-van-btn">
+                        <i class="fas fa-plus"></i>
+                        Add Van
+                    </button>
+                </div>
+            </div>
+
+            <!-- Van Management Tabs -->
+            <div class="van-management-tabs">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="fleet">
+                        <i class="fas fa-car"></i>
+                        Fleet Overview
+                    </button>
+                    <button class="tab-btn" data-tab="display">
+                        <i class="fas fa-eye"></i>
+                        Display Configuration
+                    </button>
+                    <button class="tab-btn" data-tab="technical">
+                        <i class="fas fa-cogs"></i>
+                        Technical Specs
+                    </button>
+                </div>
+            </div>
+
+            <!-- Fleet Overview Tab -->
+            <div id="fleet-tab" class="tab-content active">
+
+            <!-- CSV Import Section -->
+            <div class="csv-import-section">
+                <div class="import-header">
+                    <h4><i class="fas fa-file-upload"></i> Import Van Data from CSV</h4>
+                    <p>Upload your DataBase - Foglio1 (2).csv file to import your Swiss van fleet</p>
+                </div>
+                <div class="import-actions">
+                    <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
+                    <button class="btn btn-success" id="csv-upload-btn" onclick="document.getElementById('csv-file-input').click();">
+                        <i class="fas fa-file-upload"></i> Choose CSV File
+                    </button>
+                    <button class="btn btn-info" onclick="adminDashboard.importFromYourCSV()">
+                        <i class="fas fa-magic"></i> Quick Import
+                    </button>
+                    <button class="btn btn-primary" onclick="loadRealVanData()">
+                        <i class="fas fa-database"></i> Load Sample Swiss Data
+                    </button>
+                </div>
+                <div class="import-info">
+                    <small><strong>Expected format:</strong> VehicleID, VehicleName, CalendarID, VehicleAdress, LicencePlate, ExtHight, ExtLength, ExtLarge, IntHight, IntLength, IntLarge</small>
+                </div>
+            </div>
+
+            <!-- Van Management Filters -->
+            <div class="filters-section">
+                <div class="filter-group">
+                    <label for="van-status-filter">Status:</label>
+                    <select id="van-status-filter" name="van-status-filter">
+                        <option value="all">All Vans</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="maintenance">In Maintenance</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="van-type-filter">Type:</label>
+                    <select id="van-type-filter" name="van-type-filter">
+                        <option value="all">All Types</option>
+                        <option value="compact">Compact</option>
+                        <option value="mid-size">Mid-size</option>
+                        <option value="large">Large</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="pricing-profile-filter">Pricing Profile:</label>
+                    <select id="pricing-profile-filter" name="pricing-profile-filter">
+                        <option value="all">All Profiles</option>
+                        <!-- Will be populated dynamically -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="vans-grid" id="vans-grid">
+                <!-- Van cards will be populated here -->
+            </div>
+            </div>
+
+            <!-- Display Configuration Tab -->
+            <div id="display-tab" class="tab-content">
+                <div class="display-config-section">
+                    <h4>🎨 Main Collection Display Settings</h4>
+                    <p class="config-description">Configure what technical specifications and details are visible on your main van collection page.</p>
+                    
+                    <!-- Display Style Selection -->
+                    <div class="config-group">
+                        <h5>Display Style</h5>
+                        <div class="display-style-options">
+                            <label class="radio-option">
+                                <input type="radio" name="display-style" value="minimal" onchange="adminDashboard.updateDisplayStyle(this.value)">
+                                <span class="radio-custom"></span>
+                                <div class="option-content">
+                                    <strong>Minimal</strong>
+                                    <small>Basic info only (name, price, availability)</small>
+                                </div>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="display-style" value="detailed" checked onchange="adminDashboard.updateDisplayStyle(this.value)">
+                                <span class="radio-custom"></span>
+                                <div class="option-content">
+                                    <strong>Detailed</strong>
+                                    <small>Selected technical specs + features</small>
+                                </div>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="display-style" value="comprehensive" onchange="adminDashboard.updateDisplayStyle(this.value)">
+                                <span class="radio-custom"></span>
+                                <div class="option-content">
+                                    <strong>Comprehensive</strong>
+                                    <small>All available technical data</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Technical Specifications Toggle -->
+                    <div class="config-group">
+                        <h5>📐 Technical Specifications</h5>
+                        <div class="spec-toggles-grid">
+                            <div class="spec-category">
+                                <h6>External Dimensions</h6>
+                                <div class="toggle-list">
+                                    <label class="toggle-item">
+                                        <span class="toggle-label">Length</span>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="show-ext-length" name="show-ext-length" checked onchange="adminDashboard.updateDisplayConfig('showExtLength', this.checked)">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </label>
+                                    <label class="toggle-item">
+                                        <span class="toggle-label">Height</span>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="show-ext-height" name="show-ext-height" checked onchange="adminDashboard.updateDisplayConfig('showExtHeight', this.checked)">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </label>
+                                    <label class="toggle-item">
+                                        <span class="toggle-label">Width</span>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="show-ext-width" name="show-ext-width" checked onchange="adminDashboard.updateDisplayConfig('showExtWidth', this.checked)">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="spec-category">
+                                <h6>Internal Dimensions</h6>
+                                <div class="toggle-list">
+                                    <label class="toggle-item">
+                                        <span class="toggle-label">Length</span>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="show-int-length" name="show-int-length" checked onchange="adminDashboard.updateDisplayConfig('showIntLength', this.checked)">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </label>
+                                    <label class="toggle-item">
+                                        <span class="toggle-label">Height</span>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="show-int-height" name="show-int-height" checked onchange="adminDashboard.updateDisplayConfig('showIntHeight', this.checked)">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </label>
+                                    <label class="toggle-item">
+                                        <span class="toggle-label">Width</span>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="show-int-width" name="show-int-width" checked onchange="adminDashboard.updateDisplayConfig('showIntWidth', this.checked)">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="spec-category">
+                                <h6>Vehicle Details</h6>
+                                <div class="toggle-list">
+                                    <label class="toggle-item">
+                                        <span class="toggle-label">License Plate</span>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="show-license-plate" name="show-license-plate" onchange="adminDashboard.updateDisplayConfig('showLicensePlate', this.checked)">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </label>
+                                    <label class="toggle-item">
+                                        <span class="toggle-label">Vehicle Address</span>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="show-vehicle-address" name="show-vehicle-address" checked onchange="adminDashboard.updateDisplayConfig('showVehicleAddress', this.checked)">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </label>
+                                    <label class="toggle-item">
+                                        <span class="toggle-label">Load Volume</span>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="show-load-volume" name="show-load-volume" checked onchange="adminDashboard.updateDisplayConfig('showLoadVolume', this.checked)">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview Section -->
+                    <div class="config-group">
+                        <h5>👁️ Live Preview</h5>
+                        <div class="preview-container">
+                            <div class="preview-van-card" id="display-preview">
+                                <!-- Live preview will be generated here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="config-actions">
+                        <button class="btn btn-primary" onclick="adminDashboard.saveDisplayConfig()">
+                            <i class="fas fa-save"></i>
+                            Save Configuration
+                        </button>
+                        <button class="btn btn-secondary" onclick="adminDashboard.previewMainCollection()">
+                            <i class="fas fa-external-link-alt"></i>
+                            Preview Main Collection
+                        </button>
+                        <button class="btn btn-info" onclick="adminDashboard.resetDisplayConfig()">
+                            <i class="fas fa-undo"></i>
+                            Reset to Default
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technical Specifications Tab -->
+            <div id="technical-tab" class="tab-content">
+                <div class="technical-overview-section">
+                    <h4>🔧 Technical Specifications Overview</h4>
+                    <p class="config-description">Review and manage technical specifications for all vehicles in your fleet.</p>
+                    
+                    <div class="technical-summary-grid" id="technical-summary">
+                        <!-- Technical summary will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Profiles Section -->
+        <section id="pricing" class="content-section">
+            <div class="section-header">
+                <h3>Pricing Profiles</h3>
+                <button class="btn btn-primary" id="add-pricing-profile-btn">
+                    <i class="fas fa-plus"></i>
+                    Create Profile
+                </button>
+            </div>
+
+            <div class="pricing-profiles-container">
+                <div class="pricing-tabs">
+                    <button class="tab-btn active" data-tab="profiles">Pricing Profiles</button>
+                    <button class="tab-btn" data-tab="rules">Pricing Rules</button>
+                    <button class="tab-btn" data-tab="seasons">Seasonal Pricing</button>
+                </div>
+
+                <!-- Pricing Profiles Tab -->
+                <div id="profiles-tab" class="tab-content active">
+                    <div class="pricing-profiles-grid" id="pricing-profiles-grid">
+                        <!-- Pricing profile cards will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Pricing Rules Tab -->
+                <div id="rules-tab" class="tab-content">
+                    <div class="pricing-rules-section">
+                        <h4>Dynamic Pricing Rules</h4>
+                        <div class="rules-list" id="pricing-rules-list">
+                            <!-- Pricing rules will be populated here -->
+                        </div>
+                        <button class="btn btn-secondary" id="add-pricing-rule-btn">
+                            <i class="fas fa-plus"></i>
+                            Add Rule
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Seasonal Pricing Tab -->
+                <div id="seasons-tab" class="tab-content">
+                    <div class="seasonal-pricing-section">
+                        <h4>Seasonal Pricing</h4>
+                        <div class="seasons-calendar" id="seasons-calendar">
+                            <!-- Seasonal pricing calendar will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Google Sheets Integration Section -->
+        <section id="sheets" class="content-section">
+            <div class="section-header">
+                <h3>Google Sheets Integration</h3>
+                <button class="btn btn-success" id="connect-sheets-btn">
+                    <i class="fas fa-link"></i>
+                    Connect Sheets
+                </button>
+            </div>
+
+            <!-- Security Info Box -->
+            <div class="security-info-box">
+                <div class="info-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="info-content">
+                    <h5>🔒 Browser Security Notice</h5>
+                    <p>Most browsers block direct Google Sheets access for security. If this happens, you'll see a simple <strong>3-step manual import</strong> that works perfectly and preserves all your technical data.</p>
+                </div>
+            </div>
+
+            <!-- Connection Status -->
+            <div class="sheets-status-card">
+                <div class="status-indicator" id="sheets-status">
+                    <i class="fas fa-circle status-dot"></i>
+                    <span class="status-text">Not Connected</span>
+                </div>
+                <div class="last-sync" id="last-sync">
+                    <i class="fas fa-clock"></i>
+                    <span>Last sync: Never</span>
+                </div>
+            </div>
+
+            <!-- Sheets Configuration -->
+            <div class="sheets-config-grid">
+                <div class="config-card">
+                    <div class="config-header">
+                        <h4>Van Data Sheet</h4>
+                        <span class="config-status" id="van-sheet-status">
+                            <i class="fas fa-times-circle text-danger"></i>
+                        </span>
+                    </div>
+                    <div class="config-body">
+                        <div class="form-group">
+                            <label for="van-sheet-url">Sheet URL:</label>
+                            <input type="url" id="van-sheet-url" name="van-sheet-url" placeholder="https://docs.google.com/spreadsheets/d/...">
+                        </div>
+                        <div class="form-group">
+                            <label for="van-sheet-range">Data Range:</label>
+                            <input type="text" id="van-sheet-range" name="van-sheet-range" placeholder="Sheet1!A1:Z100" value="Vans!A1:Z100">
+                        </div>
+                        <button class="btn btn-secondary" id="test-van-sheet-btn">Test Connection</button>
+                    </div>
+                </div>
+
+                <div class="config-card">
+                    <div class="config-header">
+                        <h4>Pricing Data Sheet</h4>
+                        <span class="config-status" id="pricing-sheet-status">
+                            <i class="fas fa-times-circle text-danger"></i>
+                        </span>
+                    </div>
+                    <div class="config-body">
+                        <div class="form-group">
+                            <label for="pricing-sheet-url">Sheet URL:</label>
+                            <input type="url" id="pricing-sheet-url" name="pricing-sheet-url" placeholder="https://docs.google.com/spreadsheets/d/...">
+                        </div>
+                        <div class="form-group">
+                            <label for="pricing-sheet-range">Data Range:</label>
+                            <input type="text" id="pricing-sheet-range" name="pricing-sheet-range" placeholder="Sheet1!A1:Z100" value="Pricing!A1:Z100">
+                        </div>
+                        <button class="btn btn-secondary" id="test-pricing-sheet-btn">Test Connection</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Preview -->
+            <div class="data-preview-section" id="data-preview">
+                <div class="preview-tabs">
+                    <button class="tab-btn active" data-preview="van-data">Van Data Preview</button>
+                    <button class="tab-btn" data-preview="pricing-data">Pricing Data Preview</button>
+                </div>
+                
+                <div id="van-data-preview" class="preview-content active">
+                    <div class="preview-header">
+                        <h5>Van Data Structure</h5>
+                        <button class="btn btn-primary" id="import-van-data-btn">
+                            <i class="fas fa-download"></i>
+                            Import Data
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table id="van-data-table" class="data-table">
+                            <!-- Van data will be populated here -->
+                        </table>
+                    </div>
+                </div>
+
+                <div id="pricing-data-preview" class="preview-content">
+                    <div class="preview-header">
+                        <h5>Pricing Data Structure</h5>
+                        <button class="btn btn-primary" id="import-pricing-data-btn">
+                            <i class="fas fa-download"></i>
+                            Import Data
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table id="pricing-data-table" class="data-table">
+                            <!-- Pricing data will be populated here -->
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sync Settings -->
+            <div class="sync-settings-card">
+                <h4>Sync Settings</h4>
+                <div class="sync-options">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="auto-sync-enabled" name="auto-sync-enabled" checked>
+                        <label for="auto-sync-enabled">Enable automatic sync</label>
+                    </div>
+                    <div class="form-group">
+                        <label for="sync-interval">Sync interval:</label>
+                        <select id="sync-interval" name="sync-interval">
+                            <option value="5">Every 5 minutes</option>
+                            <option value="15" selected>Every 15 minutes</option>
+                            <option value="30">Every 30 minutes</option>
+                            <option value="60">Every hour</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-secondary" id="manual-sync-btn">
+                        <i class="fas fa-sync"></i>
+                        Sync Now
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sync Results Area -->
+            <div id="sync-results" class="sync-results-area">
+                <!-- Manual import interface and sync results will appear here -->
+            </div>
+        </section>
+
+        <!-- Other sections (customers, reports, settings) would follow similar patterns -->
+    </div>
+
+    <!-- Modals -->
+    <!-- Booking Details Modal -->
+    <div id="booking-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Booking Details</h3>
+                <span class="close" id="close-booking-modal">&times;</span>
+            </div>
+            <div class="modal-body" id="booking-modal-body">
+                <!-- Booking details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Van Details Modal -->
+    <div id="van-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Van Details</h3>
+                <span class="close" id="close-van-modal">&times;</span>
+            </div>
+            <div class="modal-body" id="van-modal-body">
+                <!-- Van details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="vehicle-data-mapper.js"></script>
+    <script src="real-van-data.js"></script>
+    <script src="admin-script.js"></script>
+</body>
+</html>

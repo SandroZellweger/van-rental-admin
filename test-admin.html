@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Script</title>
+</head>
+<body>
+    <h1>Testing Admin Script</h1>
+    <div id="test-output"></div>
+
+    <script src="admin-script.js"></script>
+    <script>
+        try {
+            console.log('AdminDashboard class:', AdminDashboard);
+            const testDashboard = new AdminDashboard();
+            console.log('Dashboard instance:', testDashboard);
+            console.log('getVanAvailability method:', testDashboard.getVanAvailability);
+            
+            // Test the method
+            const result = testDashboard.getVanAvailability(1, '2024-01-15');
+            console.log('Test result:', result);
+            
+            document.getElementById('test-output').innerHTML = `
+                <p>AdminDashboard class: ${typeof AdminDashboard}</p>
+                <p>Dashboard instance: ${typeof testDashboard}</p>
+                <p>getVanAvailability method: ${typeof testDashboard.getVanAvailability}</p>
+                <p>Test result: ${result}</p>
+            `;
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('test-output').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+{
+  "site": {
+    "name": "VanLife Rentals",
+    "description": "Premium Van Rental Service",
+    "url": "https://vanlife-rentals.com",
+    "logo": "/images/logo.png"
+  },
+  "booking": {
+    "minRentalDays": 1,
+    "maxRentalDays": 30,
+    "advanceBookingDays": 365,
+    "timezone": "America/New_York",
+    "currency": "USD"
+  },
+  "vans": {
+    "compact": {
+      "name": "Compact Van",
+      "price": 80,
+      "capacity": 2,
+      "transmission": "Manual",
+      "fuel": "Diesel",
+      "features": ["Basic Kitchen", "Sleeping Area", "Storage"]
+    },
+    "standard": {
+      "name": "Standard Van",
+      "price": 120,
+      "capacity": 4,
+      "transmission": "Automatic",
+      "fuel": "Diesel",
+      "features": ["Full Kitchen", "Bathroom", "Dining Area", "Storage"]
+    },
+    "luxury": {
+      "name": "Luxury Van",
+      "price": 180,
+      "capacity": 4,
+      "transmission": "Automatic",
+      "fuel": "Hybrid",
+      "features": ["Premium Kitchen", "Full Bathroom", "Entertainment System", "Premium Bedding", "Climate Control"]
+    },
+    "family": {
+      "name": "Family Van",
+      "price": 150,
+      "capacity": 6,
+      "transmission": "Automatic",
+      "fuel": "Diesel",
+      "features": ["Large Kitchen", "Bathroom", "Multiple Sleeping Areas", "Extra Storage", "Child Safety Features"]
+    }
+  },
+  "wordpress": {
+    "booking_plugin": "wp-booking-calendar",
+    "api_endpoint": "/wp-json/wp-booking/v1/",
+    "authentication": "jwt"
+  },
+  "stripe": {
+    "publishable_key": "pk_test_your_stripe_publishable_key_here",
+    "webhook_endpoint": "/stripe-webhook",
+    "supported_currencies": ["USD", "EUR", "GBP"]
+  },
+  "features": {
+    "live_chat": false,
+    "admin_panel": false,
+    "booking_tracking": false,
+    "sms_notifications": false,
+    "multi_language": false
+  },
+  "contact": {
+    "phone": "+1 (555) 123-4567",
+    "email": "info@vanlife-rentals.com",
+    "address": "123 Adventure Street, Road Trip City, RT 12345",
+    "hours": "24/7 Self-Service"
+  },
+  "social": {
+    "facebook": "https://facebook.com/vanlife-rentals",
+    "instagram": "https://instagram.com/vanlife-rentals",
+    "twitter": "https://twitter.com/vanlife-rentals"
+  }
+}

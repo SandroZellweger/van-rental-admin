@@ -1,0 +1,4 @@
+VehicleID,VehicleName,CalendarID,VehicleAdress,LicencePlate,ExtHight,ExtLength,ExtLarge,IntHight,IntLength,IntLarge
+N01,"Opel Vivaro (Losone)",cal_001,"Via dei Patrizi 1, 6616 Losone",TI 148877,1.97,5.2,2.24,1.38,2.8,1.27
+N02,"Ford Transit (Bellinzona)",cal_002,"Via Centro 15, 6500 Bellinzona",TI 295461,2.05,6.1,2.48,1.45,3.2,1.35
+N03,"Mercedes Sprinter (Lugano)",cal_003,"Corso Pestalozzi 22, 6900 Lugano",TI 384729,2.15,7.2,2.65,1.65,4.1,1.55

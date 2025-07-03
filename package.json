@@ -1,0 +1,42 @@
+{
+  "name": "vanlife-rentals",
+  "version": "1.0.0",
+  "description": "Modern van rental website with WordPress booking integration",
+  "main": "index.html",
+  "scripts": {
+    "start": "live-server --port=3000 --open=/index.html",
+    "build": "npm run minify-css && npm run minify-js",
+    "minify-css": "cleancss -o dist/styles.min.css styles.css",
+    "minify-js": "uglifyjs script.js -o dist/script.min.js",
+    "dev": "npm run start",
+    "deploy": "npm run build && gh-pages -d dist"
+  },
+  "keywords": [
+    "van-rental",
+    "booking",
+    "travel",
+    "responsive",
+    "wordpress",
+    "stripe"
+  ],
+  "author": "VanLife Rentals Team",
+  "license": "ISC",
+  "devDependencies": {
+    "live-server": "^1.2.2",
+    "clean-css-cli": "^5.6.2",
+    "uglify-js": "^3.17.4",
+    "gh-pages": "^5.0.0"
+  },
+  "dependencies": {
+    "stripe": "^12.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vanlife-rentals/website.git"
+  },
+  "homepage": "https://vanlife-rentals.com",
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  }
+}

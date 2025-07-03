@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Van Fleet Admin - Real Data</title>
+    <link rel="stylesheet" href="admin-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>Van Fleet Management - Real Data</h1>
+            <button class="btn btn-primary" onclick="loadRealVanData()">
+                <i class="fas fa-sync"></i>
+                Load Real Van Data
+            </button>
+        </div>
+        
+        <!-- Van Fleet Management Section -->
+        <section id="vans" class="content-section active">
+            <div class="vans-header">
+                <h2>Van Fleet Management</h2>
+                <div class="vans-controls">
+                    <button class="btn btn-primary" onclick="adminDashboard.addNewVan()">
+                        <i class="fas fa-plus"></i>
+                        Add Van
+                    </button>
+                    <button class="btn btn-secondary" onclick="adminDashboard.exportVansData()">
+                        <i class="fas fa-download"></i>
+                        Export Data
+                    </button>
+                </div>
+            </div>
+
+            <div class="vans-filters">
+                <label for="van-status-filter" class="sr-only">Status Filter</label>
+                <select id="van-status-filter" name="van-status-filter">
+                    <option value="">All Status</option>
+                    <option value="available">Available</option>
+                    <option value="rented">Rented</option>
+                    <option value="maintenance">Maintenance</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+                
+                <label for="van-type-filter" class="sr-only">Type Filter</label>
+                <select id="van-type-filter" name="van-type-filter">
+                    <option value="">All Types</option>
+                    <option value="compact">Compact</option>
+                    <option value="medium">Medium</option>
+                    <option value="large">Large</option>
+                </select>
+                
+                <label for="pricing-profile-filter" class="sr-only">Pricing Profile Filter</label>
+                <select id="pricing-profile-filter" name="pricing-profile-filter">
+                    <option value="">All Pricing Profiles</option>
+                    <option value="standard">Standard</option>
+                    <option value="premium">Premium</option>
+                </select>
+            </div>
+
+            <div class="vans-grid" id="vans-grid">
+                <!-- Van cards will be populated here -->
+            </div>
+        </section>
+    </div>
+
+    <script src="admin-script.js"></script>
+    <script src="real-van-data.js"></script>
+    
+    <script>
+        // Initialize with real data
+        document.addEventListener('DOMContentLoaded', () => {
+            // Create admin dashboard instance
+            window.adminDashboard = new AdminDashboard();
+            
+            // Load real van data after a short delay
+            setTimeout(() => {
+                loadRealVanData();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

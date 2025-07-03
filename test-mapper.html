@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Data Mapper Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        .test-result { background: #f0f9ff; border: 1px solid #0ea5e9; padding: 1rem; margin: 1rem 0; border-radius: 6px; }
+        pre { background: #f8fafc; padding: 1rem; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Vehicle Data Mapper Test</h1>
+    
+    <div class="test-result">
+        <h3>Your Original Data:</h3>
+        <pre id="original-data"></pre>
+    </div>
+    
+    <div class="test-result">
+        <h3>Mapped to VanLife Format:</h3>
+        <pre id="mapped-data"></pre>
+    </div>
+    
+    <script src="vehicle-data-mapper.js"></script>
+    <script>
+        // Test with your actual data
+        const mapper = new VehicleDataMapper();
+        
+        // Your original data structure
+        const originalData = {
+            VehicleID: 'N01',
+            VehicleName: 'Opel Vivaro (Losone)',
+            CalendarID: 'noleggiosemplice23@gmail.com',
+            VehicleAdress: 'Via dei Patrizi 1, 6616 Losone - Posteggio No 2',
+            LicencePlate: 'TI 148877',
+            ExtHight: '1,97',
+            ExtLength: '5,2',
+            ExtLarge: '2,24',
+            IntHight: '1,38',
+            IntLength: '2,8',
+            IntLarge: '1.27 / 1.69'
+        };
+        
+        // Test the mapping
+        const mappedVehicle = mapper.testMapping();
+        
+        // Display results
+        document.getElementById('original-data').textContent = JSON.stringify(originalData, null, 2);
+        document.getElementById('mapped-data').textContent = JSON.stringify(mappedVehicle, null, 2);
+        
+        console.log('Original Data:', originalData);
+        console.log('Mapped Vehicle:', mappedVehicle);
+        
+        // Show analysis
+        console.log('=== MAPPING ANALYSIS ===');
+        console.log('Van Type Classification:', mappedVehicle.type, '(based on 5.2m length, 1.97m height)');
+        console.log('Capacity Calculation:', mappedVehicle.capacity, 'people (based on 2.8m x 1.27m interior)');
+        console.log('Location Extracted:', mappedVehicle.location, '(from full address)');
+        console.log('Features Generated:', mappedVehicle.features);
+        console.log('Pricing Applied:', `$${mappedVehicle.price}/day (${mappedVehicle.pricingProfile} profile)`);
+    </script>
+</body>
+</html>

@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VanLife Rentals - Premium Van Rental Service</title>
+    
+    <!-- Content Security Policy for Google OAuth -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self'; 
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.gstatic.com https://accounts.google.com https://js.stripe.com https://cdnjs.cloudflare.com; 
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; 
+        font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; 
+        img-src 'self' data: blob: https:; 
+        connect-src 'self' https://www.googleapis.com https://accounts.google.com https://content.googleapis.com https://apis.google.com https://api.stripe.com; 
+        frame-src 'self' https://accounts.google.com https://content.googleapis.com https://js.stripe.com;
+        object-src 'none';
+    ">
+    
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Stripe JS -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- Google Calendar Integration -->
+    <script src="google-calendar-integration.js" defer></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <i class="fas fa-road"></i>
+                    <span>VanLife</span>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#booking">Book Now</a></li>
+                    <li><a href="#gallery">Gallery</a></li>
+                    <li><a href="#advantages">Why Choose Us</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Adventure Awaits</h1>
+            <p>Discover freedom with our premium van rental service. Book now and start your journey.</p>
+            <a href="#booking" class="cta-button">Book Your Van</a>
+        </div>
+        <div class="hero-image">
+            <img src="images/hero-van.jpg" alt="Van on scenic road" id="hero-img">
+        </div>
+    </section>
+
+    <!-- Booking Section -->
+    <section id="booking" class="booking-section">
+        <div class="container">
+            <h2>Book Your Perfect Van</h2>
+            
+            <!-- Van Selection Grid (moved above calendar) -->
+            <div class="van-selection-section">
+                <h3>Select Your Van</h3>
+                <p class="van-selection-subtitle">Choose a van to see its availability calendar</p>
+                
+                <div class="van-selection-grid" id="vanSelectionGrid">
+                    <div class="van-card" data-van-id="1" data-van-type="compact" data-price="80">
+                        <div class="van-header">
+                            <h4>Compact Van #1</h4>
+                            <span class="van-price">$80/day</span>
+                        </div>
+                        <div class="van-details">
+                            <span class="van-type">Compact • 2-3 people</span>
+                        </div>
+                    </div>
+                    
+                    <div class="van-card" data-van-id="2" data-van-type="compact" data-price="80">
+                        <div class="van-header">
+                            <h4>Compact Van #2</h4>
+                            <span class="van-price">$80/day</span>
+                        </div>
+                        <div class="van-details">
+                            <span class="van-type">Compact • 2-3 people</span>
+                        </div>
+                    </div>
+                    
+                    <div class="van-card" data-van-id="3" data-van-type="standard" data-price="120">
+                        <div class="van-header">
+                            <h4>Standard Van #1</h4>
+                            <span class="van-price">$120/day</span>
+                        </div>
+                        <div class="van-details">
+                            <span class="van-type">Standard • 4-5 people</span>
+                        </div>
+                    </div>
+                    
+                    <div class="van-card" data-van-id="4" data-van-type="standard" data-price="120">
+                        <div class="van-header">
+                            <h4>Standard Van #2</h4>
+                            <span class="van-price">$120/day</span>
+                        </div>
+                        <div class="van-details">
+                            <span class="van-type">Standard • 4-5 people</span>
+                        </div>
+                    </div>
+                    
+                    <div class="van-card" data-van-id="5" data-van-type="standard" data-price="120">
+                        <div class="van-header">
+                            <h4>Standard Van #3</h4>
+                            <span class="van-price">$120/day</span>
+                        </div>
+                        <div class="van-details">
+                            <span class="van-type">Standard • 4-5 people</span>
+                        </div>
+                    </div>
+                    
+                    <div class="van-card" data-van-id="6" data-van-type="luxury" data-price="180">
+                        <div class="van-header">
+                            <h4>Luxury Van #1</h4>
+                            <span class="van-price">$180/day</span>
+                        </div>
+                        <div class="van-details">
+                            <span class="van-type">Luxury • 2-4 people</span>
+                        </div>
+                    </div>
+                    
+                    <div class="van-card" data-van-id="7" data-van-type="luxury" data-price="180">
+                        <div class="van-header">
+                            <h4>Luxury Van #2</h4>
+                            <span class="van-price">$180/day</span>
+                        </div>
+                        <div class="van-details">
+                            <span class="van-type">Luxury • 2-4 people</span>
+                        </div>
+                    </div>
+                    
+                    <div class="van-card" data-van-id="8" data-van-type="family" data-price="150">
+                        <div class="van-header">
+                            <h4>Family Van #1</h4>
+                            <span class="van-price">$150/day</span>
+                        </div>
+                        <div class="van-details">
+                            <span class="van-type">Family • 6-8 people</span>
+                        </div>
+                    </div>
+                    
+                    <div class="van-card" data-van-id="9" data-van-type="family" data-price="150">
+                        <div class="van-header">
+                            <h4>Family Van #2</h4>
+                            <span class="van-price">$150/day</span>
+                        </div>
+                        <div class="van-details">
+                            <span class="van-type">Family • 6-8 people</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Calendar Container -->
+            <div class="booking-calendar-container" id="calendarContainer" style="display: none;">
+                <div class="calendar-header">
+                    <button id="prevMonth" class="nav-btn">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <h3 id="currentMonthYear">July 2025</h3>
+                    <button id="nextMonth" class="nav-btn">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <button id="clearSelection" class="clear-selection-btn" style="display: none;">
+                        <i class="fas fa-times"></i>
+                        Clear Selection
+                    </button>
+                </div>
+                
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Calendar will be generated by JavaScript -->
+                </div>
+                
+                <div class="calendar-legend">
+                    <div class="legend-item">
+                        <span class="legend-color available"></span>
+                        <span>Available</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color reserved"></span>
+                        <span>Reserved</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color partially"></span>
+                        <span>Partially Available</span>
+                    </div>
+                </div>
+                
+                <div class="booking-instructions">
+                    <p class="calendar-instruction">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>How to select your date:</strong> Click on an available date to select it for your van rental. 
+                        Click the same date again to deselect. Single-day bookings only.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Google Calendar Integration Status -->
+            <div class="google-calendar-status-section" id="googleCalendarStatus">
+                <div class="calendar-sync-status">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span class="status-text">Connecting to Google Calendar...</span>
+                    <div class="auth-buttons">
+                        <button type="button" class="google-signin-btn" id="googleSignInBtn" style="display: none;">
+                            <i class="fab fa-google"></i>
+                            Sign in with Google
+                        </button>
+                        <button type="button" class="google-signout-btn" id="googleSignOutBtn" style="display: none;">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Sign Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            </div>
+
+            <form class="booking-form" id="bookingForm" style="display: none;">
+                <!-- Hidden van type input for form submission -->
+                <input type="hidden" id="selected-van-id" name="van-id" />
+                <input type="hidden" id="selected-van-type" name="van-type" />
+
+                <!-- Time Slot Selection -->
+                <div class="form-group">
+                    <label>Time Slot Selection *</label>
+                    <div class="time-slots-grid">
+                        <label class="time-slot-option">
+                            <input type="radio" name="time-slot" value="01:00-12:00" required>
+                            <span class="time-slot-label">01:00 – 12:00</span>
+                        </label>
+                        <label class="time-slot-option">
+                            <input type="radio" name="time-slot" value="07:00-12:00" required>
+                            <span class="time-slot-label">07:00 – 12:00</span>
+                        </label>
+                        <label class="time-slot-option">
+                            <input type="radio" name="time-slot" value="07:00-19:00" required>
+                            <span class="time-slot-label">07:00 – 19:00</span>
+                        </label>
+                        <label class="time-slot-option">
+                            <input type="radio" name="time-slot" value="01:00-00:00" required>
+                            <span class="time-slot-label">01:00 – 00:00</span>
+                        </label>
+                        <label class="time-slot-option">
+                            <input type="radio" name="time-slot" value="13:00-19:00" required>
+                            <span class="time-slot-label">13:00 – 19:00</span>
+                        </label>
+                        <label class="time-slot-option">
+                            <input type="radio" name="time-slot" value="13:00-00:00" required>
+                            <span class="time-slot-label">13:00 – 00:00</span>
+                        </label>
+                        <label class="time-slot-option">
+                            <input type="radio" name="time-slot" value="20:00-00:00" required>
+                            <span class="time-slot-label">20:00 – 00:00</span>
+                        </label>
+                    </div>
+                    <div class="time-note">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Available time slots will be highlighted. Unavailable slots are grayed out for partially available days.</span>
+                    </div>
+                </div>
+
+                <!-- Destination Selection -->
+                <div class="form-group">
+                    <label for="destination">Destination * (For unlisted destinations, please call)</label>
+                    <select id="destination" name="destination" required>
+                        <option value="">— Please Select —</option>
+                        <option value="city-center">City Center</option>
+                        <option value="airport">Airport</option>
+                        <option value="train-station">Train Station</option>
+                        <option value="hotel-pickup">Hotel Pickup</option>
+                        <option value="custom">Custom Location (Call Required)</option>
+                    </select>
+                </div>
+
+                <!-- Personal Information -->
+                <div class="form-section">
+                    <h4>Personal Information</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="first-name">First Name *</label>
+                            <input type="text" id="first-name" name="first-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="last-name">Last Name *</label>
+                            <input type="text" id="last-name" name="last-name" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="address">Street Address *</label>
+                        <input type="text" id="address" name="address" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="city">City *</label>
+                        <input type="text" id="city" name="city" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="whatsapp">WhatsApp Number *</label>
+                            <input type="tel" id="whatsapp" name="whatsapp" placeholder="WhatsApp reachable number" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insurance Options -->
+                <div class="form-section">
+                    <h4>Insurance Deductible Reduction</h4>
+                    <div class="insurance-info">
+                        <p>Reduce deductible from $1000 to $500</p>
+                        <p>Cost: 10% of rental amount</p>
+                    </div>
+                    
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="insurance-reduction" value="yes">
+                            <span class="radio-custom"></span>
+                            Yes, I want deductible reduction
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="insurance-reduction" value="no" checked>
+                            <span class="radio-custom"></span>
+                            No, keep standard deductible
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Special Requests -->
+                <div class="form-group">
+                    <label for="special-requests">Special Requests</label>
+                    <textarea id="special-requests" name="special-requests" rows="4" placeholder="Any special requirements or requests..."></textarea>
+                </div>
+
+                <!-- Booking Summary -->
+                <div class="booking-summary" id="bookingSummary">
+                    <h4>Booking Summary</h4>
+                    <div class="summary-details">
+                        <div class="summary-row">
+                            <span>Selected Dates:</span>
+                            <span id="selectedDates">No dates selected</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Van Type:</span>
+                            <span id="selectedVanType">Not selected</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Deductible:</span>
+                            <span id="deductibleAmount">$1000</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Deposit:</span>
+                            <span id="depositAmount">$50 (returned 7 days after rental)</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Insurance Reduction:</span>
+                            <span id="insuranceAmount">$0</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total Rental Price:</span>
+                            <span id="totalAmount">$0 (incl. deposit & insurance if selected)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terms and Conditions -->
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="terms" required>
+                        <span class="checkbox-custom"></span>
+                        I accept the <a href="#terms" target="_blank">Terms and Conditions</a>
+                    </label>
+                    
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="deposit-terms" required>
+                        <span class="checkbox-custom"></span>
+                        I understand that the deposit will be returned 7 days after the rental period
+                    </label>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-credit-card"></i>
+                    Complete Booking & Pay
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Advantages Section -->
+    <section id="advantages" class="advantages-section">
+        <div class="container">
+            <h2>Why Choose VanLife Rentals?</h2>
+            <div class="advantages-grid">
+                <div class="advantage-card">
+                    <div class="advantage-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Quick Booking</h3>
+                    <p>Book your van in under 2 minutes with our streamlined booking process.</p>
+                </div>
+                
+                <div class="advantage-card">
+                    <div class="advantage-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>No Wait Time</h3>
+                    <p>Skip the queues. Your van is ready when you are, with contactless pickup.</p>
+                </div>
+                
+                <div class="advantage-card">
+                    <div class="advantage-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <h3>Self-Pickup</h3>
+                    <p>Access your van 24/7 with our secure keybox system. No office hours restrictions.</p>
+                </div>
+                
+                <div class="advantage-card">
+                    <div class="advantage-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3>Self Drop-off</h3>
+                    <p>Return your van at your convenience with our flexible drop-off locations.</p>
+                </div>
+                
+                <div class="advantage-card">
+                    <div class="advantage-icon">
+                        <i class="fab fa-stripe"></i>
+                    </div>
+                    <h3>Secure Online Payments</h3>
+                    <p>Safe and secure payments powered by Stripe. Multiple payment options available.</p>
+                </div>
+                
+                <div class="advantage-card">
+                    <div class="advantage-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>Mobile Optimized</h3>
+                    <p>Book, manage, and track your rental from any device, anywhere, anytime.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="gallery-section">
+        <div class="container">
+            <h2>Our Van Collection</h2>
+            <div class="gallery-grid">
+                <!-- Compact Van -->
+                <div class="van-card" data-van="compact">
+                    <div class="van-image">
+                        <img src="images/compact-van-exterior.jpg" alt="Compact Van Exterior" class="exterior-img">
+                        <div class="image-overlay">
+                            <button class="view-interior" data-van="compact">
+                                <i class="fas fa-eye"></i> View Interior
+                            </button>
+                            <button class="view-360" data-van="compact">
+                                <i class="fas fa-sync-alt"></i> 360° View
+                            </button>
+                        </div>
+                    </div>
+                    <div class="van-info">
+                        <h3>Compact Van</h3>
+                        <p>Perfect for couples or solo travelers. Efficient and easy to drive.</p>
+                        <div class="van-features">
+                            <span><i class="fas fa-bed"></i> Sleeps 2</span>
+                            <span><i class="fas fa-tachometer-alt"></i> Manual</span>
+                            <span><i class="fas fa-gas-pump"></i> Diesel</span>
+                        </div>
+                        <div class="price">$80/day</div>
+                    </div>
+                </div>
+
+                <!-- Standard Van -->
+                <div class="van-card" data-van="standard">
+                    <div class="van-image">
+                        <img src="images/standard-van-exterior.jpg" alt="Standard Van Exterior" class="exterior-img">
+                        <div class="image-overlay">
+                            <button class="view-interior" data-van="standard">
+                                <i class="fas fa-eye"></i> View Interior
+                            </button>
+                            <button class="view-360" data-van="standard">
+                                <i class="fas fa-sync-alt"></i> 360° View
+                            </button>
+                        </div>
+                    </div>
+                    <div class="van-info">
+                        <h3>Standard Van</h3>
+                        <p>Great balance of comfort and functionality for small families.</p>
+                        <div class="van-features">
+                            <span><i class="fas fa-bed"></i> Sleeps 4</span>
+                            <span><i class="fas fa-tachometer-alt"></i> Automatic</span>
+                            <span><i class="fas fa-gas-pump"></i> Diesel</span>
+                        </div>
+                        <div class="price">$120/day</div>
+                    </div>
+                </div>
+
+                <!-- Luxury Van -->
+                <div class="van-card" data-van="luxury">
+                    <div class="van-image">
+                        <img src="images/luxury-van-exterior.jpg" alt="Luxury Van Exterior" class="exterior-img">
+                        <div class="image-overlay">
+                            <button class="view-interior" data-van="luxury">
+                                <i class="fas fa-eye"></i> View Interior
+                            </button>
+                            <button class="view-360" data-van="luxury">
+                                <i class="fas fa-sync-alt"></i> 360° View
+                            </button>
+                        </div>
+                    </div>
+                    <div class="van-info">
+                        <h3>Luxury Van</h3>
+                        <p>Premium experience with all the amenities for the ultimate road trip.</p>
+                        <div class="van-features">
+                            <span><i class="fas fa-bed"></i> Sleeps 4</span>
+                            <span><i class="fas fa-tachometer-alt"></i> Automatic</span>
+                            <span><i class="fas fa-gas-pump"></i> Hybrid</span>
+                        </div>
+                        <div class="price">$180/day</div>
+                    </div>
+                </div>
+
+                <!-- Family Van -->
+                <div class="van-card" data-van="family">
+                    <div class="van-image">
+                        <img src="images/family-van-exterior.jpg" alt="Family Van Exterior" class="exterior-img">
+                        <div class="image-overlay">
+                            <button class="view-interior" data-van="family">
+                                <i class="fas fa-eye"></i> View Interior
+                            </button>
+                            <button class="view-360" data-van="family">
+                                <i class="fas fa-sync-alt"></i> 360° View
+                            </button>
+                        </div>
+                    </div>
+                    <div class="van-info">
+                        <h3>Family Van</h3>
+                        <p>Spacious and comfortable for larger groups and extended trips.</p>
+                        <div class="van-features">
+                            <span><i class="fas fa-bed"></i> Sleeps 6</span>
+                            <span><i class="fas fa-tachometer-alt"></i> Automatic</span>
+                            <span><i class="fas fa-gas-pump"></i> Diesel</span>
+                        </div>
+                        <div class="price">$150/day</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <h2>Get in Touch</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <h4>Phone</h4>
+                            <p>+1 (555) 123-4567</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h4>Email</h4>
+                            <p>info@vanlife-rentals.com</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <h4>Location</h4>
+                            <p>123 Adventure Street, Road Trip City, RT 12345</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <form>
+                        <input type="text" placeholder="Your Name" required>
+                        <input type="email" placeholder="Your Email" required>
+                        <textarea placeholder="Your Message" rows="5" required></textarea>
+                        <button type="submit">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-road"></i>
+                    <span>VanLife</span>
+                </div>
+                <div class="footer-links">
+                    <a href="#privacy">Privacy Policy</a>
+                    <a href="#terms">Terms of Service</a>
+                    <a href="#support">Support</a>
+                </div>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 VanLife Rentals. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal for Interior/360 Views -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="modal-body">
+                <img id="modalImage" src="" alt="">
+                <div id="view360Container" style="display: none;">
+                    <div class="view360-info">
+                        <p>Click and drag to rotate the view</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>
