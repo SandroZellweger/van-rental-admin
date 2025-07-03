@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Media Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .debug-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .debug-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Media Manager Debug Tool</h1>
+        
+        <div class="debug-section">
+            <h3>Van Data</h3>
+            <button onclick="showVanData()">Show Van Data</button>
+            <button onclick="showVanIds()">Show Van IDs & Types</button>
+            <pre id="van-data"></pre>
+        </div>
+
+        <div class="debug-section">
+            <h3>Media Items</h3>
+            <button onclick="showMediaData()">Show Media Data</button>
+            <button onclick="showAssignmentIds()">Show Assignment IDs & Types</button>
+            <button onclick="clearMediaData()">Clear Media Data</button>
+            <pre id="media-data"></pre>
+        </div>
+
+        <div class="debug-section">
+            <h3>Assignment Matching</h3>
+            <button onclick="testAssignmentMatching()">Test Assignment Matching</button>
+            <pre id="assignment-test"></pre>
+        </div>
+
+        <div class="warning">
+            <strong>Note:</strong> This tool helps debug the Media Manager assignment issue. 
+            Use "Clear Media Data" to reset and test with fresh uploads.
+        </div>
+    </div>
+
+    <script>
+        // Initialize sample van data (matching the admin dashboard)
+        const sampleVans = [
+            { id: 1, name: 'Compact Van #1', type: 'compact' },
+            { id: 2, name: 'Compact Van #2', type: 'compact' },
+            { id: 3, name: 'Standard Van #1', type: 'standard' },
+            { id: 4, name: 'Standard Van #2', type: 'standard' },
+            { id: 5, name: 'Standard Van #3', type: 'standard' },
+            { id: 6, name: 'Luxury Van #1', type: 'luxury' },
+            { id: 7, name: 'Luxury Van #2', type: 'luxury' }
+        ];
+
+        function showVanData() {
+            document.getElementById('van-data').textContent = JSON.stringify(sampleVans, null, 2);
+        }
+
+        function showVanIds() {
+            const vanInfo = sampleVans.map(van => ({
+                id: van.id,
+                idType: typeof van.id,
+                name: van.name
+            }));
+            document.getElementById('van-data').textContent = JSON.stringify(vanInfo, null, 2);
+        }
+
+        function showMediaData() {
+            const mediaData = localStorage.getItem('vanRental_mediaItems');
+            const parsed = mediaData ? JSON.parse(mediaData) : [];
+            document.getElementById('media-data').textContent = JSON.stringify(parsed, null, 2);
+        }
+
+        function showAssignmentIds() {
+            const mediaData = localStorage.getItem('vanRental_mediaItems');
+            const parsed = mediaData ? JSON.parse(mediaData) : [];
+            const assignmentInfo = parsed.map(item => ({
+                id: item.id,
+                assignedVan: item.assignedVan,
+                assignedVanType: typeof item.assignedVan,
+                name: item.name
+            }));
+            document.getElementById('media-data').textContent = JSON.stringify(assignmentInfo, null, 2);
+        }
+
+        function clearMediaData() {
+            if (confirm('Are you sure you want to clear all media data?')) {
+                localStorage.removeItem('vanRental_mediaItems');
+                document.getElementById('media-data').textContent = 'Media data cleared!';
+            }
+        }
+
+        function testAssignmentMatching() {
+            const mediaData = localStorage.getItem('vanRental_mediaItems');
+            const parsed = mediaData ? JSON.parse(mediaData) : [];
+            
+            const results = [];
+            
+            parsed.forEach(item => {
+                if (item.assignedVan) {
+                    const matchResult = {
+                        mediaItem: item.name,
+                        assignedVan: item.assignedVan,
+                        assignedVanType: typeof item.assignedVan,
+                        vanFound: null,
+                        vanFoundName: null
+                    };
+                    
+                    // Test direct match
+                    const directMatch = sampleVans.find(v => v.id === item.assignedVan);
+                    if (directMatch) {
+                        matchResult.vanFound = 'Direct match';
+                        matchResult.vanFoundName = directMatch.name;
+                    } else {
+                        // Test string comparison
+                        const stringMatch = sampleVans.find(v => v.id.toString() === item.assignedVan.toString());
+                        if (stringMatch) {
+                            matchResult.vanFound = 'String match';
+                            matchResult.vanFoundName = stringMatch.name;
+                        } else {
+                            matchResult.vanFound = 'No match';
+                        }
+                    }
+                    
+                    results.push(matchResult);
+                }
+            });
+            
+            document.getElementById('assignment-test').textContent = JSON.stringify(results, null, 2);
+        }
+    </script>
+</body>
+</html>

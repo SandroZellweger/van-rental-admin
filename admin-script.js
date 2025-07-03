@@ -1527,7 +1527,7 @@ class AdminDashboard {
     }
 
     createMediaItemHTML(item) {
-        const van = item.assignedVan ? this.vans.find(v => v.id.toString() === item.assignedVan) : null;
+        const van = item.assignedVan ? this.vans.find(v => v.id.toString() === item.assignedVan.toString()) : null;
         const vanName = van ? van.name : 'Unassigned';
         const fileSize = (item.size / 1024 / 1024).toFixed(1);
         
@@ -1625,7 +1625,7 @@ class AdminDashboard {
         // If setting as primary, remove primary flag from other images of the same van
         if (setPrimary && assignVan) {
             this.mediaItems.forEach(mediaItem => {
-                if (mediaItem.assignedVan === assignVan && mediaItem.id !== item.id) {
+                if (mediaItem.assignedVan && mediaItem.assignedVan.toString() === assignVan.toString() && mediaItem.id !== item.id) {
                     mediaItem.isPrimary = false;
                 }
             });
