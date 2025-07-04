@@ -1176,6 +1176,42 @@ class AdminDashboard {
         `).join('');
     }
 
+    setupPricingTabs() {
+        // Setup pricing management tabs
+        const pricingTabs = document.querySelectorAll('.pricing-tab');
+        const pricingPanes = document.querySelectorAll('.pricing-pane');
+
+        if (pricingTabs.length === 0) return; // No pricing tabs found
+
+        pricingTabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Remove active class from all tabs and panes
+                pricingTabs.forEach(t => t.classList.remove('active'));
+                pricingPanes.forEach(p => p.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Show corresponding pane
+                const targetPane = document.getElementById(tab.dataset.tab);
+                if (targetPane) {
+                    targetPane.classList.add('active');
+                }
+            });
+        });
+
+        // Activate first tab by default
+        if (pricingTabs.length > 0) {
+            pricingTabs[0].classList.add('active');
+            const firstPane = document.getElementById(pricingTabs[0].dataset.tab);
+            if (firstPane) {
+                firstPane.classList.add('active');
+            }
+        }
+    }
+
     toggleVanStatus(vanId) {
         const van = this.vans.find(v => v.id === vanId);
         if (van) {
