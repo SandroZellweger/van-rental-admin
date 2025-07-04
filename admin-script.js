@@ -1002,25 +1002,29 @@ class AdminDashboard {
 
                     <!-- Main Van Image -->
                     <div class="van-main-image">
-                        <div class="van-image-placeholder" style="width: 100%; height: 250px; background: linear-gradient(135deg, #85b545 0%, #a8c66c 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 14px;">
-                            📷 ${van.name}
+                        <div class="van-image-placeholder" onclick="adminDashboard.openImageSelector(${van.id}, 'primary')" style="width: 100%; height: 250px; background: linear-gradient(135deg, #85b545 0%, #a8c66c 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.3s ease;" 
+                             onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                            📷 Click to add primary image<br><small style="font-size: 12px; opacity: 0.8;">for ${van.name}</small>
                         </div>
                     </div>
 
                     <!-- Additional Images -->
                     <div class="van-additional-images">
                         <div class="additional-image">
-                            <div class="van-thumb-placeholder" style="width: 100%; height: 80px; background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: black; font-size: 10px; font-weight: 500;">
+                            <div class="van-thumb-placeholder" onclick="adminDashboard.openImageSelector(${van.id}, 'interior')" style="width: 100%; height: 80px; background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: black; font-size: 10px; font-weight: 500; cursor: pointer; transition: all 0.3s ease;"
+                                 onmouseover="this.style.backgroundColor='#e3f2fd'" onmouseout="this.style.background='linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%)'">
                                 🏠 Interior
                             </div>
                         </div>
                         <div class="additional-image">
-                            <div class="van-thumb-placeholder" style="width: 100%; height: 80px; background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: black; font-size: 10px; font-weight: 500;">
+                            <div class="van-thumb-placeholder" onclick="adminDashboard.openImageSelector(${van.id}, 'exterior')" style="width: 100%; height: 80px; background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: black; font-size: 10px; font-weight: 500; cursor: pointer; transition: all 0.3s ease;"
+                                 onmouseover="this.style.backgroundColor='#e3f2fd'" onmouseout="this.style.background='linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%)'">
                                 🚐 Exterior
                             </div>
                         </div>
                         <div class="additional-image">
-                            <div class="van-thumb-placeholder" style="width: 100%; height: 80px; background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: black; font-size: 10px; font-weight: 500;">
+                            <div class="van-thumb-placeholder" onclick="adminDashboard.openImageSelector(${van.id}, 'details')" style="width: 100%; height: 80px; background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: black; font-size: 10px; font-weight: 500; cursor: pointer; transition: all 0.3s ease;"
+                                 onmouseover="this.style.backgroundColor='#e3f2fd'" onmouseout="this.style.background='linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%)'">
                                 📋 Details
                             </div>
                         </div>
@@ -2965,6 +2969,239 @@ function renderVanCollection(vans) {
         } else {
             this.showNotification('Real van data module not found. Please ensure real-van-data.js is loaded.', 'error');
         }
+    }
+
+    // Image Selection Modal for Van Management
+    openImageSelector(vanId, imageType = 'primary') {
+        const availableImages = this.mediaItems.filter(item => !item.assignedVan);
+        const assignedImages = this.mediaItems.filter(item => item.assignedVan && item.assignedVan.toString() === vanId.toString());
+        
+        // Create modal
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.id = 'image-selector-modal';
+        
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 900px;">
+                <div class="modal-header">
+                    <h3>Select Image for Van #${vanId}</h3>
+                    <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="image-selector-tabs">
+                        <button class="selector-tab-btn active" data-tab="available">Available Images (${availableImages.length})</button>
+                        <button class="selector-tab-btn" data-tab="assigned">Current Images (${assignedImages.length})</button>
+                        <button class="selector-tab-btn" data-tab="upload">Upload New</button>
+                    </div>
+                    
+                    <!-- Available Images Tab -->
+                    <div class="selector-tab-content active" id="available-tab">
+                        ${availableImages.length > 0 ? `
+                            <div class="image-selector-grid">
+                                ${availableImages.map(item => `
+                                    <div class="selector-image-item" onclick="adminDashboard.selectImageForVan('${item.id}', ${vanId}, '${imageType}')">
+                                        <img src="${item.dataUrl}" alt="${item.name}">
+                                        <div class="selector-image-info">
+                                            <div class="image-name">${item.name}</div>
+                                            <div class="image-size">${(item.size / 1024 / 1024).toFixed(1)}MB</div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : `
+                            <div class="empty-state">
+                                <i class="fas fa-images"></i>
+                                <p>No unassigned images available</p>
+                                <button class="btn btn-primary" onclick="document.querySelector('[data-tab=upload]').click()">Upload Images</button>
+                            </div>
+                        `}
+                    </div>
+                    
+                    <!-- Assigned Images Tab -->
+                    <div class="selector-tab-content" id="assigned-tab">
+                        ${assignedImages.length > 0 ? `
+                            <div class="image-selector-grid">
+                                ${assignedImages.map(item => `
+                                    <div class="selector-image-item assigned" onclick="adminDashboard.selectImageForVan('${item.id}', ${vanId}, '${imageType}')">
+                                        <img src="${item.dataUrl}" alt="${item.name}">
+                                        <div class="selector-image-info">
+                                            <div class="image-name">${item.name}</div>
+                                            <div class="image-details">
+                                                ${item.category ? `<span class="category-tag">${item.category}</span>` : ''}
+                                                ${item.isPrimary ? '<span class="primary-tag">★ Primary</span>' : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : `
+                            <div class="empty-state">
+                                <i class="fas fa-image"></i>
+                                <p>No images assigned to this van yet</p>
+                            </div>
+                        `}
+                    </div>
+                    
+                    <!-- Upload New Tab -->
+                    <div class="selector-tab-content" id="upload-tab">
+                        <div class="upload-section">
+                            <div class="upload-drop-zone" id="selector-drop-zone">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Drop images here or click to browse</p>
+                                <input type="file" id="selector-file-input" multiple accept="image/*" style="display: none;">
+                                <button class="btn btn-primary" onclick="document.getElementById('selector-file-input').click()">Choose Files</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                    <button class="btn btn-info" onclick="adminDashboard.openMediaManager()">Go to Media Manager</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        this.setupImageSelectorTabs();
+        this.setupSelectorUpload();
+    }
+
+    setupImageSelectorTabs() {
+        const tabButtons = document.querySelectorAll('.selector-tab-btn');
+        const tabContents = document.querySelectorAll('.selector-tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetTab = button.getAttribute('data-tab');
+                
+                // Remove active class from all tabs and contents
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                button.classList.add('active');
+                const targetContent = document.getElementById(`${targetTab}-tab`);
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                }
+            });
+        });
+    }
+
+    setupSelectorUpload() {
+        const dropZone = document.getElementById('selector-drop-zone');
+        const fileInput = document.getElementById('selector-file-input');
+        
+        if (!dropZone || !fileInput) return;
+
+        // Drag and drop handlers
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            this.handleSelectorFileUpload(e.dataTransfer.files);
+        });
+
+        // File input handler
+        fileInput.addEventListener('change', (e) => {
+            this.handleSelectorFileUpload(e.target.files);
+        });
+    }
+
+    handleSelectorFileUpload(files) {
+        Array.from(files).forEach(file => {
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const mediaItem = {
+                        id: Date.now() + Math.random(),
+                        name: file.name,
+                        size: file.size,
+                        dataUrl: e.target.result,
+                        uploadDate: new Date().toISOString(),
+                        assignedVan: null,
+                        category: null,
+                        description: '',
+                        isPrimary: false
+                    };
+                    
+                    this.mediaItems.push(mediaItem);
+                    this.saveMediaData();
+                    
+                    // Refresh the available images tab
+                    const modal = document.getElementById('image-selector-modal');
+                    if (modal) {
+                        modal.remove();
+                        // Reopen with updated content
+                        setTimeout(() => {
+                            const vanId = parseInt(modal.dataset.vanId);
+                            const imageType = modal.dataset.imageType;
+                            this.openImageSelector(vanId, imageType);
+                        }, 100);
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    selectImageForVan(imageId, vanId, imageType) {
+        const item = this.mediaItems.find(i => i.id.toString() === imageId.toString());
+        if (!item) return;
+
+        // Update image assignment
+        item.assignedVan = vanId.toString();
+        
+        // Set category based on image type if not already set
+        if (!item.category) {
+            switch(imageType) {
+                case 'interior': item.category = 'interior'; break;
+                case 'exterior': item.category = 'exterior'; break;
+                case 'details': item.category = 'details'; break;
+                default: item.category = 'exterior'; break;
+            }
+        }
+
+        // If this is being set as primary, remove primary from other images of this van
+        if (imageType === 'primary') {
+            this.mediaItems.forEach(mediaItem => {
+                if (mediaItem.assignedVan && mediaItem.assignedVan.toString() === vanId.toString() && mediaItem.id !== item.id) {
+                    mediaItem.isPrimary = false;
+                }
+            });
+            item.isPrimary = true;
+        }
+
+        this.saveMediaData();
+        this.renderVansGrid(); // Refresh van grid to show new image
+        
+        // Close modal
+        const modal = document.getElementById('image-selector-modal');
+        if (modal) modal.remove();
+        
+        this.showNotification(`Image assigned to van #${vanId}`, 'success');
+    }
+
+    openMediaManager() {
+        // Switch to Media Manager tab
+        const mediaManagerTab = document.querySelector('.sidebar-menu a[href="#media"]');
+        if (mediaManagerTab) {
+            mediaManagerTab.click();
+        }
+        
+        // Close any open modals
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => modal.remove());
     }
 
     // ...existing code...
