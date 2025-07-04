@@ -2773,7 +2773,7 @@ function renderVanCollection(vans) {
 
         // Auto-remove after 5 seconds
         setTimeout(() => {
-            if (notification.parentElement) {
+            if (notification.parentNode) {
                 notification.remove();
             }
         }, 5000);
