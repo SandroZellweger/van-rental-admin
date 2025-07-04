@@ -395,7 +395,75 @@ class AdminDashboard {
     }
 
     saveMediaData() {
-        localStorage.setItem('adminMediaItems', JSON.stringify(this.mediaItems));
+        try {
+            localStorage.setItem('adminMediaItems', JSON.stringify(this.mediaItems));
+        } catch (error) {
+            if (error.name === 'QuotaExceededError') {
+                this.handleStorageQuotaExceeded();
+            } else {
+                console.error('Error saving media data:', error);
+                this.showNotification('Failed to save media data', 'error');
+            }
+        }
+    }
+
+    handleStorageQuotaExceeded() {
+        console.warn('localStorage quota exceeded, attempting to free up space...');
+        
+        // Calculate current storage usage
+        const currentSize = JSON.stringify(this.mediaItems).length;
+        const maxSize = 5 * 1024 * 1024; // 5MB estimate for localStorage limit
+        
+        this.showNotification('Storage quota exceeded! Images are being compressed further to save space.', 'warning');
+        
+        // Show modal with options
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>⚠️ Storage Space Full</h3>
+                </div>
+                <div class="modal-body">
+                    <p>Your browser's storage is full. Current usage: ${(currentSize / 1024 / 1024).toFixed(1)}MB</p>
+                    <p>To continue uploading images, you can:</p>
+                    <div style="margin: 20px 0;">
+                        <button class="btn btn-primary" onclick="adminDashboard.cleanupUnassignedImages(); this.closest('.modal').remove();">
+                            🧹 Clean Up Unassigned Images
+                        </button>
+                        <button class="btn btn-secondary" onclick="adminDashboard.clearAllMedia(); this.closest('.modal').remove();">
+                            🗑️ Clear All Images
+                        </button>
+                        <button class="btn btn-outline" onclick="this.closest('.modal').remove();">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    cleanupUnassignedImages() {
+        const originalCount = this.mediaItems.length;
+        this.mediaItems = this.mediaItems.filter(item => item.assignedVan);
+        
+        try {
+            localStorage.setItem('adminMediaItems', JSON.stringify(this.mediaItems));
+            const cleanedCount = originalCount - this.mediaItems.length;
+            this.showNotification(`Cleaned up ${cleanedCount} unassigned images`, 'success');
+            this.renderMediaGallery();
+        } catch (error) {
+            this.showNotification('Storage still full. Please clear more images.', 'error');
+        }
+    }
+
+    clearAllMedia() {
+        this.mediaItems = [];
+        localStorage.removeItem('adminMediaItems');
+        this.showNotification('All media cleared', 'info');
+        this.renderMediaGallery();
+        this.renderVansGrid(); // Update van grid to remove image references
     }
 
     setupNavigation() {
