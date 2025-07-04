@@ -10,7 +10,7 @@ class AdminDashboard {
         this.seasonalPricing = this.initializeSeasonalPricing();
         this.displayConfig = this.initializeDisplayConfiguration();
         this.mediaItems = this.initializeMediaData();
-        this.compressionSettings = this.initializeCompressionSettings();
+        this.compressionSettings = { quality: 0.7, maxWidth: 1200, enabled: true };
         this.init();
     }
 
@@ -396,21 +396,6 @@ class AdminDashboard {
 
     saveMediaData() {
         localStorage.setItem('adminMediaItems', JSON.stringify(this.mediaItems));
-    }
-
-    initializeCompressionSettings() {
-        const savedSettings = localStorage.getItem('adminCompressionSettings');
-        const defaultSettings = {
-            quality: 0.7,
-            maxWidth: 1200,
-            maxHeight: 1200,
-            enabled: true
-        };
-        return savedSettings ? { ...defaultSettings, ...JSON.parse(savedSettings) } : defaultSettings;
-    }
-
-    saveCompressionSettings() {
-        localStorage.setItem('adminCompressionSettings', JSON.stringify(this.compressionSettings));
     }
 
     setupNavigation() {
@@ -2148,14 +2133,12 @@ function renderVanCollection(vans) {
 
         for (const file of fileArray) {
             if (file.type.startsWith('image/')) {
-                if (progressText) progressText.textContent = `Compressing ${file.name}...`;
-                
                 await this.processFile(file);
                 uploadedCount++;
                 
                 const progress = (uploadedCount / fileArray.length) * 100;
                 if (progressFill) progressFill.style.width = `${progress}%`;
-                if (progressText) progressText.textContent = `${uploadedCount}/${fileArray.length} images processed`;
+                if (progressText) progressText.textContent = `${Math.round(progress)}%`;
             }
         }
 
@@ -2166,33 +2149,23 @@ function renderVanCollection(vans) {
         }
 
         this.renderMediaGallery();
-        this.showNotification(`Successfully uploaded and compressed ${uploadedCount} images`, 'success');
+        this.showNotification(`Successfully uploaded ${uploadedCount} images`, 'success');
     }
 
     async processFile(file) {
         return new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = async (e) => {
-                // Compress the image before storing if compression is enabled
+                // Compress the image to prevent localStorage quota errors
                 let dataUrl = e.target.result;
-                let originalSize = e.target.result.length;
-                let compressedSize = originalSize;
-                
-                if (this.compressionSettings.enabled && file.type.startsWith('image/')) {
-                    dataUrl = await this.compressImage(
-                        e.target.result, 
-                        this.compressionSettings.quality, 
-                        this.compressionSettings.maxWidth
-                    );
-                    compressedSize = dataUrl.length;
+                if (file.type.startsWith('image/')) {
+                    dataUrl = await this.compressImage(e.target.result);
                 }
                 
                 const mediaItem = {
                     id: Date.now() + Math.random(),
                     name: file.name,
                     size: file.size,
-                    originalSize: originalSize,
-                    compressedSize: compressedSize,
                     dataUrl: dataUrl,
                     uploadDate: new Date().toISOString(),
                     assignedVan: null,
@@ -2229,7 +2202,7 @@ function renderVanCollection(vans) {
                 // Draw and compress
                 ctx.drawImage(img, 0, 0, width, height);
                 
-                // Convert to compressed JPEG
+                // Convert to compressed JPEG to save space
                 const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
                 resolve(compressedDataUrl);
             };
@@ -2273,10 +2246,6 @@ function renderVanCollection(vans) {
     createMediaItemHTML(item) {
         const assignedVan = item.assignedVan ? this.vans.find(v => v.id.toString() === item.assignedVan.toString()) : null;
         
-        // Calculate compression ratio if available
-        const compressionInfo = item.originalSize && item.compressedSize ? 
-            `${((1 - item.compressedSize / item.originalSize) * 100).toFixed(0)}% smaller` : '';
-        
         return `
             <div class="media-item" data-id="${item.id}">
                 <div class="media-image">
@@ -2287,7 +2256,6 @@ function renderVanCollection(vans) {
                     <div class="media-name">${item.name}</div>
                     <div class="media-details">
                         <span class="media-size">${(item.size / 1024 / 1024).toFixed(1)}MB</span>
-                        ${compressionInfo ? `<span class="compression-info" title="Compressed for storage">📦 ${compressionInfo}</span>` : ''}
                         ${item.category ? `<span class="media-category">${item.category}</span>` : ''}
                     </div>
                     ${assignedVan ? `
