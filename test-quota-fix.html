@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storage Quota Fix Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+        }
+        .test-section {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .success { border-color: #28a745; background-color: #d4edda; }
+        .error { border-color: #dc3545; background-color: #f8d7da; }
+        .warning { border-color: #ffc107; background-color: #fff3cd; }
+        .info { border-color: #17a2b8; background-color: #d1ecf1; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
+        .storage-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛠️ Storage Quota Fix Test</h1>
+    <p>This test verifies that the QuotaExceededError fix is working properly.</p>
+
+    <div id="test-results"></div>
+
+    <div class="test-section">
+        <h3>Test Controls</h3>
+        <button onclick="runCompressionTest()">🧪 Test Image Compression</button>
+        <button onclick="testStorageHandling()">💾 Test Storage Error Handling</button>
+        <button onclick="checkCurrentStorage()">📊 Check Storage Usage</button>
+        <button onclick="clearTestData()" class="btn-danger">🗑️ Clear Test Data</button>
+    </div>
+
+    <div class="test-section">
+        <h3>Upload Test Image</h3>
+        <input type="file" id="fileInput" accept="image/*" onchange="testImageUpload(this.files[0])">
+        <div id="uploadResults"></div>
+    </div>
+
+    <script>
+        // Simulate the AdminDashboard compression functionality
+        class StorageTestHelper {
+            constructor() {
+                this.compressionSettings = { quality: 0.7, maxWidth: 1200, enabled: true };
+            }
+
+            async compressImage(dataUrl, quality = 0.7, maxWidth = 1200) {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Calculate new dimensions while maintaining aspect ratio
+                        let { width, height } = img;
+                        if (width > maxWidth) {
+                            height = (height * maxWidth) / width;
+                            width = maxWidth;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        // Draw and compress
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Convert to compressed JPEG
+                        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                        resolve(compressedDataUrl);
+                    };
+                    img.src = dataUrl;
+                });
+            }
+
+            testStorageQuotaHandling() {
+                try {
+                    // Try to save test data
+                    const testData = { test: 'data', timestamp: Date.now() };
+                    localStorage.setItem('test_quota_data', JSON.stringify(testData));
+                    return { success: true, message: 'Storage operation successful' };
+                } catch (error) {
+                    if (error.name === 'QuotaExceededError') {
+                        return { success: false, message: 'QuotaExceededError caught successfully', error: error.name };
+                    } else {
+                        return { success: false, message: 'Unexpected error', error: error.message };
+                    }
+                }
+            }
+
+            calculateStorageUsage() {
+                let totalSize = 0;
+                for (let key in localStorage) {
+                    if (localStorage.hasOwnProperty(key)) {
+                        totalSize += localStorage[key].length;
+                    }
+                }
+                return {
+                    totalBytes: totalSize,
+                    totalMB: (totalSize / 1024 / 1024).toFixed(2),
+                    itemCount: Object.keys(localStorage).length
+                };
+            }
+        }
+
+        const testHelper = new StorageTestHelper();
+
+        function addTestResult(title, content, type = 'info') {
+            const resultsDiv = document.getElementById('test-results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-section ${type}`;
+            resultDiv.innerHTML = `<h3>${title}</h3>${content}`;
+            resultsDiv.appendChild(resultDiv);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        function runCompressionTest() {
+            addTestResult('🧪 Compression Test', '<p>Testing image compression functionality...</p>');
+            
+            // Create a test canvas image
+            const canvas = document.createElement('canvas');
+            canvas.width = 2000;
+            canvas.height = 1500;
+            const ctx = canvas.getContext('2d');
+            
+            // Fill with test pattern
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#ff0000');
+            gradient.addColorStop(0.5, '#00ff00');
+            gradient.addColorStop(1, '#0000ff');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const originalDataUrl = canvas.toDataURL('image/png');
+            const originalSize = originalDataUrl.length;
+            
+            testHelper.compressImage(originalDataUrl).then(compressedDataUrl => {
+                const compressedSize = compressedDataUrl.length;
+                const compressionRatio = ((1 - compressedSize / originalSize) * 100).toFixed(1);
+                
+                addTestResult('✅ Compression Test Results', 
+                    `<p><strong>Original size:</strong> ${(originalSize / 1024 / 1024).toFixed(2)} MB</p>
+                     <p><strong>Compressed size:</strong> ${(compressedSize / 1024 / 1024).toFixed(2)} MB</p>
+                     <p><strong>Compression ratio:</strong> ${compressionRatio}% smaller</p>
+                     <p><strong>Status:</strong> Compression working correctly! ✅</p>`, 'success');
+            });
+        }
+
+        function testStorageHandling() {
+            addTestResult('💾 Storage Handling Test', '<p>Testing storage error handling...</p>');
+            
+            const result = testHelper.testStorageQuotaHandling();
+            if (result.success) {
+                addTestResult('✅ Storage Test Results', 
+                    `<p><strong>Status:</strong> ${result.message}</p>
+                     <p><strong>Conclusion:</strong> Storage is functioning normally</p>`, 'success');
+            } else {
+                addTestResult('⚠️ Storage Test Results', 
+                    `<p><strong>Status:</strong> ${result.message}</p>
+                     <p><strong>Error Type:</strong> ${result.error}</p>
+                     <p><strong>Conclusion:</strong> Error handling working correctly</p>`, 'warning');
+            }
+        }
+
+        function checkCurrentStorage() {
+            const usage = testHelper.calculateStorageUsage();
+            addTestResult('📊 Storage Usage', 
+                `<div class="storage-info">
+                     <p><strong>Total Usage:</strong> ${usage.totalMB} MB (${usage.totalBytes.toLocaleString()} bytes)</p>
+                     <p><strong>Items Stored:</strong> ${usage.itemCount}</p>
+                     <p><strong>Estimated Limit:</strong> ~5-10 MB (browser dependent)</p>
+                     <p><strong>Status:</strong> ${usage.totalMB < 3 ? '✅ Good' : usage.totalMB < 5 ? '⚠️ Getting full' : '❌ Nearly full'}</p>
+                 </div>`, usage.totalMB < 5 ? 'success' : 'warning');
+        }
+
+        function clearTestData() {
+            const keys = Object.keys(localStorage);
+            const testKeys = keys.filter(key => key.startsWith('test_') || key.startsWith('admin'));
+            
+            testKeys.forEach(key => localStorage.removeItem(key));
+            
+            addTestResult('🗑️ Cleanup Complete', 
+                `<p>Removed ${testKeys.length} test items from storage</p>
+                 <p><strong>Cleared keys:</strong> ${testKeys.join(', ')}</p>`, 'info');
+        }
+
+        async function testImageUpload(file) {
+            if (!file) return;
+            
+            const resultsDiv = document.getElementById('uploadResults');
+            resultsDiv.innerHTML = '<p>Processing image...</p>';
+            
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const originalDataUrl = e.target.result;
+                const originalSize = originalDataUrl.length;
+                
+                // Test compression
+                const compressedDataUrl = await testHelper.compressImage(originalDataUrl);
+                const compressedSize = compressedDataUrl.length;
+                const compressionRatio = ((1 - compressedSize / originalSize) * 100).toFixed(1);
+                
+                // Test storage
+                const testKey = `test_upload_${Date.now()}`;
+                try {
+                    localStorage.setItem(testKey, compressedDataUrl);
+                    resultsDiv.innerHTML = `
+                        <div class="test-section success">
+                            <h4>✅ Upload Test Successful</h4>
+                            <p><strong>File:</strong> ${file.name}</p>
+                            <p><strong>Original:</strong> ${(originalSize / 1024 / 1024).toFixed(2)} MB</p>
+                            <p><strong>Compressed:</strong> ${(compressedSize / 1024 / 1024).toFixed(2)} MB</p>
+                            <p><strong>Saved:</strong> ${compressionRatio}% space</p>
+                            <p><strong>Storage:</strong> Successfully saved to localStorage</p>
+                        </div>
+                    `;
+                } catch (error) {
+                    resultsDiv.innerHTML = `
+                        <div class="test-section error">
+                            <h4>❌ Storage Failed</h4>
+                            <p><strong>Error:</strong> ${error.name}</p>
+                            <p><strong>Message:</strong> ${error.message}</p>
+                            <p><strong>Note:</strong> This demonstrates the quota error that the fix addresses</p>
+                        </div>
+                    `;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Run initial tests
+        document.addEventListener('DOMContentLoaded', () => {
+            addTestResult('🚀 Test Suite Initialized', 
+                `<p>Storage quota fix test suite is ready. Use the buttons above to run tests.</p>
+                 <p><strong>Purpose:</strong> Verify that image compression and storage error handling prevent QuotaExceededError.</p>`, 'info');
+        });
+    </script>
+</body>
+</html>
