@@ -27,6 +27,7 @@ class AdminDashboard {
         this.setupGoogleSheetsHandlers();
         this.setupVanManagementTabs();
         this.setupMediaManager();
+        this.setupVanImagePlaceholderListeners();
     }
 
     initializeVanData() {
@@ -386,6 +387,16 @@ class AdminDashboard {
         };
     }
 
+    initializeMediaData() {
+        // Load media data from localStorage or return empty array
+        const savedMedia = localStorage.getItem('adminMediaItems');
+        return savedMedia ? JSON.parse(savedMedia) : [];
+    }
+
+    saveMediaData() {
+        localStorage.setItem('adminMediaItems', JSON.stringify(this.mediaItems));
+    }
+
     setupNavigation() {
         const navLinks = document.querySelectorAll('.nav-link');
         const sections = document.querySelectorAll('.content-section');
@@ -469,37 +480,6 @@ class AdminDashboard {
             });
         }
 
-        // CSV file input event listener
-        const csvFileInput = document.getElementById('csv-file-input');
-        if (csvFileInput) {
-            csvFileInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        try {
-                            const csvData = event.target.result;
-                            console.log('CSV Data:', csvData);
-                            const importedVans = this.importVanDataFromYourCSV(csvData);
-                            console.log('Imported vans:', importedVans);
-                            
-                            // Replace current van data
-                            this.vans = importedVans;
-                            console.log('Current vans after import:', this.vans);
-                            this.renderVansGrid();
-                            this.renderAvailabilityCalendar();
-                            
-                            this.showNotification(`Successfully imported ${importedVans.length} vans from CSV!`, 'success');
-                        } catch (error) {
-                            console.error('CSV import error:', error);
-                            this.showNotification('Error importing CSV: ' + error.message, 'error');
-                        }
-                    };
-                    reader.readAsText(file);
-                }
-            });
-        }
-
         // Modal event listeners
         this.setupModalListeners();
     }
@@ -547,35 +527,35 @@ class AdminDashboard {
                     <form onsubmit="adminDashboard.createPricingProfile(event)">
                         <div class="form-group">
                             <label for="profile-id">Profile ID:</label>
-                            <input type="text" id="profile-id" name="profile-id" required placeholder="e.g., weekend-special">
+                            <input type="text" id="profile-id" required placeholder="e.g., weekend-special">
                         </div>
                         <div class="form-group">
                             <label for="profile-name">Profile Name:</label>
-                            <input type="text" id="profile-name" name="profile-name" required placeholder="e.g., Weekend Special">
+                            <input type="text" id="profile-name" required placeholder="e.g., Weekend Special">
                         </div>
                         <div class="form-group">
                             <label for="profile-description">Description:</label>
-                            <textarea id="profile-description" name="profile-description" rows="2" placeholder="Brief description of this pricing profile"></textarea>
+                            <textarea id="profile-description" rows="2" placeholder="Brief description of this pricing profile"></textarea>
                         </div>
                         <div class="form-group">
                             <label for="profile-base-price">Base Price ($):</label>
-                            <input type="number" id="profile-base-price" name="profile-base-price" min="0" step="1" required placeholder="100">
+                            <input type="number" id="profile-base-price" min="0" step="1" required placeholder="100">
                         </div>
                         <div class="form-group">
                             <label for="profile-weekend-mult">Weekend Multiplier:</label>
-                            <input type="number" id="profile-weekend-mult" name="profile-weekend-mult" min="1" step="0.1" value="1.2" placeholder="1.2">
+                            <input type="number" id="profile-weekend-mult" min="1" step="0.1" value="1.2" placeholder="1.2">
                         </div>
                         <div class="form-group">
                             <label for="profile-holiday-mult">Holiday Multiplier:</label>
-                            <input type="number" id="profile-holiday-mult" name="profile-holiday-mult" min="1" step="0.1" value="1.5" placeholder="1.5">
+                            <input type="number" id="profile-holiday-mult" min="1" step="0.1" value="1.5" placeholder="1.5">
                         </div>
                         <div class="form-group">
                             <label for="profile-min-days">Minimum Days:</label>
-                            <input type="number" id="profile-min-days" name="profile-min-days" min="1" value="1" required>
+                            <input type="number" id="profile-min-days" min="1" value="1" required>
                         </div>
                         <div class="form-group">
                             <label for="profile-cancellation">Cancellation Policy:</label>
-                            <input type="text" id="profile-cancellation" name="profile-cancellation" value="24h free cancellation" placeholder="24h free cancellation">
+                            <input type="text" id="profile-cancellation" value="24h free cancellation" placeholder="24h free cancellation">
                         </div>
                         <div class="modal-actions">
                             <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
@@ -738,85 +718,6 @@ class AdminDashboard {
         return calendar;
     }
 
-    // Generate 7-day mini calendar for van availability
-    generateMiniCalendar(van) {
-        const today = new Date();
-        const days = [];
-        
-        // Generate next 7 days
-        for (let i = 0; i < 7; i++) {
-            const date = new Date(today);
-            date.setDate(today.getDate() + i);
-            
-            const dateStr = this.formatDate(date);
-            const availability = this.getVanAvailability(van.id, dateStr);
-            
-            days.push({
-                date: date,
-                day: date.getDate(),
-                dayName: date.toLocaleDateString('en', { weekday: 'short' }),
-                available: availability === 'available',
-                status: availability
-            });
-        }
-        
-        return `
-            <div class="mini-calendar">
-                <div class="mini-calendar-header">
-                    <span class="calendar-title">Next 7 Days</span>
-                </div>
-                <div class="mini-calendar-days">
-                    ${days.map(day => `
-                        <div class="mini-day ${day.available ? 'available' : 'unavailable'}">
-                            <div class="day-name">${day.dayName}</div>
-                            <div class="day-number">${day.day}</div>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-    }
-
-    // Generate next 7 days calendar for preview
-    generateNext7DaysCalendar(van) {
-        const today = new Date();
-        const next7Days = [];
-        
-        for (let i = 0; i < 7; i++) {
-            const date = new Date(today);
-            date.setDate(today.getDate() + i);
-            
-            const dateStr = this.formatDate(date);
-            const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-            const dayNumber = date.getDate();
-            
-            // Check availability for this van on this date
-            const isAvailable = this.getVanAvailability(van.id, dateStr) === 'available';
-            
-            next7Days.push({
-                date: dateStr,
-                dayName: dayName,
-                dayNumber: dayNumber,
-                isAvailable: isAvailable
-            });
-        }
-        
-        return next7Days.map(day => {
-            const bgColor = day.isAvailable ? '#85b545' : 'black';
-            const textColor = day.isAvailable ? 'white' : 'white';
-            const borderColor = day.isAvailable ? '#6a9235' : '#333333';
-            const statusText = day.isAvailable ? 'Free' : 'Busy';
-            
-            return `
-                <div style="text-align: center; padding: 6px 4px; border-radius: 4px; background: ${bgColor}; color: ${textColor}; font-size: 11px; font-weight: 500; border: 1px solid ${borderColor};">
-                    <div style="font-size: 9px; margin-bottom: 2px;">${day.dayName}</div>
-                    <div style="font-weight: 600;">${day.dayNumber}</div>
-                    <div style="font-size: 8px; margin-top: 2px;">${statusText}</div>
-                </div>
-            `;
-        }).join('');
-    }
-
     setupSearch() {
         // Set up real-time search
         const searchInputs = ['search-checkin', 'search-checkout', 'search-van-type', 'search-guests'];
@@ -960,12 +861,8 @@ class AdminDashboard {
     }
 
     renderVansGrid() {
-        console.log('renderVansGrid called with vans:', this.vans);
         const vansGrid = document.getElementById('vans-grid');
-        if (!vansGrid) {
-            console.error('vans-grid element not found');
-            return;
-        }
+        if (!vansGrid) return;
 
         vansGrid.innerHTML = this.vans.map(van => {
             const bookingsCount = this.bookings.filter(b => b.vanId === van.id).length;
@@ -982,7 +879,7 @@ class AdminDashboard {
                         <div class="van-header-left">
                             <div class="van-id-badge">${van.VehicleID || van.id}</div>
                             <div class="van-title-section">
-                                <h3 class="van-name">${van.VehicleID || van.id} - ${van.name}</h3>
+                                <h3 class="van-name">${van.name}</h3>
                                 <div class="van-location">
                                     <i class="fas fa-map-marker-alt"></i>
                                     ${van.location}
@@ -990,9 +887,10 @@ class AdminDashboard {
                             </div>
                         </div>
                         <div class="van-header-right">
+                            <div class="van-type-badge ${van.type}">${van.type.charAt(0).toUpperCase() + van.type.slice(1)} Van</div>
                             <div class="van-toggle">
                                 <label class="toggle-switch">
-                                    <input type="checkbox" id="van-enabled-${van.id}" name="van-enabled-${van.id}" ${van.enabled ? 'checked' : ''} 
+                                    <input type="checkbox" ${van.enabled ? 'checked' : ''} 
                                            onchange="adminDashboard.toggleVanStatus(${van.id})">
                                     <span class="toggle-slider"></span>
                                 </label>
@@ -1030,14 +928,35 @@ class AdminDashboard {
                         </div>
                     </div>
 
-                    <!-- Quick Availability Calendar -->
-                    <div class="van-quick-calendar-section">
-                        <h4 class="section-title">
-                            <i class="fas fa-calendar-alt"></i>
-                            Next 7 Days
-                        </h4>
-                        <div class="quick-calendar-grid">
-                            ${this.generateNext7DaysCalendar(van)}
+                    <!-- Business Metrics -->
+                    <div class="van-metrics-section">
+                        <div class="metric-item">
+                            <div class="metric-icon"><i class="fas fa-dollar-sign"></i></div>
+                            <div class="metric-content">
+                                <div class="metric-value">$${van.price}</div>
+                                <div class="metric-label">Daily Rate</div>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-icon"><i class="fas fa-calendar-check"></i></div>
+                            <div class="metric-content">
+                                <div class="metric-value">${bookingsCount}</div>
+                                <div class="metric-label">Bookings</div>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-icon"><i class="fas fa-chart-line"></i></div>
+                            <div class="metric-content">
+                                <div class="metric-value">$${revenue.toLocaleString()}</div>
+                                <div class="metric-label">Revenue</div>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-icon"><i class="fas fa-cube"></i></div>
+                            <div class="metric-content">
+                                <div class="metric-value">${van.load_volume || van.capacity}m³</div>
+                                <div class="metric-label">Load Volume</div>
+                            </div>
                         </div>
                     </div>
 
@@ -1127,6 +1046,20 @@ class AdminDashboard {
                                     ${feature}
                                 </span>
                             `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Management Section -->
+                    <div class="van-management-section">
+                        <div class="pricing-profile-section">
+                            <label class="profile-label">Pricing Profile:</label>
+                            <select class="pricing-profile-select" onchange="adminDashboard.updateVanPricingProfile(${van.id}, this.value)">
+                                ${this.pricingProfiles.map(profile => 
+                                    `<option value="${profile.id}" ${profile.id === van.pricingProfile ? 'selected' : ''}>
+                                        ${profile.name}
+                                    </option>`
+                                ).join('')}
+                            </select>
                         </div>
                     </div>
 
@@ -1230,23 +1163,23 @@ class AdminDashboard {
                     <form onsubmit="adminDashboard.saveVanChanges(event, ${van.id})">
                         <div class="form-group">
                             <label for="van-name">Van Name:</label>
-                            <input type="text" id="van-name" name="van-name" value="${van.name}" required>
+                            <input type="text" id="van-name" value="${van.name}" required>
                         </div>
                         <div class="form-group">
                             <label for="van-location">Location:</label>
-                            <input type="text" id="van-location" name="van-location" value="${van.location}" required>
+                            <input type="text" id="van-location" value="${van.location}" required>
                         </div>
                         <div class="form-group">
                             <label for="van-capacity">Capacity:</label>
-                            <input type="number" id="van-capacity" name="van-capacity" value="${van.capacity}" min="1" max="12" required>
+                            <input type="number" id="van-capacity" value="${van.capacity}" min="1" max="12" required>
                         </div>
                         <div class="form-group">
                             <label for="van-description">Description:</label>
-                            <textarea id="van-description" name="van-description" rows="3">${van.description}</textarea>
+                            <textarea id="van-description" rows="3">${van.description}</textarea>
                         </div>
                         <div class="form-group">
                             <label for="van-features">Features (comma-separated):</label>
-                            <input type="text" id="van-features" name="van-features" value="${van.features.join(', ')}">
+                            <input type="text" id="van-features" value="${van.features.join(', ')}">
                         </div>
                         <div class="modal-actions">
                             <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
@@ -1306,436 +1239,6 @@ class AdminDashboard {
         // Initialize display config tab on first load
         this.initializeDisplayConfigTab();
         this.updateDisplayPreview();
-    }
-
-    // Media Manager Methods
-    initializeMediaData() {
-        const stored = localStorage.getItem('vanRental_mediaItems');
-        return stored ? JSON.parse(stored) : [];
-    }
-
-    saveMediaData() {
-        localStorage.setItem('vanRental_mediaItems', JSON.stringify(this.mediaItems));
-    }
-
-    setupMediaManager() {
-        // Upload button click handler
-        document.getElementById('upload-media-btn')?.addEventListener('click', () => {
-            document.getElementById('file-input').click();
-        });
-
-        // File input change handler
-        document.getElementById('file-input')?.addEventListener('change', (e) => {
-            this.handleFileUpload(e.target.files);
-        });
-
-        // Setup drag and drop
-        this.setupDragAndDrop();
-
-        // Setup filters
-        this.setupMediaFilters();
-
-        // Setup modal handlers
-        this.setupMediaModal();
-
-        // Initial render
-        this.renderMediaGallery();
-        this.populateVanFilterOptions();
-    }
-
-    setupDragAndDrop() {
-        const dropzone = document.getElementById('upload-dropzone');
-        if (!dropzone) return;
-
-        // Prevent default drag behaviors
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropzone.addEventListener(eventName, this.preventDefaults, false);
-        });
-
-        // Highlight drop area when item is dragged over it
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropzone.addEventListener(eventName, () => {
-                dropzone.classList.add('dragover');
-            }, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropzone.addEventListener(eventName, () => {
-                dropzone.classList.remove('dragover');
-            }, false);
-        });
-
-        // Handle dropped files
-        dropzone.addEventListener('drop', (e) => {
-            const files = e.dataTransfer.files;
-            this.handleFileUpload(files);
-        }, false);
-    }
-
-    preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-
-    setupMediaFilters() {
-        const vanFilter = document.getElementById('van-filter');
-        const categoryFilter = document.getElementById('category-filter');
-        const clearFilters = document.getElementById('clear-filters-btn');
-
-        [vanFilter, categoryFilter].forEach(filter => {
-            filter?.addEventListener('change', () => {
-                this.renderMediaGallery();
-            });
-        });
-
-        clearFilters?.addEventListener('click', () => {
-            if (vanFilter) vanFilter.value = '';
-            if (categoryFilter) categoryFilter.value = '';
-            this.renderMediaGallery();
-        });
-    }
-
-    setupMediaModal() {
-        const modal = document.getElementById('media-modal');
-        const closeBtn = document.getElementById('close-media-modal');
-        const saveBtn = document.getElementById('save-media-assignment');
-        const deleteBtn = document.getElementById('delete-media-item');
-        const downloadBtn = document.getElementById('download-media-item');
-
-        closeBtn?.addEventListener('click', () => {
-            modal.classList.remove('active');
-        });
-
-        modal?.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('active');
-            }
-        });
-
-        saveBtn?.addEventListener('click', () => {
-            this.saveMediaAssignment();
-        });
-
-        deleteBtn?.addEventListener('click', () => {
-            this.deleteMediaItem();
-        });
-
-        downloadBtn?.addEventListener('click', () => {
-            this.downloadMediaItem();
-        });
-    }
-
-    async handleFileUpload(files) {
-        const fileArray = Array.from(files);
-        const validFiles = fileArray.filter(file => {
-            const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-            const maxSize = 5 * 1024 * 1024; // 5MB
-            return validTypes.includes(file.type) && file.size <= maxSize;
-        });
-
-        if (validFiles.length === 0) {
-            this.showNotification('No valid image files selected', 'error');
-            return;
-        }
-
-        const progressSection = document.getElementById('upload-progress');
-        const progressFill = document.getElementById('progress-fill');
-        const progressText = document.getElementById('progress-text');
-
-        progressSection.style.display = 'flex';
-        
-        for (let i = 0; i < validFiles.length; i++) {
-            const file = validFiles[i];
-            const progress = ((i + 1) / validFiles.length) * 100;
-            
-            progressFill.style.width = `${progress}%`;
-            progressText.textContent = `${Math.round(progress)}%`;
-
-            await this.processFile(file);
-        }
-
-        progressSection.style.display = 'none';
-        this.renderMediaGallery();
-        this.showNotification(`${validFiles.length} image(s) uploaded successfully`, 'success');
-    }
-
-    async processFile(file) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const mediaItem = {
-                    id: Date.now() + Math.random(),
-                    name: file.name,
-                    size: file.size,
-                    type: file.type,
-                    dataUrl: e.target.result,
-                    uploadDate: new Date().toISOString(),
-                    assignedVan: null,
-                    category: null,
-                    description: '',
-                    isPrimary: false
-                };
-
-                this.mediaItems.push(mediaItem);
-                this.saveMediaData();
-                
-                // Simulate processing time
-                setTimeout(() => resolve(), 100);
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-
-    renderMediaGallery() {
-        const mediaGrid = document.getElementById('media-grid');
-        const noMediaMessage = document.getElementById('no-media-message');
-
-        if (!mediaGrid) return;
-
-        const vanFilter = document.getElementById('van-filter')?.value;
-        const categoryFilter = document.getElementById('category-filter')?.value;
-
-        // Filter media items
-        let filteredItems = this.mediaItems;
-
-        if (vanFilter) {
-            if (vanFilter === 'unassigned') {
-                filteredItems = filteredItems.filter(item => !item.assignedVan);
-            } else {
-                filteredItems = filteredItems.filter(item => item.assignedVan === vanFilter);
-            }
-        }
-
-        if (categoryFilter) {
-            filteredItems = filteredItems.filter(item => item.category === categoryFilter);
-        }
-
-        if (filteredItems.length === 0) {
-            mediaGrid.innerHTML = '';
-            noMediaMessage.style.display = 'block';
-            return;
-        }
-
-        noMediaMessage.style.display = 'none';
-        mediaGrid.innerHTML = filteredItems.map(item => this.createMediaItemHTML(item)).join('');
-
-        // Add click handlers
-        mediaGrid.querySelectorAll('.media-item').forEach(element => {
-            element.addEventListener('click', (e) => {
-                if (!e.target.closest('.media-action-btn')) {
-                    const itemId = element.dataset.itemId;
-                    this.openMediaModal(itemId);
-                }
-            });
-        });
-    }
-
-    createMediaItemHTML(item) {
-        const van = item.assignedVan ? this.vans.find(v => v.id.toString() === item.assignedVan.toString()) : null;
-        const vanName = van ? van.name : 'Unassigned';
-        const fileSize = (item.size / 1024 / 1024).toFixed(1);
-        
-        const mediaItem = document.createElement('div');
-        mediaItem.className = 'media-item';
-        mediaItem.dataset.itemId = item.id;
-
-        const img = document.createElement('img');
-        img.src = item.dataUrl;
-        img.alt = item.name; // Safe assignment
-        img.className = 'media-item-image';
-        mediaItem.appendChild(img);
-
-        const actionsDiv = document.createElement('div');
-        actionsDiv.className = 'media-item-actions';
-        const actionButton = document.createElement('button');
-        actionButton.className = 'media-action-btn';
-        actionButton.onclick = (event) => {
-            event.stopPropagation();
-            adminDashboard.openMediaModal(item.id);
-        };
-        const actionIcon = document.createElement('i');
-        actionIcon.className = 'fas fa-edit';
-        actionButton.appendChild(actionIcon);
-        actionsDiv.appendChild(actionButton);
-        mediaItem.appendChild(actionsDiv);
-
-        const infoDiv = document.createElement('div');
-        infoDiv.className = 'media-item-info';
-        const nameDiv = document.createElement('div');
-        nameDiv.className = 'media-item-name';
-        nameDiv.textContent = item.name; // Safe assignment
-        infoDiv.appendChild(nameDiv);
-
-        const detailsDiv = document.createElement('div');
-        detailsDiv.className = 'media-item-details';
-        detailsDiv.textContent = `${fileSize}MB`;
-        infoDiv.appendChild(detailsDiv);
-
-        const assignmentDiv = document.createElement('div');
-        assignmentDiv.className = 'media-item-assignment';
-        const assignmentBadge = document.createElement('span');
-        assignmentBadge.className = `assignment-badge ${item.assignedVan ? (item.isPrimary ? 'primary' : '') : 'unassigned'}`;
-        assignmentBadge.textContent = `${item.isPrimary ? '★ ' : ''}${vanName}`;
-        assignmentDiv.appendChild(assignmentBadge);
-        infoDiv.appendChild(assignmentDiv);
-
-        if (item.category) {
-            const categoryDiv = document.createElement('div');
-            categoryDiv.className = 'media-item-category';
-            const categoryIcon = document.createElement('i');
-            categoryIcon.className = 'fas fa-tag';
-            categoryDiv.appendChild(categoryIcon);
-            const categoryText = document.createTextNode(item.category);
-            categoryDiv.appendChild(categoryText);
-            infoDiv.appendChild(categoryDiv);
-        }
-
-        mediaItem.appendChild(infoDiv);
-        return mediaItem.outerHTML;
-    }
-
-    openMediaModal(itemId) {
-        const item = this.mediaItems.find(i => i.id.toString() === itemId);
-        if (!item) return;
-
-        const modal = document.getElementById('media-modal');
-        const previewImage = document.getElementById('media-preview-image');
-        const filename = document.getElementById('media-filename');
-        const details = document.getElementById('media-details');
-        const assignVan = document.getElementById('assign-van');
-        const imageCategory = document.getElementById('image-category');
-        const imageDescription = document.getElementById('image-description');
-        const setPrimary = document.getElementById('set-as-primary');
-
-        // Set preview
-        previewImage.src = item.dataUrl;
-        filename.textContent = item.name;
-        details.textContent = `Size: ${(item.size / 1024 / 1024).toFixed(1)}MB | Uploaded: ${new Date(item.uploadDate).toLocaleDateString()}`;
-
-        // Set form values
-        assignVan.value = item.assignedVan || '';
-        imageCategory.value = item.category || '';
-        imageDescription.value = item.description || '';
-        setPrimary.checked = item.isPrimary;
-
-        // Store current item ID
-        modal.dataset.currentItemId = itemId;
-
-        // Populate van options
-        this.populateVanOptions(assignVan);
-
-        modal.classList.add('active');
-    }
-
-    populateVanOptions(selectElement) {
-        if (!selectElement) return;
-
-        const options = ['<option value="">Select Van</option>'];
-        this.vans.forEach(van => {
-            options.push(`<option value="${van.id}">${van.name}</option>`);
-        });
-        selectElement.innerHTML = options.join('');
-    }
-
-    populateVanFilterOptions() {
-        const vanFilter = document.getElementById('van-filter');
-        if (!vanFilter) return;
-
-        const options = ['<option value="">All Vans</option>', '<option value="unassigned">Unassigned</option>'];
-        this.vans.forEach(van => {
-            options.push(`<option value="${van.id}">${van.name}</option>`);
-        });
-        vanFilter.innerHTML = options.join('');
-    }
-
-    saveMediaAssignment() {
-        const modal = document.getElementById('media-modal');
-        const itemId = modal.dataset.currentItemId;
-        const item = this.mediaItems.find(i => i.id.toString() === itemId);
-        
-        if (!item) return;
-
-        const assignVan = document.getElementById('assign-van').value;
-        const imageCategory = document.getElementById('image-category').value;
-        const imageDescription = document.getElementById('image-description').value;
-        const setPrimary = document.getElementById('set-as-primary').checked;
-
-        // If setting as primary, remove primary flag from other images of the same van
-        if (setPrimary && assignVan) {
-            this.mediaItems.forEach(mediaItem => {
-                if (mediaItem.assignedVan && mediaItem.assignedVan.toString() === assignVan.toString() && mediaItem.id !== item.id) {
-                    mediaItem.isPrimary = false;
-                }
-            });
-        }
-
-        // Update item
-        item.assignedVan = assignVan;
-        item.category = imageCategory;
-        item.description = imageDescription;
-        item.isPrimary = setPrimary;
-
-        this.saveMediaData();
-        this.renderMediaGallery();
-        modal.classList.remove('active');
-        this.showNotification('Image assignment saved successfully', 'success');
-    }
-
-    deleteMediaItem() {
-        const modal = document.getElementById('media-modal');
-        const itemId = modal.dataset.currentItemId;
-        
-        if (!confirm('Are you sure you want to delete this image?')) return;
-
-        this.mediaItems = this.mediaItems.filter(item => item.id.toString() !== itemId);
-        this.saveMediaData();
-        this.renderMediaGallery();
-        modal.classList.remove('active');
-        this.showNotification('Image deleted successfully', 'success');
-    }
-
-    downloadMediaItem() {
-        const modal = document.getElementById('media-modal');
-        const itemId = modal.dataset.currentItemId;
-        const item = this.mediaItems.find(i => i.id.toString() === itemId);
-        
-        if (!item) return;
-
-        const link = document.createElement('a');
-        link.href = item.dataUrl;
-        link.download = item.name;
-        link.click();
-    }
-
-    setupPricingTabs() {
-        const tabButtons = document.querySelectorAll('.pricing-tabs .tab-btn');
-        const tabContents = document.querySelectorAll('#pricing .tab-content');
-
-        tabButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const targetTab = button.getAttribute('data-tab');
-                
-                // Remove active class from all tabs and contents
-                tabButtons.forEach(btn => btn.classList.remove('active'));
-                tabContents.forEach(content => content.classList.remove('active'));
-                
-                // Add active class to clicked tab and corresponding content
-                button.classList.add('active');
-                const targetContent = document.getElementById(`${targetTab}-tab`);
-                if (targetContent) {
-                    targetContent.classList.add('active');
-                }
-
-                // Initialize tab-specific content
-                if (targetTab === 'profiles') {
-                    this.renderPricingProfiles();
-                } else if (targetTab === 'rules') {
-                    this.renderPricingRules();
-                } else if (targetTab === 'seasons') {
-                    this.renderSeasonalPricing();
-                }
-            });
-        });
     }
 
     initializeDisplayConfigTab() {
@@ -1859,37 +1362,10 @@ class AdminDashboard {
         return `
             <div class="preview-van-card-inner">
                 <div class="preview-header">
-                    <h4>${van.VehicleID || van.id} - ${van.name}</h4>
+                    <h4>${van.name}</h4>
+                    <div class="preview-price">$${van.price}/day</div>
                 </div>
-                
-                <!-- Main Van Image -->
-                <div class="preview-main-image">
-                    <div style="width: 100%; height: 200px; background: linear-gradient(135deg, #85b545 0%, #a8c66c 100%); border-radius: 8px; margin: 10px 0; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 16px;">
-                        📷 ${van.name}
-                    </div>
-                </div>
-                
-                <!-- Additional Images -->
-                <div class="preview-additional-images" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0;">
-                    <div style="width: 100%; height: 60px; background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: black; font-size: 9px; font-weight: 500;">
-                        🏠 Interior
-                    </div>
-                    <div style="width: 100%; height: 60px; background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: black; font-size: 9px; font-weight: 500;">
-                        🚐 Exterior
-                    </div>
-                    <div style="width: 100%; height: 60px; background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: black; font-size: 9px; font-weight: 500;">
-                        📋 Details
-                    </div>
-                </div>
-                
-                <!-- Quick Availability Calendar -->
-                <div class="preview-availability-calendar" style="margin: 15px 0; padding: 12px; background: #f8f9fa; border-radius: 8px;">
-                    <h6 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #495057;">Next 7 Days</h6>
-                    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;">
-                        ${this.generateNext7DaysCalendar(van)}
-                    </div>
-                </div>
-                
+                <div class="preview-type">${van.type.charAt(0).toUpperCase() + van.type.slice(1)} Van • ${van.capacity} guests</div>
                 ${config.technicalSpecs.showVehicleAddress && van.VehicleAdress ? `
                     <div class="preview-address">
                         <i class="fas fa-map-marker-alt"></i>
@@ -1897,7 +1373,7 @@ class AdminDashboard {
                     </div>
                 ` : ''}
                 ${technicalSpecs}
-                ${config.technicalSpecs.showFeatures && van.features && van.features.length > 0 ? `
+                ${config.technicalSpecs.showFeatures ? `
                     <div class="preview-features">
                         ${van.features.slice(0, 3).map(feature => `<span class="feature-tag">${feature}</span>`).join('')}
                     </div>
@@ -1955,24 +1431,21 @@ function renderVanCollection(vans) {
                 <style>
                     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 20px; background: #f8f9fa; }
                     .preview-header { text-align: center; margin-bottom: 30px; }
-                    .collection-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
-                    .van-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.2s ease, box-shadow 0.2s ease; }
-                    .van-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
-                    .van-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-                    .van-name { margin: 0; color: #1e293b; font-size: 1.2rem; font-weight: 600; }
+                    .collection-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+                    .van-card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+                    .van-header { display: flex; justify-content: between; align-items: center; margin-bottom: 15px; }
+                    .van-name { margin: 0; color: #333; }
+                    .van-price { font-weight: bold; color: #007bff; }
                     .van-type { color: #6c757d; margin-bottom: 10px; }
-                    .preview-technical-specs { margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; }
+                    .preview-technical-specs { margin: 15px 0; }
                     .spec-group { margin-bottom: 8px; font-size: 14px; }
                     .spec-title { font-weight: 600; color: #495057; }
                     .spec-values { color: #6c757d; }
                     .preview-features { margin: 15px 0; }
-                    .feature-tag { background: #e9ecef; padding: 4px 8px; border-radius: 4px; font-size: 12px; margin-right: 5px; margin-bottom: 4px; display: inline-block; }
+                    .feature-tag { background: #e9ecef; padding: 4px 8px; border-radius: 4px; font-size: 12px; margin-right: 5px; }
                     .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
                     .status-badge.available { background: #d4edda; color: #155724; }
-                    .preview-address { color: #6c757d; font-size: 14px; margin: 10px 0; display: flex; align-items: center; gap: 6px; }
-                    .preview-main-image { margin: 15px 0; }
-                    .preview-additional-images { margin: 15px 0; }
-                    .preview-van-card-inner h4 { margin-bottom: 15px; }
+                    .preview-address { color: #6c757d; font-size: 14px; margin: 10px 0; }
                 </style>
             </head>
             <body>
@@ -2081,673 +1554,18 @@ function renderVanCollection(vans) {
         };
     }
 
-    // Google Sheets section rendering and event handlers
-    renderGoogleSheetsSection() {
-        // The Google Sheets section is already rendered in HTML
-        // This method handles dynamic updates to the existing HTML structure
-        
-        // Update connection status
-        const statusElement = document.getElementById('sheets-status');
-        const lastSyncElement = document.getElementById('last-sync');
-        
-        if (statusElement) {
-            const statusDot = statusElement.querySelector('.status-dot');
-            const statusText = statusElement.querySelector('.status-text');
-            
-            if (this.googleSheetsConfig.isConnected) {
-                statusDot.className = 'fas fa-circle status-dot connected';
-                statusDot.className = 'fas fa-circle status-dot connected';
-                statusText.textContent = 'Connected';
-            } else {
-                statusDot.className = 'fas fa-circle status-dot disconnected';
-                statusText.textContent = 'Not Connected';
-            }
-        }
-        
-        if (lastSyncElement) {
-            const lastSyncText = this.googleSheetsConfig.lastSync || 'Never';
-            lastSyncElement.innerHTML = `<i class="fas fa-clock"></i><span>Last sync: ${lastSyncText}</span>`;
-        }
-        
-        // Update sheet status indicators
-        const vanSheetStatus = document.getElementById('van-sheet-status');
-        const pricingSheetStatus = document.getElementById('pricing-sheet-status');
-        
-        if (vanSheetStatus) {
-            if (this.googleSheetsConfig.vanSheetUrl) {
-                vanSheetStatus.innerHTML = '<i class="fas fa-check-circle text-success"></i>';
-            } else {
-                vanSheetStatus.innerHTML = '<i class="fas fa-times-circle text-danger"></i>';
-            }
-        }
-        
-        if (pricingSheetStatus) {
-            if (this.googleSheetsConfig.pricingSheetUrl) {
-                pricingSheetStatus.innerHTML = '<i class="fas fa-check-circle text-success"></i>';
-            } else {
-                pricingSheetStatus.innerHTML = '<i class="fas fa-times-circle text-danger"></i>';
-            }
-        }
-        
-        // Populate existing form fields
-        const vanSheetUrlInput = document.getElementById('van-sheet-url');
-        const pricingSheetUrlInput = document.getElementById('pricing-sheet-url');
-        const vanSheetRangeInput = document.getElementById('van-sheet-range');
-        const pricingSheetRangeInput = document.getElementById('pricing-sheet-range');
-        
-        if (vanSheetUrlInput) vanSheetUrlInput.value = this.googleSheetsConfig.vanSheetUrl || '';
-        if (pricingSheetUrlInput) pricingSheetUrlInput.value = this.googleSheetsConfig.pricingSheetUrl || '';
-        if (vanSheetRangeInput) vanSheetRangeInput.value = this.googleSheetsConfig.vanSheetRange || 'Vans!A1:Z100';
-        if (pricingSheetRangeInput) pricingSheetRangeInput.value = this.googleSheetsConfig.pricingSheetRange || 'Pricing!A1:Z100';
-    }
-
-    setupGoogleSheetsHandlers() {
-        // Connect Sheets button
-        const connectSheetsBtn = document.getElementById('connect-sheets-btn');
-        if (connectSheetsBtn) {
-            connectSheetsBtn.addEventListener('click', () => {
-                this.showConnectSheetsModal();
-            });
-        }
-        
-        // Test connection buttons
-        const testVanSheetBtn = document.getElementById('test-van-sheet-btn');
-        const testPricingSheetBtn = document.getElementById('test-pricing-sheet-btn');
-        
-        if (testVanSheetBtn) {
-            testVanSheetBtn.addEventListener('click', () => {
-                this.testSheetConnection('van');
-            });
-        }
-        
-        if (testPricingSheetBtn) {
-            testPricingSheetBtn.addEventListener('click', () => {
-                this.testSheetConnection('pricing');
-            });
-        }
-        
-        // Import data buttons
-        const importVanDataBtn = document.getElementById('import-van-data-btn');
-        const importPricingDataBtn = document.getElementById('import-pricing-data-btn');
-        
-        if (importVanDataBtn) {
-            importVanDataBtn.addEventListener('click', () => {
-                this.importVanData();
-            });
-        }
-        
-        if (importPricingDataBtn) {
-            importPricingDataBtn.addEventListener('click', () => {
-                this.importPricingData();
-            });
-        }
-        
-        // Manual sync button
-        const manualSyncBtn = document.getElementById('manual-sync-btn');
-        if (manualSyncBtn) {
-            manualSyncBtn.addEventListener('click', () => {
-                this.performManualSync();
-            });
-        }
-        
-        // Sheet URL input handlers
-        const vanSheetUrlInput = document.getElementById('van-sheet-url');
-        const pricingSheetUrlInput = document.getElementById('pricing-sheet-url');
-        
-        if (vanSheetUrlInput) {
-            vanSheetUrlInput.addEventListener('change', (e) => {
-                this.googleSheetsConfig.vanSheetUrl = e.target.value;
-                this.renderGoogleSheetsSection();
-            });
-        }
-        
-        if (pricingSheetUrlInput) {
-            pricingSheetUrlInput.addEventListener('change', (e) => {
-                this.googleSheetsConfig.pricingSheetUrl = e.target.value;
-                this.renderGoogleSheetsSection();
-            });
-        }
-        
-        // Preview tab handlers
-        const previewTabs = document.querySelectorAll('.preview-tabs .tab-btn');
-        previewTabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const targetPreview = tab.dataset.preview;
-                this.switchPreviewTab(targetPreview);
-            });
-        });
-    }
-
-    testSheetConnection(type) {
-        const url = type === 'van' ? this.googleSheetsConfig.vanSheetUrl : this.googleSheetsConfig.pricingSheetUrl;
-        
-        if (!url) {
-            this.showNotification(`Please enter a ${type} sheet URL first`, 'error');
-            return;
-        }
-        
-        this.showNotification(`Testing ${type} sheet connection...`, 'info');
-        
-        // Simulate connection test
-        setTimeout(() => {
-            // In a real implementation, this would test the actual connection
-            this.showNotification(`${type} sheet connection successful!`, 'success');
-            
-            // Update the sheet status
-            const statusElement = document.getElementById(`${type}-sheet-status`);
-            if (statusElement) {
-                statusElement.innerHTML = '<i class="fas fa-check-circle text-success"></i>';
-            }
-        }, 2000);
-    }
-
-    switchPreviewTab(targetPreview) {
-        // Remove active class from all tabs and content
-        document.querySelectorAll('.preview-tabs .tab-btn').forEach(tab => {
-            tab.classList.remove('active');
-        });
-        document.querySelectorAll('.preview-content').forEach(content => {
-            content.classList.remove('active');
-        });
-        
-        // Add active class to clicked tab and corresponding content
-        const clickedTab = document.querySelector(`[data-preview="${targetPreview}"]`);
-        const targetContent = document.getElementById(`${targetPreview}-preview`);
-        
-        if (clickedTab) clickedTab.classList.add('active');
-        if (targetContent) targetContent.classList.add('active');
-        
-        // Load preview data
-        this.loadPreviewData(targetPreview);
-    }
-
-    loadPreviewData(previewType) {
-        const tableId = `${previewType.replace('-', '-')}-table`;
-        const table = document.getElementById(tableId);
-        
-        if (!table) return;
-        
-        // Clear existing content
-        table.innerHTML = '';
-        
-        if (previewType === 'van-data') {
-            // Sample van data structure
-            const sampleData = [
-                ['ID', 'Name', 'Type', 'Status', 'Location', 'Price', 'Capacity', 'Features'],
-                ['1', 'Compact Van #1', 'compact', 'available', 'City Center', '$80', '2', 'GPS, AC, Bluetooth'],
-                ['2', 'Compact Van #2', 'compact', 'available', 'Airport', '$80', '2', 'GPS, AC, Bluetooth'],
-                ['3', 'Standard Van #1', 'standard', 'available', 'Downtown', '$120', '4', 'GPS, AC, Kitchen, Bluetooth']
-            ];
-            
-            this.populatePreviewTable(table, sampleData);
-        } else if (previewType === 'pricing-data') {
-            // Sample pricing data structure
-            const sampleData = [
-                ['ProfileID', 'Name', 'BasePrice', 'Weekend Multiplier', 'Season', 'Minimum Days'],
-                ['Standard', 'compact', '$80', '1.2', 'summer', '2'],
-                ['Luxury', 'luxury', '$200', '1.5', 'summer', '3']
-            ];
-            
-            this.populatePreviewTable(table, sampleData);
-        }
-    }
-
-    populatePreviewTable(table, data) {
-        // Create table header
-        const thead = document.createElement('thead');
-        const headerRow = document.createElement('tr');
-        
-        data[0].forEach(header => {
-            const th = document.createElement('th');
-            th.textContent = header;
-            headerRow.appendChild(th);
-        });
-        
-        thead.appendChild(headerRow);
-        table.appendChild(thead);
-        
-        // Create table body
-        const tbody = document.createElement('tbody');
-        
-        for (let i = 1; i < data.length; i++) {
-            const row = document.createElement('tr');
-            
-            data[i].forEach(cell => {
-                const td = document.createElement('td');
-                td.textContent = cell;
-                row.appendChild(td);
-            });
-            
-            tbody.appendChild(row);
-        }
-        
-        table.appendChild(tbody);
-    }
-
-    performManualSync() {
-        this.showNotification('Starting manual sync...', 'info');
-        
-        // Check if sheets are configured
-        if (!this.googleSheetsConfig.vanSheetUrl && !this.googleSheetsConfig.pricingSheetUrl) {
-            this.showNotification('Please configure at least one sheet URL before syncing', 'error');
-            return;
-        }
-        
-        // Show the 3-step manual import process
-        this.showManualImportProcess();
-    }
-
-    showManualImportProcess() {
-        const syncResults = document.getElementById('sync-results');
-        if (!syncResults) return;
-        
-        syncResults.innerHTML = `
-            <div class="manual-import-container">
-                <div class="manual-import-header">
-                    <h4><i class="fas fa-download"></i> 3-Step Manual Import</h4>
-                    <p>Follow these simple steps to import your data:</p>
-                </div>
-                
-                <div class="import-steps">
-                    <div class="import-step">
-                        <div class="step-number">1</div>
-                        <div class="step-content">
-                            <h5>Download your data</h5>
-                            <p>Click the buttons below to download your Google Sheets data as CSV files:</p>
-                            <div class="download-buttons">
-                                <button class="btn btn-primary" onclick="adminDashboard.downloadSheetAsCSV('van')">
-                                    <i class="fas fa-download"></i> Download Van Data
-                                </button>
-                                <button class="btn btn-primary" onclick="adminDashboard.downloadSheetAsCSV('pricing')">
-                                    <i class="fas fa-download"></i> Download Pricing Data
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        const vanFileInput = document.getElementById('van-file-input');
-        const pricingFileInput = document.getElementById('pricing-file-input');
-        
-        if (vanFileInput) {
-            vanFileInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    this.showNotification('Van data file selected', 'success');
-                }
-            });
-        }
-        
-        if (pricingFileInput) {
-            pricingFileInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    this.showNotification('Pricing data file selected', 'success');
-                }
-            });
-        }
-    }
-
-    downloadSheetAsCSV(type) {
-        const sheetUrl = type === 'van' ? this.googleSheetsConfig.vanSheetUrl : this.googleSheetsConfig.pricingSheetUrl;
-        
-        if (!sheetUrl) {
-            this.showNotification(`Please configure the ${type} sheet URL first`, 'error');
-            return;
-        }
-        
-        this.showNotification(`Opening ${type} sheet for download...`, 'info');
-        
-        // Convert Google Sheets URL to CSV export URL
-        const csvUrl = this.convertToCsvUrl(sheetUrl);
-        
-        // Open the CSV download URL in a new tab
-        window.open(csvUrl, '_blank');
-        
-        setTimeout(() => {
-            this.showNotification(`${type} sheet opened for download. Please save it as a CSV file.`, 'success');
-        }, 1000);
-    }
-
-    convertToCsvUrl(sheetUrl) {
-        // Convert Google Sheets URL to CSV export format
-        if (sheetUrl.includes('/edit')) {
-            return sheetUrl.replace('/edit', '/export?format=csv');
-        } else if (sheetUrl.includes('docs.google.com/spreadsheets/d/')) {
-            const match = sheetUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-            if (match) {
-                return `https://docs.google.com/spreadsheets/d/${match[1]}/export?format=csv`;
-            }
-        }
-        
-        return sheetUrl;
-    }
-
-
-
-    processManualImport() {
-        const vanFile = document.getElementById('van-csv-file')?.files[0];
-        const pricingFile = document.getElementById('pricing-csv-file')?.files[0];
-        
-        if (!vanFile && !pricingFile) {
-            this.showNotification('Please select at least one CSV file to import', 'error');
-            return;
-        }
-        
-        this.showNotification('Processing your CSV files...', 'info');
-        
-        const promises = [];
-        
-        if (vanFile) {
-            promises.push(this.processCSVFile(vanFile, 'van'));
-        }
-        
-        if (pricingFile) {
-            promises.push(this.processCSVFile(pricingFile, 'pricing'));
-        }
-        
-        Promise.all(promises).then(() => {
-            this.showNotification('Data imported successfully!', 'success');
-            this.googleSheetsConfig.lastSync = new Date().toLocaleString();
-            this.renderGoogleSheetsSection();
-            this.renderVansGrid();
-            this.renderPricingProfiles();
-            
-            // Clear the manual import interface
-            document.getElementById('sync-results').innerHTML = '';
-        }).catch(error => {
-            this.showNotification('Error importing data: ' + error.message, 'error');
-        });
-    }
-
-    processCSVFile(file, type) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            
-            reader.onload = (e) => {
-                try {
-                    const csvData = e.target.result;
-                    const parsedData = this.parseCSV(csvData);
-                    
-                    if (type === 'van') {
-                        this.importVanDataFromCSV(parsedData);
-                    } else if (type === 'pricing') {
-                        this.importPricingDataFromCSV(parsedData);
-                    }
-                    
-                    resolve();
-                } catch (error) {
-                    reject(error);
-                }
-            };
-            
-            reader.onerror = () => {
-                reject(new Error('Failed to read file'));
-            };
-            
-            reader.readAsText(file);
-        });
-    }
-
-    parseCSV(csvData) {
-        const lines = csvData.split('\n');
-        const headers = lines[0].split(',').map(h => h.trim().replace(/['"]/g, ''));
-        const data = [];
-        
-        for (let i = 1; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (line) {
-                const values = line.split(',').map(v => v.trim().replace(/['"]/g, ''));
-                const row = {};
-                
-                headers.forEach((header, index) => {
-                    row[header.toLowerCase()] = values[index] || '';
-                });
-                
-                data.push(row);
-            }
-        }
-        
-        return data;
-    }
-
-    importVanDataFromCSV(data) {
-        let imported = 0;
-        
-        data.forEach(row => {
-            if (row.name && row.type) {
-                const van = {
-                    id: this.vans.length + 1,
-                    name: row.name,
-                    type: row.type.toLowerCase(),
-                    status: row.status || 'available',
-                    enabled: row.enabled !== 'false',
-                    location: row.location || 'Unknown',
-                    price: parseFloat(row.price) || 0,
-                    capacity: parseInt(row.capacity) || 2,
-                    pricingProfile: row.pricingprofile || 'standard',
-                    features: row.features ? row.features.split(';') : [],
-                    description: row.description || ''
-                };
-                
-                this.vans.push(van);
-                imported++;
-            }
-        });
-        
-        this.showNotification(`Imported ${imported} vans from CSV`, 'success');
-    }
-
-    importPricingDataFromCSV(data) {
-        let imported = 0;
-        
-        data.forEach(row => {
-            if (row.profile && row.vantype) {
-                const pricing = {
-                    id: this.pricingProfiles.length + 1,
-                    name: row.profile,
-                    vanType: row.vantype.toLowerCase(),
-                    basePrice: parseFloat(row.baseprice) || 0,
-                    weekendMultiplier: parseFloat(row.weekendmultiplier) || 1.0,
-                    seasonalMultiplier: parseFloat(row.seasonalmultiplier) || 1.0,
-                    minimumDays: parseInt(row.minimumdays) || 1,
-                    description: row.description || ''
-                };
-                
-                this.pricingProfiles.push(pricing);
-                imported++;
-            }
-        });
-        
-        this.showNotification(`Imported ${imported} pricing profiles from CSV`, 'success');
-    }
-
-    // Function to import van data from your CSV format
-    importVanDataFromYourCSV(csvData) {
-        const lines = csvData.split('\n');
-        const headers = lines[0].split(',').map(h => h.trim().replace(/['"]/g, ''));
-        const importedVans = [];
-        
-        for (let i = 1; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (line) {
-                const values = this.parseCSVLine(line);
-                const row = {};
-                
-                headers.forEach((header, index) => {
-                    row[header] = values[index] || '';
-                });
-                
-                // Convert CSV row to van object
-                if (row.VehicleID && row.VehicleName) {
-                    const van = {
-                        id: row.VehicleID,
-                        VehicleID: row.VehicleID,
-                        name: row.VehicleName,
-                        VehicleName: row.VehicleName,
-                        type: this.determineVanType(row.VehicleName),
-                        status: 'available',
-                        enabled: true,
-                        location: this.extractLocation(row.VehicleName),
-                        VehicleAdress: row.VehicleAdress || '',
-                        LicencePlate: row.LicencePlate || '',
-                        CalendarID: row.CalendarID || '',
-                        price: this.determinePricing(row.VehicleName),
-                        capacity: 3, // Default capacity
-                        ExtHight: row.ExtHight || '',
-                        ExtLength: row.ExtLength || '',
-                        ExtLarge: row.ExtLarge || '',
-                        IntHight: row.IntHight || '',
-                        IntLength: row.IntLength || '',
-                        IntLarge: row.IntLarge || '',
-                        load_volume: this.calculateLoadVolume(row),
-                        pricingProfile: 'standard',
-                        features: ['GPS', 'AC', 'Bluetooth'],
-                        description: `${this.determineVanType(row.VehicleName)} van available in ${this.extractLocation(row.VehicleName)}`
-                    };
-                    
-                    importedVans.push(van);
-                }
-            }
-        }
-        
-        return importedVans;
-    }
-    
-    parseCSVLine(line) {
-        const result = [];
-        let current = '';
-        let inQuotes = false;
-        
-        for (let i = 0; i < line.length; i++) {
-            const char = line[i];
-            
-            if (char === '"') {
-                inQuotes = !inQuotes;
-            } else if (char === ',' && !inQuotes) {
-                result.push(current.trim());
-                current = '';
-            } else {
-                current += char;
-            }
-        }
-        
-        result.push(current.trim());
-        return result;
-    }
-    
-    determineVanType(vehicleName) {
-        const name = vehicleName.toLowerCase();
-        if (name.includes('trafic') || name.includes('vivaro')) {
-            return 'compact';
-        } else if (name.includes('ducato') || name.includes('l1h1')) {
-            return 'medium';
-        } else if (name.includes('master') || name.includes('boxer') || name.includes('jumper')) {
-            return 'large';
-        }
-        return 'medium'; // default
-    }
-    
-    extractLocation(vehicleName) {
-        const match = vehicleName.match(/\(([^)]+)\)/);
-        return match ? match[1] : 'Ticino';
-    }
-    
-    determinePricing(vehicleName) {
-        const name = vehicleName.toLowerCase();
-        if (name.includes('trafic') || name.includes('vivaro')) {
-            return 75;
-        } else if (name.includes('ducato') || name.includes('l1h1')) {
-            return 95;
-        } else if (name.includes('master')) {
-            return 120;
-        } else if (name.includes('boxer') || name.includes('jumper')) {
-            return 110;
-        }
-        return 85; // default
-    }
-    
-    calculateLoadVolume(row) {
-        try {
-            const length = parseFloat((row.IntLength || '0').replace(',', '.'));
-            const width = parseFloat((row.IntLarge || '0').replace(',', '.'));
-            const height = parseFloat((row.IntHight || '0').replace(',', '.'));
-            
-            if (length > 0 && width > 0 && height > 0) {
-                return Math.round(length * width * height * 10) / 10;
-            }
-        } catch (e) {
-            console.warn('Could not calculate load volume for:', row.VehicleID);
-        }
-        return 0;
-    }
-
-    // Enhanced import function for your specific CSV format
-    importFromYourCSV() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.csv';
-        
-        input.onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    try {
-                        const csvData = event.target.result;
-                        const importedVans = this.importVanDataFromYourCSV(csvData);
-                        
-                        // Replace current van data
-                        this.vans = importedVans;
-                        this.renderVansGrid();
-                        this.renderAvailabilityCalendar();
-                        
-                        this.showNotification(`Successfully imported ${importedVans.length} vans from CSV!`, 'success');
-                    } catch (error) {
-                        this.showNotification('Error importing CSV: ' + error.message, 'error');
-                    }
-                };
-                reader.readAsText(file);
-            }
-        };
-        
-        input.click();
-    }
-
+    // Utility Methods
     formatDate(date) {
+        // Format date as YYYY-MM-DD
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
 
-    getVanAvailability(vanId, dateStr) {
-        // Check if van has any bookings for this date
-        const hasBooking = this.bookings.some(booking => 
-            booking.vanId === vanId && 
-            dateStr >= booking.startDate && 
-            dateStr <= booking.endDate
-        );
-        
-        if (hasBooking) {
-            return 'booked';
-        }
-        
-        // Check if date is in the past
-        const today = new Date();
-        const checkDate = new Date(dateStr);
-        today.setHours(0, 0, 0, 0);
-        checkDate.setHours(0, 0, 0, 0);
-        
-        if (checkDate < today) {
-            return 'past';
-        }
-        
-        return 'available';
-    }
-
-    formatDisplayDate(dateStr) {
-        const date = new Date(dateStr);
+    formatDisplayDate(dateString) {
+        // Format date string for display (e.g., "Jul 15, 2025")
+        const date = new Date(dateString);
         return date.toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
@@ -2756,39 +1574,32 @@ function renderVanCollection(vans) {
     }
 
     showNotification(message, type = 'info') {
-        // Create notification element
+        // Create and show notification
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
         notification.innerHTML = `
             <div class="notification-content">
                 <i class="fas fa-${this.getNotificationIcon(type)}"></i>
-                <span class="notification-message">${message}</span>
-                <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
-                    <i class="fas fa-times"></i>
-                </button>
+                <span>${message}</span>
             </div>
+            <button class="notification-close" onclick="this.remove()">
+                <i class="fas fa-times"></i>
+            </button>
         `;
 
-        // Add to notification container or create one
-        let container = document.getElementById('notification-container');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'notification-container';
-            container.className = 'notification-container';
-            document.body.appendChild(container);
-        }
-
-        container.appendChild(notification);
+        // Add to page
+        document.body.appendChild(notification);
 
         // Auto-remove after 5 seconds
         setTimeout(() => {
-            if (notification.parentElement) {
+            if (notification.parentNode) {
                 notification.remove();
             }
         }, 5000);
     }
 
     getNotificationIcon(type) {
+       
         const icons = {
             success: 'check-circle',
             error: 'exclamation-circle',
@@ -2798,43 +1609,203 @@ function renderVanCollection(vans) {
         return icons[type] || 'info-circle';
     }
 
-    showConnectSheetsModal() {
+    viewVanDetails(vanId) {
+        const van = this.vans.find(v => v.id === vanId);
+        if (!van) return;
+
+        this.showVanDetailsModal(van);
+    }
+
+    showVanDetailsModal(van) {
         const modal = document.createElement('div');
         modal.className = 'modal active';
         modal.innerHTML = `
             <div class="modal-content large">
                 <div class="modal-header">
-                    <h3>Connect to Google Sheets</h3>
+                    <h3>Van Details: ${van.name}</h3>
                     <span class="close" onclick="this.closest('.modal').remove()">&times;</span>
                 </div>
                 <div class="modal-body">
-                    <div class="connect-steps">
-                        <div class="step">
-                            <div class="step-number">1</div>
-                            <div class="step-content">
-                                <h4>Prepare Your Google Sheet</h4>
-                                <p>Create a Google Sheet with your van data. Make sure it's publicly accessible or shared with the service account.</p>
-                                <button class="btn btn-secondary" onclick="adminDashboard.openSampleSheet()">View Sample Sheet</button>
-                            </div>
-                        </div>
-                        <div class="step">
-                            <div class="step-number">2</div>
-                            <div class="step-content">
-                                <h4>Copy Sheet URL</h4>
-                                <p>Copy the full URL of your Google Sheet from the browser address bar.</p>
-                                <input type="text" placeholder="Paste your Google Sheets URL here..." id="connect-sheet-url" name="connect-sheet-url">
-                            </div>
-                        </div>
-                        <div class="step">
-                            <div class="step-number">3</div>
-                            <div class="step-content">
-                                <h4>Test & Import</h4>
-                                <p>Test the connection and import your data.</p>
-                                <div class="step-actions">
-                                    <button class="btn btn-primary" onclick="adminDashboard.testAndConnect()">Test Connection</button>
-                                    <button class="btn btn-success" onclick="adminDashboard.importFromUrl()" disabled id="import-btn">Import Data</button>
+                    <div class="van-details-content">
+                        <div class="details-section">
+                            <h4>Basic Information</h4>
+                            <div class="details-grid">
+                                <div class="detail-item">
+                                    <span class="label">Name:</span>
+                                    <span class="value">${van.name}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Type:</span>
+                                    <span class="value">${van.type}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Location:</span>
+                                    <span class="value">${van.location}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Capacity:</span>
+                                    <span class="value">${van.capacity} guests</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Status:</span>
+                                    <span class="value status-${van.status}">${van.status}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Daily Rate:</span>
+                                    <span class="value">$${van.price}</span>
                                 </div>
                             </div>
+                        </div>
+                        
+                        ${van.VehicleAdress ? `
+                        <div class="details-section">
+                            <h4>Address</h4>
+                            <p>${van.VehicleAdress}</p>
+                        </div>
+                        ` : ''}
+                        
+                        <div class="details-section">
+                            <h4>Technical Specifications</h4>
+                            <div class="tech-specs-detailed">
+                                <div class="spec-category">
+                                    <h5>External Dimensions</h5>
+                                    <div class="spec-list">
+                                        <div class="spec-item">
+                                            <span class="spec-label">Length:</span>
+                                            <span class="spec-value">${van.ExtLength || 'N/A'}m</span>
+                                        </div>
+                                        <div class="spec-item">
+                                            <span class="spec-label">Height:</span>
+                                            <span class="spec-value">${van.ExtHight || 'N/A'}m</span>
+                                        </div>
+                                        <div class="spec-item">
+                                            <span class="spec-label">Width:</span>
+                                            <span class="spec-value">${van.ExtLarge || 'N/A'}m</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="spec-category">
+                                    <h5>Internal Dimensions</h5>
+                                    <div class="spec-list">
+                                        <div class="spec-item">
+                                            <span class="spec-label">Length:</span>
+                                            <span class="spec-value">${van.IntLength || 'N/A'}m</span>
+                                        </div>
+                                        <div class="spec-item">
+                                            <span class="spec-label">Height:</span>
+                                            <span class="spec-value">${van.IntHight || 'N/A'}m</span>
+                                        </div>
+                                        <div class="spec-item">
+                                            <span class="spec-label">Width:</span>
+                                            <span class="spec-value">${van.IntLarge || 'N/A'}m</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="spec-category">
+                                    <h5>Vehicle Information</h5>
+                                    <div class="spec-list">
+                                        <div class="spec-item">
+                                            <span class="spec-label">Vehicle ID:</span>
+                                            <span class="spec-value">${van.VehicleID || van.id}</span>
+                                        </div>
+                                        <div class="spec-item">
+                                            <span class="spec-label">License Plate:</span>
+                                            <span class="spec-value">${van.LicencePlate || 'N/A'}</span>
+                                        </div>
+                                        <div class="spec-item">
+                                            <span class="spec-label">Calendar ID:</span>
+                                            <span class="spec-value">${van.CalendarID || van.calendar_id || 'N/A'}</span>
+                                        </div>
+                                        <div class="spec-item">
+                                            <span class="spec-label">Load Volume:</span>
+                                            <span class="spec-value">${van.load_volume || 'N/A'}m³</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="details-section">
+                            <h4>Features & Equipment</h4>
+                            <div class="features-list">
+                                ${van.features.map(feature => `
+                                    <span class="feature-badge">
+                                        <i class="fas fa-check"></i>
+                                        ${feature}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        ${van.description ? `
+                        <div class="details-section">
+                            <h4>Description</h4>
+                            <p>${van.description}</p>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    viewVanCalendar(vanId) {
+        const van = this.vans.find(v => v.id === vanId);
+        if (!van) return;
+
+        // For now, just show a notification
+        this.showNotification(`Opening calendar for ${van.name}`, 'info');
+        // TODO: Implement calendar view modal
+    }
+
+    viewBookingDetails(bookingId) {
+        const booking = this.bookings.find(b => b.id === bookingId);
+        if (!booking) return;
+
+        this.showBookingDetailsModal(booking);
+    }
+
+    showBookingDetailsModal(booking) {
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Booking Details: ${booking.id}</h3>
+                    <span class="close" onclick="this.closest('.modal').remove()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="booking-details-content">
+                        <div class="detail-item">
+                            <span class="label">Customer:</span>
+                            <span class="value">${booking.customerName}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Email:</span>
+                            <span class="value">${booking.customerEmail}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Phone:</span>
+                            <span class="value">${booking.phone}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Van:</span>
+                            <span class="value">${booking.vanName}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Dates:</span>
+                            <span class="value">${this.formatDisplayDate(booking.startDate)} - ${this.formatDisplayDate(booking.endDate)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Status:</span>
+                            <span class="value status-${booking.status}">${booking.status}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Total:</span>
+                            <span class="value">$${booking.total.toLocaleString()}</span>
                         </div>
                     </div>
                 </div>
@@ -2843,138 +1814,596 @@ function renderVanCollection(vans) {
         document.body.appendChild(modal);
     }
 
-    testAndConnect() {
-        const url = document.getElementById('connect-sheet-url')?.value;
+    editBooking(bookingId) {
+        const booking = this.bookings.find(b => b.id === bookingId);
+        if (!booking) return;
+
+        // For now, just show a notification
+        this.showNotification(`Editing booking ${bookingId}`, 'info');
+        // TODO: Implement booking edit modal
+    }
+
+    createBooking(vanId, checkin, checkout) {
+        const van = this.vans.find(v => v.id === vanId);
+        if (!van) return;
+
+        // For now, just show a notification
+        this.showNotification(`Creating booking for ${van.name} from ${checkin} to ${checkout}`, 'info');
+        // TODO: Implement booking creation modal
+    }
+
+    getVanAvailability(vanId, dateStr) {
+        // This would check against actual booking data and Google Calendar
+        // For now, return mock availability
+        const date = new Date(dateStr);
+        const today = new Date();
         
-        if (!url) {
-            this.showNotification('Please enter a Google Sheets URL', 'warning');
-            return;
+        // Past dates
+        if (date < today.setHours(0, 0, 0, 0)) {
+            return 'past';
         }
         
-        // Validate URL format
-        if (!url.includes('docs.google.com/spreadsheets')) {
-            this.showNotification('Please enter a valid Google Sheets URL', 'error');
-            return;
+        // Check if van has bookings on this date
+        const hasBooking = this.bookings.some(booking => {
+            const startDate = new Date(booking.startDate);
+            const endDate = new Date(booking.endDate);
+            return booking.vanId === vanId && 
+                   date >= startDate && 
+                   date <= endDate &&
+                   booking.status === 'confirmed';
+        });
+        
+        if (hasBooking) {
+            return 'booked';
         }
         
-        this.showNotification('Testing connection to Google Sheets...', 'info');
+        // Random availability for demo purposes
+        const random = Math.random();
+        if (random < 0.7) return 'available';
+        if (random < 0.9) return 'partial';
+        return 'booked';
+    }
+
+    handleCalendarDayClick(van, dateStr) {
+        console.log(`Clicked on ${dateStr} for van ${van.name}`);
         
-        // Simulate connection test
-        setTimeout(() => {
-            this.showNotification('Connection successful! Ready to import data.', 'success');
-            
-            // Enable import button
-            const importBtn = document.getElementById('import-btn');
-            if (importBtn) {
-                importBtn.disabled = false;
-            }
-        }, 2000);
-    }
+        // Show booking details for this day
+        const bookings = this.bookings.filter(booking => {
+            const startDate = new Date(booking.startDate);
+            const endDate = new Date(booking.endDate);
+            const clickedDate = new Date(dateStr);
+            return booking.vanId === van.id && 
+                   clickedDate >= startDate && 
+                   clickedDate <= endDate;
+        });
 
-    importFromUrl() {
-        this.showNotification('Importing data from Google Sheets...', 'info');
-        
-        setTimeout(() => {
-            this.showNotification('Data imported successfully!', 'success');
-            
-            // Close modal and refresh
-            const modals = document.querySelectorAll('.modal');
-            modals.forEach(modal => modal.remove());
-            
-            this.renderVansGrid();
-            this.renderPricingProfiles();
-        }, 3000);
-    }
-
-    openSampleSheet() {
-        // Open a new window with sample sheet information
-        const sampleWindow = window.open('', '_blank', 'width=800,height=600');
-        sampleWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Sample Google Sheet Structure</title>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; }
-                    table { border-collapse: collapse; width: 100%; }
-                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                    th { background-color: #f2f2f2; }
-                    .note { background: #e3f2fd; padding: 15px; margin: 20px 0; border-radius: 5px; }
-                </style>
-            </head>
-            <body>
-                <h1>Sample Google Sheet Structure for Van Data</h1>
-                <div class="note">
-                    <strong>Note:</strong> Your Google Sheet should have the following columns in this exact order:
-                </div>
-                <table>
-                    <tr>
-                        <th>VehicleID</th>
-                        <th>VehicleName</th>
-                        <th>CalendarID</th>
-                        <th>VehicleAdress</th>
-                        <th>LicencePlate</th>
-                        <th>ExtHight</th>
-                        <th>ExtLength</th>
-                        <th>ExtLarge</th>
-                        <th>IntHight</th>
-                        <th>IntLength</th>
-                        <th>IntLarge</th>
-                    </tr>
-                    <tr>
-                        <td>N01</td>
-                        <td>Opel Vivaro (Losone)</td>
-                        <td>noleggiosemplice23@gmail.com</td>
-                        <td>Via dei Patrizi 1, 6616 Losone</td>
-                        <td>TI 148877</td>
-                        <td>1,97</td>
-                        <td>5,2</td>
-                        <td>2,24</td>
-                        <td>1,38</td>
-                        <td>2,8</td>
-                        <td>1.27 / 1.69</td>
-                    </tr>
-                </table>
-                <div class="note">
-                    <strong>Tips:</strong>
-                    <ul>
-                        <li>Make sure your sheet is publicly viewable or shared with appropriate permissions</li>
-                        <li>The first row should contain the column headers exactly as shown above</li>
-                        <li>Use commas as decimal separators for dimensions (European format)</li>
-                        <li>Calendar IDs should be your actual Google Calendar IDs for integration</li>
-                    </ul>
-                </div>
-            </body>
-            </html>
-        `);
-        sampleWindow.document.close();
-    }
-
-    // Load sample Swiss van data
-    loadRealVanData() {
-        // Check if real-van-data.js is available
-        if (typeof getRealVanData === 'function') {
-            try {
-                const realVanData = getRealVanData();
-                
-                // Replace current van data
-                this.vans = realVanData;
-                this.renderVansGrid();
-                this.renderAvailabilityCalendar();
-                
-                this.showNotification(`Successfully loaded ${realVanData.length} Swiss vans!`, 'success');
-            } catch (error) {
-                this.showNotification('Error loading real van data: ' + error.message, 'error');
-            }
+        if (bookings.length > 0) {
+            // Show existing bookings
+            this.showDayBookingsModal(van, dateStr, bookings);
         } else {
-            this.showNotification('Real van data module not found. Please ensure real-van-data.js is loaded.', 'error');
+            // Show option to create new booking
+            this.showCreateBookingModal(van, dateStr);
         }
+    }
+
+    showDayBookingsModal(van, dateStr, bookings) {
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Bookings for ${van.name} - ${this.formatDisplayDate(dateStr)}</h3>
+                    <span class="close" onclick="this.closest('.modal').remove()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="day-bookings-list">
+                        ${bookings.map(booking => `
+                            <div class="booking-item">
+                                <div class="booking-header">
+                                    <h4>${booking.customerName}</h4>
+                                    <span class="booking-status ${booking.status}">${booking.status}</span>
+                                </div>
+                                <div class="booking-details">
+                                    <p><strong>Dates:</strong> ${this.formatDisplayDate(booking.startDate)} - ${this.formatDisplayDate(booking.endDate)}</p>
+                                    <p><strong>Email:</strong> ${booking.customerEmail}</p>
+                                    <p><strong>Phone:</strong> ${booking.phone}</p>
+                                    <p><strong>Total:</strong> $${booking.total.toLocaleString()}</p>
+                                </div>
+                                <div class="booking-actions">
+                                    <button class="btn btn-primary btn-sm" onclick="adminDashboard.viewBookingDetails('${booking.id}')">
+                                        View Details
+                                    </button>
+                                    <button class="btn btn-secondary btn-sm" onclick="adminDashboard.editBooking('${booking.id}')">
+                                        Edit
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    showCreateBookingModal(van, dateStr) {
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Create Booking for ${van.name}</h3>
+                    <span class="close" onclick="this.closest('.modal').remove()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form onsubmit="adminDashboard.createBookingFromForm(event, ${van.id})">
+                        <div class="form-group">
+                            <label for="booking-start-date">Start Date:</label>
+                            <input type="date" id="booking-start-date" value="${dateStr}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="booking-end-date">End Date:</label>
+                            <input type="date" id="booking-end-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-name">Customer Name:</label>
+                            <input type="text" id="customer-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-email">Customer Email:</label>
+                            <input type="email" id="customer-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-phone">Customer Phone:</label>
+                            <input type="tel" id="customer-phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="booking-total">Total Amount ($):</label>
+                            <input type="number" id="booking-total" min="0" step="1" required>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Create Booking</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Set minimum end date
+        const startDateInput = document.getElementById('booking-start-date');
+        const endDateInput = document.getElementById('booking-end-date');
+        
+        startDateInput.addEventListener('change', () => {
+            endDateInput.min = startDateInput.value;
+            this.calculateBookingTotal(van.id);
+        });
+        
+        endDateInput.addEventListener('change', () => {
+            this.calculateBookingTotal(van.id);
+        });
+
+        // Set initial minimum end date
+        endDateInput.min = dateStr;
+    }
+
+    createBookingFromForm(event, vanId) {
+        event.preventDefault();
+        
+        const van = this.vans.find(v => v.id === vanId);
+        if (!van) return;
+
+        const startDate = document.getElementById('booking-start-date').value;
+        const endDate = document.getElementById('booking-end-date').value;
+        const customerName = document.getElementById('customer-name').value;
+        const customerEmail = document.getElementById('customer-email').value;
+        const customerPhone = document.getElementById('customer-phone').value;
+        const total = parseFloat(document.getElementById('booking-total').value);
+
+        // Generate booking ID
+        const bookingId = 'BK' + String(Date.now()).slice(-6);
+
+        const newBooking = {
+            id: bookingId,
+            customerId: 'C' + String(Date.now()).slice(-6),
+            customerName: customerName,
+            customerEmail: customerEmail,
+            phone: customerPhone,
+            vanId: vanId,
+            vanName: van.name,
+            startDate: startDate,
+            endDate: endDate,
+            status: 'confirmed',
+            total: total
+        };
+
+        // Add booking to array
+        this.bookings.push(newBooking);
+
+        // Update displays
+        this.renderBookingsTable();
+        this.renderAvailabilityCalendar();
+
+        // Close modal and show success
+        event.target.closest('.modal').remove();
+        this.showNotification(`Booking ${bookingId} created successfully for ${customerName}`, 'success');
+    }
+
+    calculateBookingTotal(vanId) {
+        const van = this.vans.find(v => v.id === vanId);
+        if (!van) return;
+
+        const startDate = document.getElementById('booking-start-date')?.value;
+        const endDate = document.getElementById('booking-end-date')?.value;
+        const totalInput = document.getElementById('booking-total');
+
+        if (startDate && endDate && totalInput) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+            
+            if (days > 0) {
+                const total = van.price * days;
+                totalInput.value = total;
+            }
+        }
+    }
+
+    // Media Manager Functions
+    setupMediaManager() {
+        const uploadDropzone = document.getElementById('upload-dropzone');
+        const fileInput = document.getElementById('file-input');
+        const uploadButton = document.getElementById('upload-media-btn');
+
+        if (uploadDropzone && fileInput) {
+            // Drag and drop handlers
+            uploadDropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadDropzone.classList.add('dragover');
+            });
+
+            uploadDropzone.addEventListener('dragleave', () => {
+                uploadDropzone.classList.remove('dragover');
+            });
+
+            uploadDropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadDropzone.classList.remove('dragover');
+                this.handleFileUpload(e.dataTransfer.files);
+            });
+
+            uploadDropzone.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                this.handleFileUpload(e.target.files);
+            });
+        }
+
+        if (uploadButton) {
+            uploadButton.addEventListener('click', () => {
+                fileInput?.click();
+            });
+        }
+
+        this.setupMediaFilters();
+        this.renderMediaGallery();
+    }
+
+    setupMediaFilters() {
+        const vanFilter = document.getElementById('van-filter');
+        const categoryFilter = document.getElementById('category-filter');
+        const clearFiltersBtn = document.getElementById('clear-filters-btn');
+
+        // Populate van filter options
+        this.populateVanFilterOptions();
+
+        // Add filter event listeners
+        if (vanFilter) {
+            vanFilter.addEventListener('change', () => this.renderMediaGallery());
+        }
+
+        if (categoryFilter) {
+            categoryFilter.addEventListener('change', () => this.renderMediaGallery());
+        }
+
+        if (clearFiltersBtn) {
+            clearFiltersBtn.addEventListener('click', () => {
+                if (vanFilter) vanFilter.value = '';
+                if (categoryFilter) categoryFilter.value = '';
+                this.renderMediaGallery();
+            });
+        }
+    }
+
+    async handleFileUpload(files) {
+        const progressContainer = document.getElementById('upload-progress');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+
+        if (progressContainer) {
+            progressContainer.style.display = 'block';
+        }
+
+        const fileArray = Array.from(files);
+        let uploadedCount = 0;
+
+        for (const file of fileArray) {
+            if (file.type.startsWith('image/')) {
+                await this.processFile(file);
+                uploadedCount++;
+                
+                const progress = (uploadedCount / fileArray.length) * 100;
+                if (progressFill) progressFill.style.width = `${progress}%`;
+                if (progressText) progressText.textContent = `${Math.round(progress)}%`;
+            }
+        }
+
+        if (progressContainer) {
+            setTimeout(() => {
+                progressContainer.style.display = 'none';
+            }, 1000);
+        }
+
+        this.renderMediaGallery();
+        this.showNotification(`Successfully uploaded ${uploadedCount} images`, 'success');
+    }
+
+    async processFile(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const mediaItem = {
+                    id: Date.now() + Math.random(),
+                    name: file.name,
+                    size: file.size,
+                    dataUrl: e.target.result,
+                    uploadDate: new Date().toISOString(),
+                    assignedVan: null,
+                    category: null,
+                    description: '',
+                    isPrimary: false
+                };
+                
+                this.mediaItems.push(mediaItem);
+                this.saveMediaData();
+                resolve();
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    renderMediaGallery() {
+        const mediaGrid = document.getElementById('media-grid');
+        const noMediaMessage = document.getElementById('no-media-message');
+        
+        if (!mediaGrid) return;
+
+        // Apply filters
+        const vanFilter = document.getElementById('van-filter')?.value;
+        const categoryFilter = document.getElementById('category-filter')?.value;
+
+        let filteredItems = this.mediaItems;
+
+        if (vanFilter === 'unassigned') {
+            filteredItems = filteredItems.filter(item => !item.assignedVan);
+        } else if (vanFilter && vanFilter !== '') {
+            filteredItems = filteredItems.filter(item => item.assignedVan === vanFilter);
+        }
+
+        if (categoryFilter) {
+            filteredItems = filteredItems.filter(item => item.category === categoryFilter);
+        }
+
+        if (filteredItems.length === 0) {
+            mediaGrid.style.display = 'none';
+            if (noMediaMessage) noMediaMessage.style.display = 'block';
+        } else {
+            mediaGrid.style.display = 'grid';
+            if (noMediaMessage) noMediaMessage.style.display = 'none';
+            
+            mediaGrid.innerHTML = filteredItems.map(item => this.createMediaItemHTML(item)).join('');
+        }
+    }
+
+    createMediaItemHTML(item) {
+        const assignedVan = item.assignedVan ? this.vans.find(v => v.id.toString() === item.assignedVan.toString()) : null;
+        
+        return `
+            <div class="media-item" data-id="${item.id}">
+                <div class="media-image">
+                    <img src="${item.dataUrl}" alt="${item.name}" onclick="adminDashboard.openMediaModal('${item.id}')">
+                    ${item.isPrimary ? '<div class="primary-badge">★ Primary</div>' : ''}
+                </div>
+                <div class="media-info">
+                    <div class="media-name">${item.name}</div>
+                    <div class="media-details">
+                        <span class="media-size">${(item.size / 1024 / 1024).toFixed(1)}MB</span>
+                        ${item.category ? `<span class="media-category">${item.category}</span>` : ''}
+                    </div>
+                    ${assignedVan ? `
+                        <div class="media-assignment">
+                            Assigned to: <strong>${assignedVan.name}</strong>
+                        </div>
+                    ` : `
+                        <div class="media-unassigned">Unassigned</div>
+                    `}
+                </div>
+                <div class="media-actions">
+                    <button class="btn btn-sm btn-primary" onclick="adminDashboard.openMediaModal('${item.id}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="adminDashboard.deleteMediaItem('${item.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    openMediaModal(itemId) {
+        const item = this.mediaItems.find(i => i.id.toString() === itemId.toString());
+        if (!item) return;
+
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Edit Media Item</h3>
+                    <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="media-preview">
+                        <img src="${item.dataUrl}" alt="${item.name}">
+                    </div>
+                    <div class="media-form">
+                        <div class="form-group">
+                            <label for="media-name">Name:</label>
+                            <input type="text" id="media-name" value="${item.name}">
+                        </div>
+                        <div class="form-group">
+                            <label for="media-description">Description:</label>
+                            <textarea id="media-description" rows="3">${item.description || ''}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="media-category">Category:</label>
+                            <select id="media-category">
+                                <option value="">Select category...</option>
+                                <option value="exterior" ${item.category === 'exterior' ? 'selected' : ''}>Exterior</option>
+                                <option value="interior" ${item.category === 'interior' ? 'selected' : ''}>Interior</option>
+                                <option value="features" ${item.category === 'features' ? 'selected' : ''}>Features</option>
+                                <option value="360" ${item.category === '360' ? 'selected' : ''}>360° View</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="media-van">Assign to Van:</label>
+                            <select id="media-van">
+                                <option value="">Unassigned</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="media-primary" ${item.isPrimary ? 'checked' : ''}>
+                                Set as primary image for this van
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                    <button class="btn btn-success" onclick="adminDashboard.downloadMediaItem('${item.id}')">
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                    <button class="btn btn-danger" onclick="adminDashboard.deleteMediaItem('${item.id}')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                    <button class="btn btn-primary" onclick="adminDashboard.saveMediaAssignment('${item.id}')">Save</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        this.populateVanOptions(document.getElementById('media-van'));
+    }
+
+    populateVanOptions(selectElement) {
+        if (!selectElement) return;
+        
+        this.vans.forEach(van => {
+            const option = document.createElement('option');
+            option.value = van.id;
+            option.textContent = `${van.VehicleID || van.id} - ${van.name}`;
+            selectElement.appendChild(option);
+        });
+    }
+
+    populateVanFilterOptions() {
+        const vanFilter = document.getElementById('van-filter');
+        if (!vanFilter) return;
+
+        // Clear existing options (except first two)
+        while (vanFilter.children.length > 2) {
+            vanFilter.removeChild(vanFilter.lastChild);
+        }
+
+        this.vans.forEach(van => {
+            const option = document.createElement('option');
+            option.value = van.id;
+            option.textContent = `${van.VehicleID || van.id} - ${van.name}`;
+            vanFilter.appendChild(option);
+        });
+    }
+
+    saveMediaAssignment(itemId) {
+        const item = this.mediaItems.find(i => i.id.toString() === itemId.toString());
+        if (!item) return;
+
+        const name = document.getElementById('media-name')?.value;
+        const description = document.getElementById('media-description')?.value;
+        const category = document.getElementById('media-category')?.value;
+        const vanId = document.getElementById('media-van')?.value;
+        const isPrimary = document.getElementById('media-primary')?.checked;
+
+        // Update item
+        item.name = name || item.name;
+        item.description = description || '';
+        item.category = category || null;
+        item.assignedVan = vanId || null;
+        item.isPrimary = isPrimary || false;
+
+        // If setting as primary, remove primary from other images of the same van
+        if (isPrimary && vanId) {
+            this.mediaItems.forEach(mediaItem => {
+                if (mediaItem.assignedVan === vanId && mediaItem.id !== item.id) {
+                    mediaItem.isPrimary = false;
+                }
+            });
+        }
+
+        this.saveMediaData();
+        this.renderMediaGallery();
+        this.renderVansGrid(); // Update van cards to show new images
+
+        // Close modal
+        document.querySelector('.modal')?.remove();
+        this.showNotification('Media item updated successfully', 'success');
+    }
+
+    deleteMediaItem(itemId) {
+        if (!confirm('Are you sure you want to delete this image?')) return;
+
+        this.mediaItems = this.mediaItems.filter(item => item.id.toString() !== itemId.toString());
+        this.saveMediaData();
+        this.renderMediaGallery();
+        this.renderVansGrid(); // Update van cards
+
+        // Close modal if open
+        document.querySelector('.modal')?.remove();
+        this.showNotification('Image deleted successfully', 'success');
+    }
+
+    downloadMediaItem(itemId) {
+        const item = this.mediaItems.find(i => i.id.toString() === itemId.toString());
+        if (!item) return;
+
+        const link = document.createElement('a');
+        link.href = item.dataUrl;
+        link.download = item.name;
+        link.click();
     }
 
     // Image Selection Modal for Van Management
     openImageSelector(vanId, imageType = 'primary') {
+        console.log('openImageSelector called with:', { vanId, imageType });
+        
         const availableImages = this.mediaItems.filter(item => !item.assignedVan);
         const assignedImages = this.mediaItems.filter(item => item.assignedVan && item.assignedVan.toString() === vanId.toString());
+        
+        console.log('Available images:', availableImages.length);
+        console.log('Assigned images:', assignedImages.length);
         
         // Create modal
         const modal = document.createElement('div');
@@ -3144,9 +2573,7 @@ function renderVanCollection(vans) {
                         modal.remove();
                         // Reopen with updated content
                         setTimeout(() => {
-                            const vanId = parseInt(modal.dataset.vanId);
-                            const imageType = modal.dataset.imageType;
-                            this.openImageSelector(vanId, imageType);
+                            this.openImageSelector(parseInt(modal.dataset.vanId || '1'), modal.dataset.imageType || 'primary');
                         }, 100);
                     }
                 };
@@ -3204,15 +2631,59 @@ function renderVanCollection(vans) {
         modals.forEach(modal => modal.remove());
     }
 
-    // ...existing code...
-}
+    setupVanImagePlaceholderListeners() {
+        // Add click handlers for van image placeholders
+        document.querySelectorAll('.van-image-placeholder, .van-thumb-placeholder').forEach(placeholder => {
+            placeholder.addEventListener('click', (e) => {
+                const vanId = parseInt(e.target.getAttribute('data-van-id'));
+                const imageType = e.target.getAttribute('data-image-type');
+                console.log('Image placeholder clicked:', { vanId, imageType });
+                this.openImageSelector(vanId, imageType);
+            });
+        });
+    }
 
-// Global functions that can be called from HTML
-function loadRealVanData() {
-    if (adminDashboard && typeof adminDashboard.loadRealVanData === 'function') {
-        adminDashboard.loadRealVanData();
-    } else {
-        console.error('AdminDashboard not initialized');
+    showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fas fa-${this.getNotificationIcon(type)}"></i>
+                <span class="notification-message">${message}</span>
+                <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+
+        // Add to notification container or create one
+        let container = document.getElementById('notification-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'notification-container';
+            container.className = 'notification-container';
+            document.body.appendChild(container);
+        }
+
+        container.appendChild(notification);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+
+    getNotificationIcon(type) {
+        const icons = {
+            success: 'check-circle',
+            error: 'exclamation-circle',
+            warning: 'exclamation-triangle',
+            info: 'info-circle'
+        };
+        return icons[type] || 'info-circle';
     }
 }
 
@@ -3220,6 +2691,8 @@ function loadRealVanData() {
 let adminDashboard;
 document.addEventListener('DOMContentLoaded', () => {
     adminDashboard = new AdminDashboard();
+    // Make it globally accessible for onclick handlers
+    window.adminDashboard = adminDashboard;
 });
 
 // Global search functionality
