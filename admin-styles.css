@@ -2314,6 +2314,23 @@ body {
     margin-bottom: 0.5rem;
 }
 
+.compression-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.7rem;
+    color: #28a745;
+    font-weight: 500;
+    background-color: rgba(40, 167, 69, 0.1);
+    padding: 0.2rem 0.4rem;
+    border-radius: 8px;
+    margin-left: 0.5rem;
+}
+
+.compression-info:hover {
+    background-color: rgba(40, 167, 69, 0.2);
+}
+
 .media-item-assignment {
     display: flex;
     align-items: center;
