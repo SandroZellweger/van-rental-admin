@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Admin Dashboard Test</title>
+    <link rel="stylesheet" href="admin-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { padding: 20px; font-family: Inter, sans-serif; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .test-result { padding: 10px; margin: 5px 0; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Admin Dashboard Complete Test</h1>
+    
+    <div class="test-section">
+        <h2>JavaScript Tests</h2>
+        <div id="js-tests"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Media Manager UI Test</h2>
+        <button onclick="testMediaManager()" class="btn btn-primary">Test Media Manager</button>
+        <button onclick="testImageSelector()" class="btn btn-secondary">Test Image Selector</button>
+        <div id="ui-tests"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Van Management Test</h2>
+        <div class="van-image-placeholder" onclick="adminDashboard.openImageSelector(1, 'primary')" 
+             style="width: 200px; height: 150px; background: linear-gradient(135deg, #85b545 0%, #a8c66c 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; cursor: pointer;">
+            📷 Click to test image selector
+        </div>
+    </div>
+
+    <script src="admin-script.js"></script>
+    <script>
+        let testResults = [];
+        
+        function addTestResult(test, status, message) {
+            testResults.push({test, status, message});
+            updateDisplay();
+        }
+        
+        function updateDisplay() {
+            const container = document.getElementById('js-tests');
+            container.innerHTML = testResults.map(result => 
+                `<div class="test-result ${result.status}">
+                    <strong>${result.test}:</strong> ${result.message}
+                </div>`
+            ).join('');
+        }
+        
+        function runTests() {
+            // Test 1: AdminDashboard class
+            try {
+                if (typeof AdminDashboard !== 'undefined') {
+                    addTestResult('AdminDashboard Class', 'success', 'Class is defined');
+                } else {
+                    addTestResult('AdminDashboard Class', 'error', 'Class is NOT defined');
+                    return;
+                }
+            } catch (e) {
+                addTestResult('AdminDashboard Class', 'error', e.message);
+                return;
+            }
+            
+            // Test 2: Create instance
+            try {
+                const dashboard = new AdminDashboard();
+                addTestResult('Dashboard Instance', 'success', 'Instance created successfully');
+                
+                // Test 3: Media Manager methods
+                const methods = ['setupMediaManager', 'openImageSelector', 'initializeMediaData', 'saveMediaData', 'renderMediaGallery'];
+                methods.forEach(method => {
+                    if (typeof dashboard[method] === 'function') {
+                        addTestResult(`Method ${method}`, 'success', 'Method exists');
+                    } else {
+                        addTestResult(`Method ${method}`, 'error', 'Method missing');
+                    }
+                });
+                
+                // Test 4: Media items initialization
+                if (Array.isArray(dashboard.mediaItems)) {
+                    addTestResult('Media Items', 'success', `Initialized as array with ${dashboard.mediaItems.length} items`);
+                } else {
+                    addTestResult('Media Items', 'error', 'Not properly initialized as array');
+                }
+                
+                // Test 5: Global accessibility
+                if (window.adminDashboard) {
+                    addTestResult('Global Access', 'success', 'adminDashboard is globally accessible');
+                } else {
+                    addTestResult('Global Access', 'error', 'adminDashboard not globally accessible');
+                }
+                
+            } catch (e) {
+                addTestResult('Dashboard Instance', 'error', e.message);
+            }
+        }
+        
+        function testMediaManager() {
+            const result = document.getElementById('ui-tests');
+            try {
+                if (window.adminDashboard && typeof window.adminDashboard.setupMediaManager === 'function') {
+                    result.innerHTML = '<div class="test-result success">✅ Media Manager methods are accessible</div>';
+                } else {
+                    result.innerHTML = '<div class="test-result error">❌ Media Manager methods not accessible</div>';
+                }
+            } catch (e) {
+                result.innerHTML = `<div class="test-result error">❌ Error: ${e.message}</div>`;
+            }
+        }
+        
+        function testImageSelector() {
+            const result = document.getElementById('ui-tests');
+            try {
+                if (window.adminDashboard && typeof window.adminDashboard.openImageSelector === 'function') {
+                    // Try to call the function (it will open a modal)
+                    window.adminDashboard.openImageSelector(1, 'primary');
+                    result.innerHTML = '<div class="test-result success">✅ Image selector opened successfully! Check for modal.</div>';
+                } else {
+                    result.innerHTML = '<div class="test-result error">❌ Image selector function not accessible</div>';
+                }
+            } catch (e) {
+                result.innerHTML = `<div class="test-result error">❌ Error opening image selector: ${e.message}</div>`;
+            }
+        }
+        
+        // Run tests when page loads
+        window.addEventListener('load', () => {
+            setTimeout(runTests, 100); // Small delay to ensure everything is loaded
+        });
+    </script>
+</body>
+</html>

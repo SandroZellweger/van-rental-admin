@@ -671,6 +671,7 @@
                             <i class="fas fa-cloud-upload-alt"></i>
                             <h4>Drop images here or click to browse</h4>
                             <p>Supports JPG, PNG, GIF, WebP (max 5MB each)</p>
+                            <p><small>📦 Images are automatically compressed to save storage space</small></p>
                             <input type="file" id="file-input" multiple accept="image/*" style="display: none;">
                         </div>
                     </div>
@@ -680,6 +681,17 @@
                             <div class="progress-fill" id="progress-fill"></div>
                         </div>
                         <span class="progress-text" id="progress-text">0%</span>
+                    </div>
+                </div>
+
+                <!-- Storage Management -->
+                <div class="storage-section">
+                    <div class="storage-info">
+                        <h4>📊 Storage Information</h4>
+                        <div id="storage-stats"></div>
+                        <button class="btn btn-outline" onclick="adminDashboard.showStorageSettings()">
+                            <i class="fas fa-cog"></i> Storage Settings
+                        </button>
                     </div>
                 </div>
 

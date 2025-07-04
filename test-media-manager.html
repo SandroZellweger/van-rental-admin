@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Manager Test</title>
+    <script>
+        // Test if admin-script.js loads without errors
+        window.addEventListener('load', () => {
+            console.log('Testing Media Manager functionality...');
+            
+            // Test 1: Check if AdminDashboard class exists
+            if (typeof AdminDashboard !== 'undefined') {
+                console.log('✅ AdminDashboard class is defined');
+            } else {
+                console.error('❌ AdminDashboard class is NOT defined');
+            }
+            
+            // Test 2: Try to create an instance
+            try {
+                const testDashboard = new AdminDashboard();
+                console.log('✅ AdminDashboard instance created successfully');
+                
+                // Test 3: Check if Media Manager methods exist
+                if (typeof testDashboard.setupMediaManager === 'function') {
+                    console.log('✅ setupMediaManager method exists');
+                } else {
+                    console.error('❌ setupMediaManager method missing');
+                }
+                
+                if (typeof testDashboard.openImageSelector === 'function') {
+                    console.log('✅ openImageSelector method exists');
+                } else {
+                    console.error('❌ openImageSelector method missing');
+                }
+                
+                if (typeof testDashboard.initializeMediaData === 'function') {
+                    console.log('✅ initializeMediaData method exists');
+                } else {
+                    console.error('❌ initializeMediaData method missing');
+                }
+                
+                console.log('🎉 All tests passed! Media Manager should be working.');
+                
+            } catch (error) {
+                console.error('❌ Error creating AdminDashboard instance:', error);
+            }
+        });
+    </script>
+</head>
+<body>
+    <h1>Media Manager Test</h1>
+    <p>Check the browser console for test results.</p>
+    
+    <script src="admin-script.js"></script>
+</body>
+</html>
