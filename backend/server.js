@@ -13,7 +13,7 @@ const { Van, Booking, User, Pricing } = require('./models');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3002; // Temporarily hardcoded to avoid port conflicts
 
 // Security middleware
 app.use(helmet());
