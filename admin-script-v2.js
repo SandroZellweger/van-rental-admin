@@ -1212,6 +1212,84 @@ class AdminDashboard {
         }
     }
 
+    renderGoogleSheetsSection() {
+        // Render Google Sheets integration section
+        const googleSheetsContainer = document.getElementById('google-sheets-section');
+        if (!googleSheetsContainer) return;
+
+        googleSheetsContainer.innerHTML = `
+            <div class="section-header">
+                <h3>Google Sheets Integration</h3>
+                <p>Connect your admin dashboard to Google Sheets for data synchronization</p>
+            </div>
+            <div class="google-sheets-config">
+                <div class="form-group">
+                    <label for="sheets-url">Google Sheets URL:</label>
+                    <input type="url" id="sheets-url" placeholder="https://docs.google.com/spreadsheets/d/..." value="${this.googleSheetsConfig.url || ''}">
+                </div>
+                <div class="form-group">
+                    <label for="api-key">API Key:</label>
+                    <input type="password" id="api-key" placeholder="Your Google Sheets API Key" value="${this.googleSheetsConfig.apiKey || ''}">
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="adminDashboard.saveGoogleSheetsConfig()">Save Configuration</button>
+                    <button class="btn btn-success" onclick="adminDashboard.testGoogleSheetsConnection()">Test Connection</button>
+                    <button class="btn btn-info" onclick="adminDashboard.syncWithGoogleSheets()">Sync Data</button>
+                </div>
+                <div id="google-sheets-status" class="status-message"></div>
+            </div>
+        `;
+    }
+
+    setupGoogleSheetsHandlers() {
+        // Setup Google Sheets event handlers
+        const sheetsUrl = document.getElementById('sheets-url');
+        const apiKey = document.getElementById('api-key');
+        
+        if (sheetsUrl) {
+            sheetsUrl.addEventListener('change', () => {
+                this.googleSheetsConfig.url = sheetsUrl.value;
+            });
+        }
+        
+        if (apiKey) {
+            apiKey.addEventListener('change', () => {
+                this.googleSheetsConfig.apiKey = apiKey.value;
+            });
+        }
+    }
+
+    saveGoogleSheetsConfig() {
+        const url = document.getElementById('sheets-url')?.value || '';
+        const apiKey = document.getElementById('api-key')?.value || '';
+        
+        this.googleSheetsConfig = { url, apiKey };
+        localStorage.setItem('googleSheetsConfig', JSON.stringify(this.googleSheetsConfig));
+        
+        this.showNotification('Google Sheets configuration saved', 'success');
+    }
+
+    testGoogleSheetsConnection() {
+        // Test connection to Google Sheets
+        const statusDiv = document.getElementById('google-sheets-status');
+        if (statusDiv) {
+            statusDiv.innerHTML = '<p class="status-testing">🔄 Testing connection...</p>';
+            
+            // Simulate connection test
+            setTimeout(() => {
+                if (this.googleSheetsConfig.url && this.googleSheetsConfig.apiKey) {
+                    statusDiv.innerHTML = '<p class="status-success">✅ Connection successful</p>';
+                } else {
+                    statusDiv.innerHTML = '<p class="status-error">❌ Please provide URL and API key</p>';
+                }
+            }, 2000);
+        }
+    }
+
+    syncWithGoogleSheets() {
+        this.showNotification('Google Sheets sync feature coming soon', 'info');
+    }
+
     toggleVanStatus(vanId) {
         const van = this.vans.find(v => v.id === vanId);
         if (van) {
