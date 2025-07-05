@@ -129,11 +129,14 @@
 <body>
     <div class="container">
         <div class="logo">🚐 VanLife Admin</div>
-        <div class="tagline">Live Testing Environment - Media Manager</div>
+        <div class="tagline">Modular Admin Dashboard - Refactored & Improved</div>
         
         <div class="access-buttons">
             <a href="admin.html" class="btn btn-primary">
-                🏠 Admin Dashboard
+                🏠 Modular Admin Dashboard (NEW)
+            </a>
+            <a href="admin-legacy.html" class="btn btn-secondary">
+                🔧 Legacy Admin Dashboard
             </a>
             <a href="test-quota-fix.html" class="btn btn-secondary">
                 🧪 Storage Quota Test
@@ -144,19 +147,26 @@
             <a href="test-admin-script.html" class="btn btn-secondary">
                 🔍 Script Diagnostics
             </a>
+            <a href="test-modular-dashboard.html" class="btn btn-success">
+                🧪 Module Testing Suite
+            </a>
         </div>
 
         <div class="features">
-            <h3>📋 Latest Improvements</h3>
+            <h3>📋 Latest Improvements - Modular Refactor</h3>
             <ul class="feature-list">
-                <li>✅ Fixed QuotaExceededError with image compression</li>
-                <li>✅ Automatic JPEG compression (70% quality, max 1200px)</li>
-                <li>✅ Storage management with cleanup options</li>
-                <li>✅ Fixed setupPricingTabs method missing error</li>
-                <li>✅ Fixed image selector vanId/imageType issues</li>
-                <li>✅ Added cache-busting for script updates</li>
-                <li>✅ Enhanced error handling and user feedback</li>
-                <li>✅ Comprehensive test suites for verification</li>
+                <li>🔧 Split monolithic admin script into 8 focused modules</li>
+                <li>📦 VanManager - Van data and operations</li>
+                <li>📅 BookingManager - Booking data and operations</li>
+                <li>💰 PricingManager - Pricing profiles and rules</li>
+                <li>🖼️ MediaManager - Image upload and gallery management</li>
+                <li>📆 CalendarManager - Calendar rendering and availability</li>
+                <li>🔗 GoogleSheetsIntegration - CSV import and sync</li>
+                <li>🎨 UIManager - Navigation, modals, and notifications</li>
+                <li>🎯 AdminDashboard - Main orchestrator class</li>
+                <li>✅ Improved maintainability and scalability</li>
+                <li>✅ Better separation of concerns</li>
+                <li>✅ ES6 modules with clean imports/exports</li>
             </ul>
         </div>
 
