@@ -41,9 +41,13 @@ export class UIManager {
             dashboard: 'Dashboard',
             availability: 'Availability Calendar',
             bookings: 'Bookings Management',
+            search: 'Van Search',
             vans: 'Van Management',
-            pricing: 'Pricing Management',
             media: 'Media Manager',
+            pricing: 'Pricing Management',
+            sheets: 'Google Sheets Integration',
+            customers: 'Customer Management',
+            reports: 'Reports & Analytics',
             settings: 'Settings'
         };
         

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Form Configuration Test</title>
+    <link rel="stylesheet" href="admin-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <style>
+        body {
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1><i class="fas fa-cog"></i> Booking Form Configuration Test</h1>
+        <p>Testing the booking form configuration UI components</p>
+        
+        <!-- Booking Form Configuration -->
+        <div class="settings-card">
+            <div class="card-header">
+                <h3><i class="fas fa-form"></i> Booking Form Configuration</h3>
+                <p>Customize which fields appear in your booking form and their order</p>
+            </div>
+            
+            <div class="form-config-container">
+                <div class="form-sections">
+                    <h4>Form Sections</h4>
+                    
+                    <!-- Customer Information Section -->
+                    <div class="section-config" data-section="customer">
+                        <div class="section-header">
+                            <label class="section-toggle">
+                                <input type="checkbox" id="section-customer" checked>
+                                <span class="section-title">Customer Information</span>
+                            </label>
+                            <button class="section-expand-btn" type="button">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="section-fields" id="fields-customer">
+                            <div class="fields-list sortable-fields" data-section="customer">
+                                <!-- Fields will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Booking Details Section -->
+                    <div class="section-config" data-section="booking">
+                        <div class="section-header">
+                            <label class="section-toggle">
+                                <input type="checkbox" id="section-booking" checked>
+                                <span class="section-title">Booking Details</span>
+                            </label>
+                            <button class="section-expand-btn" type="button">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="section-fields" id="fields-booking">
+                            <div class="fields-list sortable-fields" data-section="booking">
+                                <!-- Fields will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Van Preferences Section -->
+                    <div class="section-config" data-section="preferences">
+                        <div class="section-header">
+                            <label class="section-toggle">
+                                <input type="checkbox" id="section-preferences" checked>
+                                <span class="section-title">Van Preferences</span>
+                            </label>
+                            <button class="section-expand-btn" type="button">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="section-fields" id="fields-preferences">
+                            <div class="fields-list sortable-fields" data-section="preferences">
+                                <!-- Fields will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information Section -->
+                    <div class="section-config" data-section="additional">
+                        <div class="section-header">
+                            <label class="section-toggle">
+                                <input type="checkbox" id="section-additional" checked>
+                                <span class="section-title">Additional Information</span>
+                            </label>
+                            <button class="section-expand-btn" type="button">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="section-fields" id="fields-additional">
+                            <div class="fields-list sortable-fields" data-section="additional">
+                                <!-- Fields will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-preview">
+                    <h4>Form Preview</h4>
+                    <div class="preview-container">
+                        <div id="form-preview" class="booking-form-preview">
+                            <!-- Live preview will be generated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-config-actions">
+                <button class="btn btn-primary" id="save-form-config">
+                    <i class="fas fa-save"></i>
+                    Save Configuration
+                </button>
+                <button class="btn btn-secondary" id="reset-form-config">
+                    <i class="fas fa-undo"></i>
+                    Reset to Default
+                </button>
+                <button class="btn btn-outline" id="preview-form-config">
+                    <i class="fas fa-eye"></i>
+                    Preview Full Form
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import and test the form configuration functionality
+        import { AdminDashboard } from './js/AdminDashboard.js';
+        
+        class FormConfigTest {
+            constructor() {
+                this.adminDashboard = new AdminDashboard();
+                this.init();
+            }
+            
+            async init() {
+                // Wait for admin dashboard to initialize
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Initialize form configuration UI
+                this.adminDashboard.initializeFormConfigurationUI();
+                
+                console.log('Form configuration test initialized');
+            }
+        }
+        
+        // Initialize test when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new FormConfigTest();
+        });
+    </script>
+</body>
+</html>

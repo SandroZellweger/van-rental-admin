@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VanLife - Booking Form Profiles Test</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9fafb;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .header h1 {
+            color: #111827;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #6b7280;
+            font-size: 18px;
+        }
+        
+        .test-controls {
+            background: #f0f9ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .test-controls h3 {
+            margin-top: 0;
+            color: #1e40af;
+        }
+        
+        .profile-selector {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .profile-selector label {
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .profile-selector select {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            min-width: 200px;
+        }
+        
+        .van-selector {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .van-selector label {
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .van-selector select {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            min-width: 200px;
+        }
+        
+        .profile-info {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .profile-info h4 {
+            margin-top: 0;
+            color: #92400e;
+        }
+        
+        .profile-info p {
+            margin-bottom: 0;
+            color: #92400e;
+        }
+        
+        .form-container {
+            margin-top: 30px;
+        }
+        
+        .pricing-summary {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .pricing-summary h4 {
+            margin-top: 0;
+            color: #166534;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .btn-outline {
+            background: white;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-outline:hover {
+            background: #f9fafb;
+        }
+        
+        #dynamicBookingContainer {
+            margin-top: 20px;
+        }
+        
+        .notification {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .notification.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .notification.error {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        
+        .notification.info {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-clipboard-list"></i> Booking Form Profiles Test Page</h1>
+            <p>Test different booking form profiles with van associations and pricing calculations</p>
+        </div>
+        
+        <div class="test-controls">
+            <h3><i class="fas fa-cog"></i> Test Controls</h3>
+            
+            <div class="profile-selector">
+                <label for="test-profile-select">Select Profile:</label>
+                <select id="test-profile-select">
+                    <option value="">Loading profiles...</option>
+                </select>
+                <button class="btn btn-outline" id="load-profile-btn">
+                    <i class="fas fa-sync"></i> Load Profile
+                </button>
+            </div>
+            
+            <div class="van-selector">
+                <label for="test-van-select">Simulate Van Selection:</label>
+                <select id="test-van-select">
+                    <option value="">No specific van</option>
+                    <option value="van1">Adventure Van (Compact)</option>
+                    <option value="van2">Family Explorer (Large)</option>
+                    <option value="van3">Solo Traveler (Compact)</option>
+                </select>
+                <button class="btn btn-outline" id="load-van-profile-btn">
+                    <i class="fas fa-truck"></i> Load Van Profile
+                </button>
+            </div>
+            
+            <div class="buttons">
+                <button class="btn btn-primary" id="test-basic-btn">
+                    <i class="fas fa-star"></i> Test Basic Profile
+                </button>
+                <button class="btn btn-primary" id="test-standard-btn">
+                    <i class="fas fa-star-half-alt"></i> Test Standard Profile
+                </button>
+                <button class="btn btn-primary" id="test-premium-btn">
+                    <i class="fas fa-crown"></i> Test Premium Profile
+                </button>
+                <a href="admin.html" class="btn btn-secondary">
+                    <i class="fas fa-cogs"></i> Open Admin Dashboard
+                </a>
+            </div>
+        </div>
+        
+        <div id="profile-info" class="profile-info" style="display: none;">
+            <h4 id="profile-info-title">Profile Information</h4>
+            <p id="profile-info-description">Profile description will appear here</p>
+            <div id="profile-info-details"></div>
+        </div>
+        
+        <div id="notifications"></div>
+        
+        <div class="form-container">
+            <div id="dynamicBookingContainer">
+                <!-- Dynamic form will be loaded here -->
+                <div style="text-align: center; padding: 40px; color: #6b7280;">
+                    <i class="fas fa-clipboard-list" style="font-size: 48px; margin-bottom: 16px; display: block;"></i>
+                    <h3>Select a profile to generate the booking form</h3>
+                    <p>Use the controls above to test different profiles and configurations</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="pricing-summary" class="pricing-summary" style="display: none;">
+            <h4><i class="fas fa-calculator"></i> Pricing Breakdown</h4>
+            <div id="pricing-details">
+                <!-- Pricing details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Include necessary JavaScript modules -->
+    <script type="module">
+        import { BookingFormProfileManager } from './js/BookingFormProfileManager.js';
+        import { BookingFormGenerator } from './js/BookingFormGenerator.js';
+
+        class ProfileTestPage {
+            constructor() {
+                this.profileManager = new BookingFormProfileManager();
+                this.currentGenerator = null;
+                this.init();
+            }
+
+            async init() {
+                console.log('Initializing Profile Test Page...');
+                
+                // Wait for profile manager to initialize
+                await this.profileManager.init();
+                
+                this.populateProfileSelector();
+                this.bindEvents();
+                
+                this.showNotification('Profile test page initialized successfully!', 'success');
+            }
+
+            populateProfileSelector() {
+                const select = document.getElementById('test-profile-select');
+                const profiles = this.profileManager.getAllProfiles();
+                
+                select.innerHTML = '<option value="">Select a profile...</option>' +
+                    profiles.map(profile => 
+                        `<option value="${profile.name}">${profile.name}</option>`
+                    ).join('');
+            }
+
+            bindEvents() {
+                // Profile selection
+                document.getElementById('load-profile-btn').addEventListener('click', () => {
+                    const profileName = document.getElementById('test-profile-select').value;
+                    if (profileName) {
+                        this.loadProfile(profileName);
+                    }
+                });
+
+                // Van selection
+                document.getElementById('load-van-profile-btn').addEventListener('click', () => {
+                    const vanId = document.getElementById('test-van-select').value;
+                    this.loadVanProfile(vanId);
+                });
+
+                // Quick test buttons
+                document.getElementById('test-basic-btn').addEventListener('click', () => {
+                    this.loadProfile('Basic');
+                });
+
+                document.getElementById('test-standard-btn').addEventListener('click', () => {
+                    this.loadProfile('Standard');
+                });
+
+                document.getElementById('test-premium-btn').addEventListener('click', () => {
+                    this.loadProfile('Premium');
+                });
+
+                // Auto-load on profile select change
+                document.getElementById('test-profile-select').addEventListener('change', (e) => {
+                    if (e.target.value) {
+                        this.loadProfile(e.target.value);
+                    }
+                });
+            }
+
+            loadProfile(profileName) {
+                const profile = this.profileManager.getProfile(profileName);
+                if (!profile) {
+                    this.showNotification(`Profile "${profileName}" not found`, 'error');
+                    return;
+                }
+
+                this.displayProfileInfo(profile);
+                this.generateForm(profile);
+                this.showNotification(`Loaded profile: ${profileName}`, 'success');
+            }
+
+            loadVanProfile(vanId) {
+                if (!vanId) {
+                    // Load default profile
+                    const activeProfile = this.profileManager.getActiveProfile();
+                    if (activeProfile) {
+                        this.loadProfile(activeProfile.name);
+                    }
+                    return;
+                }
+
+                const profile = this.profileManager.getProfileForVan(vanId);
+                if (profile) {
+                    this.displayProfileInfo(profile);
+                    this.generateForm(profile);
+                    this.showNotification(`Loaded profile for van ${vanId}: ${profile.name}`, 'success');
+                } else {
+                    this.showNotification(`No specific profile found for van ${vanId}, using default`, 'info');
+                    const activeProfile = this.profileManager.getActiveProfile();
+                    if (activeProfile) {
+                        this.loadProfile(activeProfile.name);
+                    }
+                }
+            }
+
+            displayProfileInfo(profile) {
+                const infoDiv = document.getElementById('profile-info');
+                const titleDiv = document.getElementById('profile-info-title');
+                const descDiv = document.getElementById('profile-info-description');
+                const detailsDiv = document.getElementById('profile-info-details');
+
+                titleDiv.textContent = `Profile: ${profile.name}`;
+                descDiv.textContent = profile.description || 'No description available';
+
+                // Display profile details
+                const fieldCount = this.countProfileFields(profile);
+                const hasTimeSlotPricing = profile.pricingConfig?.timeSlots ? Object.keys(profile.pricingConfig.timeSlots).length : 0;
+                const hasDestinationPricing = profile.pricingConfig?.destinations ? Object.keys(profile.pricingConfig.destinations).length : 0;
+
+                detailsDiv.innerHTML = `
+                    <p><strong>Form Fields:</strong> ${fieldCount}</p>
+                    <p><strong>Time Slot Pricing Options:</strong> ${hasTimeSlotPricing}</p>
+                    <p><strong>Destination Pricing Options:</strong> ${hasDestinationPricing}</p>
+                    <p><strong>Deposit:</strong> ${profile.pricingConfig?.deposit?.price || 50} CHF</p>
+                `;
+
+                infoDiv.style.display = 'block';
+            }
+
+            countProfileFields(profile) {
+                let count = 0;
+                if (profile.formConfig && profile.formConfig.sections) {
+                    profile.formConfig.sections.forEach(section => {
+                        if (section.fields) {
+                            count += section.fields.filter(field => field.enabled).length;
+                        }
+                    });
+                }
+                return count;
+            }
+
+            generateForm(profile) {
+                const container = document.getElementById('dynamicBookingContainer');
+                
+                // Create form generator with profile configuration
+                this.currentGenerator = new BookingFormGenerator(profile.formConfig, profile.pricingConfig);
+                
+                // Generate form HTML
+                const formHTML = this.currentGenerator.generateFormHTML();
+                container.innerHTML = formHTML;
+                
+                // Initialize form functionality
+                setTimeout(() => {
+                    this.currentGenerator.initializeFormElements();
+                    this.setupPricingDisplay();
+                }, 100);
+            }
+
+            setupPricingDisplay() {
+                if (!this.currentGenerator) return;
+
+                const form = document.getElementById('dynamicBookingForm');
+                if (!form) return;
+
+                // Add event listener to show pricing breakdown
+                const pricingElements = form.querySelectorAll('input[name="timeSlot"], select[name="destination"], input[name="deductibleReduction"]');
+                pricingElements.forEach(element => {
+                    element.addEventListener('change', () => {
+                        this.updatePricingDisplay();
+                    });
+                });
+
+                // Initial pricing display
+                this.updatePricingDisplay();
+            }
+
+            updatePricingDisplay() {
+                if (!this.currentGenerator) return;
+
+                const pricing = this.currentGenerator.calculateTotalPrice();
+                const summaryDiv = document.getElementById('pricing-summary');
+                const detailsDiv = document.getElementById('pricing-details');
+
+                detailsDiv.innerHTML = `
+                    <p><strong>Base Price:</strong> CHF ${pricing.basePrice}.-</p>
+                    <p><strong>Destination Surcharge:</strong> CHF ${pricing.destinationPrice}.-</p>
+                    <p><strong>Deductible Reduction:</strong> CHF ${pricing.deductiblePrice}.-</p>
+                    <p><strong>Add-ons:</strong> CHF ${pricing.addOnsPrice}.-</p>
+                    <hr>
+                    <p><strong>Subtotal:</strong> CHF ${pricing.subtotal}.-</p>
+                    <p><strong>Deposit:</strong> CHF ${pricing.deposit}.-</p>
+                    <p style="font-size: 18px; font-weight: 600; color: #166534;"><strong>Total:</strong> CHF ${pricing.total}.-</p>
+                `;
+
+                summaryDiv.style.display = 'block';
+            }
+
+            showNotification(message, type = 'info') {
+                const container = document.getElementById('notifications');
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                
+                const icon = type === 'success' ? 'check-circle' : 
+                           type === 'error' ? 'exclamation-circle' : 'info-circle';
+                
+                notification.innerHTML = `
+                    <i class="fas fa-${icon}"></i>
+                    <span>${message}</span>
+                `;
+                
+                container.appendChild(notification);
+                
+                // Remove after 5 seconds
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.remove();
+                    }
+                }, 5000);
+            }
+        }
+
+        // Initialize the test page
+        window.addEventListener('DOMContentLoaded', () => {
+            new ProfileTestPage();
+        });
+    </script>
+</body>
+</html>

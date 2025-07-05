@@ -403,6 +403,28 @@
                     Complete Booking & Pay
                 </button>
             </form>
+
+            <!-- Dynamic Booking Form Container -->
+            <div id="dynamicBookingContainer" class="dynamic-booking-container" style="display: none;">
+                <!-- Dynamic form will be generated here -->
+            </div>
+
+            <!-- Form Type Toggle (for testing/admin) -->
+            <div class="form-toggle-section" style="margin-top: 24px; text-align: center; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <div style="margin-bottom: 12px;">
+                    <span style="font-weight: 500; color: #374151; margin-right: 16px;">Form Mode:</span>
+                    <button id="toggleStatic" class="form-toggle-btn active" style="padding: 8px 16px; margin: 0 4px; border: 1px solid #d1d5db; background: #3b82f6; color: white; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                        Static Form
+                    </button>
+                    <button id="toggleDynamic" class="form-toggle-btn" style="padding: 8px 16px; margin: 0 4px; border: 1px solid #d1d5db; background: white; color: #374151; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                        Dynamic Form
+                    </button>
+                </div>
+                <div style="font-size: 12px; color: #6b7280;">
+                    <i class="fas fa-info-circle"></i> 
+                    Dynamic form uses configuration from <a href="admin.html" target="_blank" style="color: #3b82f6; text-decoration: none;">Admin Dashboard → Settings</a>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -652,5 +674,8 @@
 
     <!-- Scripts -->
     <script src="script.js"></script>
+    
+    <!-- Dynamic Form Integration -->
+    <script type="module" src="form-integration.js"></script>
 </body>
 </html>

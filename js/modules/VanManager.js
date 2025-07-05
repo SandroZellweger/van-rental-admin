@@ -302,6 +302,13 @@ export class VanManager {
                     <p><strong>Price:</strong> $${van.price}/day</p>
                     <p><strong>Features:</strong> ${van.features.join(', ')}</p>
                 </div>
+                <div class="van-profile-section">
+                    <label><strong>Booking Form Profile:</strong></label>
+                    <select class="van-profile-select" data-van-id="${van.id}" onchange="adminDashboard.updateVanProfile('${van.id}', this.value)">
+                        <option value="">Use default profile</option>
+                        ${this.getProfileOptions(van.id)}
+                    </select>
+                </div>
                 <div class="van-actions">
                     <button class="btn btn-small btn-primary" onclick="adminDashboard.vanManager.editVan(${van.id})">
                         <i class="fas fa-edit"></i> Edit
@@ -313,6 +320,19 @@ export class VanManager {
                 </div>
             </div>
         `).join('');
+    }
+
+    getProfileOptions(vanId) {
+        // Get available profiles from the admin dashboard
+        if (window.adminDashboard && window.adminDashboard.profileManager) {
+            const profiles = window.adminDashboard.profileManager.getAllProfiles();
+            const currentProfile = window.adminDashboard.getVanProfile(vanId);
+            
+            return profiles.map(profile => 
+                `<option value="${profile.name}" ${currentProfile && currentProfile.name === profile.name ? 'selected' : ''}>${profile.name}</option>`
+            ).join('');
+        }
+        return '';
     }
 
     editVan(vanId) {

@@ -15,16 +15,23 @@ app.use(express.json());
 // Mock data storage
 let mockVans = [
   { 
-    _id: '1', 
+    _id: '1',
+    id: '1',
     name: 'Adventure Seeker', 
     type: 'standard', 
     location: 'San Francisco, CA', 
-    base_price: 89.00, 
+    base_price: 89.00,
+    price: 89.00,
     capacity: 2, 
     status: 'active',
-    features: {
-      amenities: ['Kitchen', 'Bed', 'Solar Power'],
-      specifications: { length: '20ft', height: '8ft', width: '6.5ft' }
+    features: ['Kitchen', 'Bed', 'Solar Power'],
+    specifications: { 
+      length: '20ft', 
+      height: '8ft', 
+      width: '6.5ft',
+      engine: 'V6',
+      transmission: 'Automatic',
+      fuel_type: 'Gasoline' 
     },
     pricing_profile: 'standard',
     description: 'Perfect for couples and small groups seeking adventure.',
@@ -35,11 +42,14 @@ let mockVans = [
 let mockBookings = [
   {
     _id: '1',
+    id: '1',
     van_id: '1',
-    customer_name: 'John Doe',
-    customer_email: 'john.doe@example.com',
-    checkin_date: new Date('2025-07-15'),
-    checkout_date: new Date('2025-07-20'),
+    vanName: 'Adventure Seeker',
+    customerName: 'John Doe',
+    customerEmail: 'john.doe@example.com',
+    checkinDate: new Date('2025-07-15'),
+    checkoutDate: new Date('2025-07-20'),
+    totalAmount: 445.00,
     total_price: 445.00,
     status: 'confirmed',
     total_days: 5

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Booking Form Demo</title>
+    
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self'; 
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; 
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; 
+        font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; 
+        img-src 'self' data: blob: https:; 
+        connect-src 'self' http://localhost:*; 
+        object-src 'none';
+    ">
+    
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            padding: 40px 20px;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+        
+        .demo-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .demo-header {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 32px;
+            text-align: center;
+        }
+        
+        .demo-header h1 {
+            font-size: 28px;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+        
+        .demo-header p {
+            color: #64748b;
+            font-size: 16px;
+        }
+        
+        .demo-controls {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 32px;
+        }
+        
+        .demo-controls h3 {
+            margin-bottom: 16px;
+            color: #1e293b;
+        }
+        
+        .control-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #475569;
+        }
+        
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+        }
+        
+        .demo-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .demo-section-header {
+            background: #f8fafc;
+            padding: 20px 32px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .demo-section-header h3 {
+            color: #1e293b;
+            margin: 0;
+        }
+        
+        .demo-section-content {
+            padding: 32px;
+        }
+        
+        .status-message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .status-info {
+            background: #eff6ff;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+        
+        .status-success {
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .status-warning {
+            background: #fffbeb;
+            color: #d97706;
+            border: 1px solid #fed7aa;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1><i class="fas fa-form"></i> Dynamic Booking Form Generator</h1>
+            <p>Test the dynamic form generation based on admin configuration</p>
+        </div>
+        
+        <div class="demo-controls">
+            <h3>Demo Controls</h3>
+            <div class="control-buttons">
+                <button class="btn btn-primary" id="generateForm">
+                    <i class="fas fa-magic"></i>
+                    Generate Form
+                </button>
+                <button class="btn btn-secondary" id="loadConfig">
+                    <i class="fas fa-download"></i>
+                    Load Config
+                </button>
+                <button class="btn btn-success" id="openAdmin">
+                    <i class="fas fa-cog"></i>
+                    Open Admin
+                </button>
+                <button class="btn btn-secondary" id="resetForm">
+                    <i class="fas fa-undo"></i>
+                    Reset Form
+                </button>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <div class="demo-section-header">
+                <h3>Generated Booking Form</h3>
+            </div>
+            <div class="demo-section-content">
+                <div id="status-message" class="status-message status-info">
+                    Click "Generate Form" to create a booking form based on your admin configuration.
+                </div>
+                
+                <div id="form-container">
+                    <!-- Dynamic form will be generated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { BookingFormGenerator } from './js/BookingFormGenerator.js';
+        
+        class FormDemo {
+            constructor() {
+                this.formGenerator = new BookingFormGenerator();
+                this.setupEventListeners();
+                this.showStatus('Ready to generate form', 'info');
+            }
+            
+            setupEventListeners() {
+                document.getElementById('generateForm').addEventListener('click', () => {
+                    this.generateForm();
+                });
+                
+                document.getElementById('loadConfig').addEventListener('click', () => {
+                    this.loadConfiguration();
+                });
+                
+                document.getElementById('openAdmin').addEventListener('click', () => {
+                    window.open('admin.html', '_blank');
+                });
+                
+                document.getElementById('resetForm').addEventListener('click', () => {
+                    this.resetForm();
+                });
+            }
+            
+            generateForm() {
+                try {
+                    this.showStatus('Generating form...', 'info');
+                    
+                    // Load configuration
+                    const configLoaded = this.formGenerator.loadFormConfiguration();
+                    
+                    if (configLoaded) {
+                        this.showStatus('Using saved configuration from admin dashboard', 'success');
+                    } else {
+                        this.showStatus('Using default configuration (no admin config found)', 'warning');
+                    }
+                    
+                    // Generate the form
+                    this.formGenerator.generateBookingForm('form-container');
+                    
+                    setTimeout(() => {
+                        this.showStatus('Form generated successfully! Fill it out to test functionality.', 'success');
+                    }, 500);
+                    
+                } catch (error) {
+                    console.error('Error generating form:', error);
+                    this.showStatus('Error generating form: ' + error.message, 'error');
+                }
+            }
+            
+            loadConfiguration() {
+                const hasConfig = this.formGenerator.loadFormConfiguration();
+                if (hasConfig) {
+                    this.showStatus('Configuration loaded from localStorage', 'success');
+                    console.log('Current configuration:', this.formGenerator.formConfig);
+                } else {
+                    this.showStatus('No saved configuration found. Using defaults.', 'warning');
+                }
+            }
+            
+            resetForm() {
+                document.getElementById('form-container').innerHTML = '';
+                this.showStatus('Form cleared. Click "Generate Form" to create a new one.', 'info');
+            }
+            
+            showStatus(message, type) {
+                const statusEl = document.getElementById('status-message');
+                statusEl.textContent = message;
+                statusEl.className = `status-message status-${type}`;
+            }
+        }
+        
+        // Initialize demo when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new FormDemo();
+        });
+    </script>
+</body>
+</html>

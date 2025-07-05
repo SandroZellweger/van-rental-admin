@@ -6,6 +6,8 @@ import { MediaManager } from './modules/MediaManager.js';
 import { CalendarManager } from './modules/CalendarManager.js';
 import { GoogleSheetsIntegration } from './modules/GoogleSheetsIntegration.js';
 import { UIManager } from './modules/UIManager.js';
+import { BookingFormProfileManager } from './BookingFormProfileManager.js';
+import { BookingProfileUIManager } from './modules/BookingProfileUIManager.js';
 
 export class AdminDashboard {
     constructor() {
@@ -19,6 +21,8 @@ export class AdminDashboard {
         this.mediaManager = new MediaManager();
         this.calendarManager = new CalendarManager();
         this.googleSheetsIntegration = new GoogleSheetsIntegration();
+        this.profileManager = new BookingFormProfileManager();
+        this.profileUIManager = new BookingProfileUIManager(this.profileManager);
         
         // Initialize the dashboard
         this.init();
@@ -42,6 +46,17 @@ export class AdminDashboard {
                 this.mediaManager.loadMediaItems()
             ]);
             
+            // Initialize booking form configuration
+            this.initializeBookingFormConfiguration();
+            
+            // Try to load saved form configuration
+            if (!this.loadFormConfiguration()) {
+                console.log('Using default form configuration');
+            }
+            
+            // Setup settings navigation handler
+            this.setupSettingsNavigation();
+            
             // Check if we're running in mock mode
             if (this.vanManager.api.useMockData) {
                 this.uiManager.showNotification('⚠️ Running in Mock Mode - Backend not available', 'warning', 5000);
@@ -62,6 +77,7 @@ export class AdminDashboard {
             this.setupVanManagementTabs();
             this.setupMediaManager();
             this.setupVanImagePlaceholderListeners();
+            this.setupBookingProfiles();
             
             // Show success notification
             this.uiManager.showNotification('Admin Dashboard loaded successfully with live backend data!', 'success', 3000);
@@ -525,6 +541,521 @@ export class AdminDashboard {
                     this.uiManager.handleGlobalSearch(searchTerm);
                 }
             });
+        }
+    }
+
+    initializeBookingFormConfiguration() {
+        this.bookingFormConfig = {
+            sections: [
+                {
+                    id: 'customer',
+                    title: 'Customer Information',
+                    order: 1,
+                    enabled: true,
+                    fields: [
+                        { id: 'customerName', label: 'Customer Name', type: 'text', required: true, enabled: true, order: 1 },
+                        { id: 'customerEmail', label: 'Email Address', type: 'email', required: true, enabled: true, order: 2 },
+                        { id: 'customerPhone', label: 'Phone Number', type: 'tel', required: true, enabled: true, order: 3 },
+                        { id: 'customerAddress', label: 'Address', type: 'textarea', required: false, enabled: false, order: 4 },
+                        { id: 'emergencyContact', label: 'Emergency Contact', type: 'text', required: false, enabled: false, order: 5 }
+                    ]
+                },
+                {
+                    id: 'booking',
+                    title: 'Booking Details',
+                    order: 2,
+                    enabled: true,
+                    fields: [
+                        { id: 'vanId', label: 'Select Van', type: 'select', required: true, enabled: true, order: 1 },
+                        { id: 'checkinDate', label: 'Check-in Date', type: 'date', required: true, enabled: true, order: 2 },
+                        { id: 'checkoutDate', label: 'Check-out Date', type: 'date', required: true, enabled: true, order: 3 },
+                        { id: 'checkinTime', label: 'Check-in Time', type: 'time', required: false, enabled: true, order: 4 },
+                        { id: 'checkoutTime', label: 'Check-out Time', type: 'time', required: false, enabled: true, order: 5 },
+                        { id: 'guests', label: 'Number of Guests', type: 'number', required: true, enabled: true, order: 6 },
+                        { id: 'specialRequests', label: 'Special Requests', type: 'textarea', required: false, enabled: true, order: 7 }
+                    ]
+                },
+                {
+                    id: 'preferences',
+                    title: 'Van Preferences',
+                    order: 3,
+                    enabled: true,
+                    fields: [
+                        { id: 'petFriendly', label: 'Pet-Friendly', type: 'checkbox', required: false, enabled: true, order: 1 },
+                        { id: 'insuranceOption', label: 'Insurance Coverage', type: 'select', required: false, enabled: true, order: 2 },
+                        { id: 'addOns', label: 'Add-on Services', type: 'checkbox-group', required: false, enabled: true, order: 3 },
+                        { id: 'deliveryOption', label: 'Delivery Service', type: 'checkbox', required: false, enabled: true, order: 4 }
+                    ]
+                },
+                {
+                    id: 'additional',
+                    title: 'Additional Information',
+                    order: 4,
+                    enabled: true,
+                    fields: [
+                        { id: 'totalAmount', label: 'Total Amount', type: 'number', required: true, enabled: true, order: 1, readonly: true },
+                        { id: 'paymentMethod', label: 'Payment Method', type: 'select', required: true, enabled: true, order: 2 },
+                        { id: 'depositAmount', label: 'Deposit Amount', type: 'number', required: false, enabled: true, order: 3 },
+                        { id: 'paymentStatus', label: 'Payment Status', type: 'select', required: true, enabled: true, order: 4 },
+                        { id: 'notes', label: 'Internal Notes', type: 'textarea', required: false, enabled: false, order: 5 }
+                    ]
+                }
+            ]
+        };
+    }
+
+    // Booking Form Configuration Methods
+    initializeFormConfigurationUI() {
+        console.log('Initializing form configuration UI...');
+        
+        // Initialize sortable functionality
+        this.initializeSortableFields();
+        
+        // Populate form configuration
+        this.populateFormConfiguration();
+        
+        // Setup event listeners
+        this.setupFormConfigEventListeners();
+        
+        // Initial preview update
+        this.updateFormPreview();
+    }
+
+    initializeSortableFields() {
+        // Check if SortableJS is available (we'll need to include it)
+        if (typeof Sortable !== 'undefined') {
+            const sortableContainers = document.querySelectorAll('.sortable-fields');
+            sortableContainers.forEach(container => {
+                new Sortable(container, {
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    chosenClass: 'sortable-chosen',
+                    dragClass: 'sortable-drag',
+                    onEnd: (evt) => {
+                        this.handleFieldReorder(evt);
+                    }
+                });
+            });
+        } else {
+            console.warn('SortableJS not available - drag and drop disabled');
+        }
+    }
+
+    populateFormConfiguration() {
+        this.bookingFormConfig.sections.forEach(section => {
+            this.populateSectionFields(section);
+            this.updateSectionToggle(section);
+        });
+    }
+
+    populateSectionFields(section) {
+        const container = document.querySelector(`#fields-${section.id} .fields-list`);
+        if (!container) return;
+
+        container.innerHTML = '';
+        
+        // Sort fields by order
+        const sortedFields = [...section.fields].sort((a, b) => a.order - b.order);
+        
+        sortedFields.forEach(field => {
+            const fieldElement = this.createFieldElement(field, section.id);
+            container.appendChild(fieldElement);
+        });
+    }
+
+    createFieldElement(field, sectionId) {
+        const fieldDiv = document.createElement('div');
+        fieldDiv.className = 'field-item';
+        fieldDiv.dataset.fieldId = field.id;
+        fieldDiv.dataset.sectionId = sectionId;
+        
+        fieldDiv.innerHTML = `
+            <div class="field-drag-handle">
+                <i class="fas fa-grip-vertical"></i>
+            </div>
+            <input type="checkbox" class="field-checkbox" ${field.enabled ? 'checked' : ''}>
+            <span class="field-label">${field.label}</span>
+            <span class="field-type">${field.type}</span>
+            ${field.required ? '<span class="field-required">Required</span>' : ''}
+            <span class="field-status ${field.enabled ? 'enabled' : 'disabled'}">${field.enabled ? 'enabled' : 'disabled'}</span>
+        `;
+
+        // Add event listener for checkbox
+        const checkbox = fieldDiv.querySelector('.field-checkbox');
+        checkbox.addEventListener('change', (e) => {
+            this.handleFieldToggle(field.id, sectionId, e.target.checked);
+        });
+
+        return fieldDiv;
+    }
+
+    updateSectionToggle(section) {
+        const checkbox = document.getElementById(`section-${section.id}`);
+        if (checkbox) {
+            checkbox.checked = section.enabled;
+            checkbox.addEventListener('change', (e) => {
+                this.handleSectionToggle(section.id, e.target.checked);
+            });
+        }
+    }
+
+    setupFormConfigEventListeners() {
+        // Section expand/collapse buttons
+        document.querySelectorAll('.section-expand-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const sectionConfig = e.target.closest('.section-config');
+                sectionConfig.classList.toggle('collapsed');
+            });
+        });
+
+        // Save configuration button
+        const saveBtn = document.getElementById('save-form-config');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', () => this.saveFormConfiguration());
+        }
+
+        // Reset configuration button
+        const resetBtn = document.getElementById('reset-form-config');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => this.resetFormConfiguration());
+        }
+
+        // Preview form button
+        const previewBtn = document.getElementById('preview-form-config');
+        if (previewBtn) {
+            previewBtn.addEventListener('click', () => this.showFullFormPreview());
+        }
+    }
+
+    handleSectionToggle(sectionId, enabled) {
+        const section = this.bookingFormConfig.sections.find(s => s.id === sectionId);
+        if (section) {
+            section.enabled = enabled;
+            this.updateFormPreview();
+            
+            // Update field checkboxes based on section state
+            const fieldCheckboxes = document.querySelectorAll(`#fields-${sectionId} .field-checkbox`);
+            fieldCheckboxes.forEach(checkbox => {
+                checkbox.disabled = !enabled;
+                if (!enabled) {
+                    checkbox.checked = false;
+                    const fieldId = checkbox.closest('.field-item').dataset.fieldId;
+                    this.handleFieldToggle(fieldId, sectionId, false, false);
+                }
+            });
+        }
+    }
+
+    handleFieldToggle(fieldId, sectionId, enabled, updatePreview = true) {
+        const section = this.bookingFormConfig.sections.find(s => s.id === sectionId);
+        if (section) {
+            const field = section.fields.find(f => f.id === fieldId);
+            if (field) {
+                field.enabled = enabled;
+                
+                // Update status indicator
+                const fieldElement = document.querySelector(`[data-field-id="${fieldId}"]`);
+                if (fieldElement) {
+                    const statusElement = fieldElement.querySelector('.field-status');
+                    statusElement.textContent = enabled ? 'enabled' : 'disabled';
+                    statusElement.className = `field-status ${enabled ? 'enabled' : 'disabled'}`;
+                }
+                
+                if (updatePreview) {
+                    this.updateFormPreview();
+                }
+            }
+        }
+    }
+
+    handleFieldReorder(evt) {
+        const fieldId = evt.item.dataset.fieldId;
+        const sectionId = evt.item.dataset.sectionId;
+        const newIndex = evt.newIndex;
+        
+        const section = this.bookingFormConfig.sections.find(s => s.id === sectionId);
+        if (section) {
+            // Update field orders based on new positions
+            const sortedFields = Array.from(evt.to.children).map((element, index) => {
+                const fId = element.dataset.fieldId;
+                const field = section.fields.find(f => f.id === fId);
+                if (field) {
+                    field.order = index + 1;
+                }
+                return field;
+            }).filter(Boolean);
+            
+            this.updateFormPreview();
+        }
+    }
+
+    updateFormPreview() {
+        const previewContainer = document.getElementById('form-preview');
+        if (!previewContainer) return;
+
+        // Clear existing preview
+        previewContainer.innerHTML = '';
+
+        // Generate preview based on current configuration
+        const enabledSections = this.bookingFormConfig.sections
+            .filter(section => section.enabled)
+            .sort((a, b) => a.order - b.order);
+
+        enabledSections.forEach(section => {
+            const sectionDiv = this.createPreviewSection(section);
+            previewContainer.appendChild(sectionDiv);
+        });
+    }
+
+    createPreviewSection(section) {
+        const sectionDiv = document.createElement('div');
+        sectionDiv.className = 'preview-section';
+        
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'preview-section-title';
+        titleDiv.innerHTML = `<i class="fas fa-list"></i> ${section.title}`;
+        sectionDiv.appendChild(titleDiv);
+
+        const enabledFields = section.fields
+            .filter(field => field.enabled)
+            .sort((a, b) => a.order - b.order);
+
+        enabledFields.forEach(field => {
+            const fieldDiv = this.createPreviewField(field);
+            sectionDiv.appendChild(fieldDiv);
+        });
+
+        return sectionDiv;
+    }
+
+    createPreviewField(field) {
+        const fieldDiv = document.createElement('div');
+        fieldDiv.className = 'preview-field';
+        
+        const label = document.createElement('label');
+        label.innerHTML = `${field.label} ${field.required ? '<span class="required">*</span>' : ''}`;
+        fieldDiv.appendChild(label);
+
+        let input;
+        switch (field.type) {
+            case 'textarea':
+                input = document.createElement('textarea');
+                input.rows = 3;
+                break;
+            case 'select':
+                input = document.createElement('select');
+                // Add some sample options
+                const options = this.getFieldOptions(field.id);
+                options.forEach(optionText => {
+                    const option = document.createElement('option');
+                    option.textContent = optionText;
+                    input.appendChild(option);
+                });
+                break;
+            case 'checkbox':
+                input = document.createElement('input');
+                input.type = 'checkbox';
+                break;
+            case 'checkbox-group':
+                const checkboxGroup = document.createElement('div');
+                checkboxGroup.className = 'checkbox-group';
+                const sampleOptions = ['Option 1', 'Option 2', 'Option 3'];
+                sampleOptions.forEach(optionText => {
+                    const checkboxWrapper = document.createElement('label');
+                    checkboxWrapper.className = 'checkbox-label';
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    const span = document.createElement('span');
+                    span.textContent = optionText;
+                    checkboxWrapper.appendChild(checkbox);
+                    checkboxWrapper.appendChild(span);
+                    checkboxGroup.appendChild(checkboxWrapper);
+                });
+                fieldDiv.appendChild(checkboxGroup);
+                return fieldDiv;
+            default:
+                input = document.createElement('input');
+                input.type = field.type;
+                break;
+        }
+
+        if (field.readonly) {
+            input.disabled = true;
+        }
+
+        input.placeholder = `Enter ${field.label.toLowerCase()}...`;
+        fieldDiv.appendChild(input);
+
+        return fieldDiv;
+    }
+
+    getFieldOptions(fieldId) {
+        const optionsMap = {
+            'vanId': ['Van 1 - Adventure Explorer', 'Van 2 - Mountain Cruiser', 'Van 3 - Ocean Breeze'],
+            'paymentMethod': ['Credit Card', 'PayPal', 'Bank Transfer', 'Cash'],
+            'paymentStatus': ['Pending', 'Paid', 'Partial', 'Refunded'],
+            'insuranceOption': ['Basic Coverage', 'Comprehensive', 'Premium Plus']
+        };
+        return optionsMap[fieldId] || ['Option 1', 'Option 2', 'Option 3'];
+    }
+
+    saveFormConfiguration() {
+        try {
+            // Save to localStorage for now
+            localStorage.setItem('vanlife_booking_form_config', JSON.stringify(this.bookingFormConfig));
+            
+            // TODO: Save to backend when available
+            // await this.api.saveBookingFormConfiguration(this.bookingFormConfig);
+            
+            this.uiManager.showNotification('Form configuration saved successfully!', 'success');
+            console.log('Form configuration saved:', this.bookingFormConfig);
+        } catch (error) {
+            console.error('Error saving form configuration:', error);
+            this.uiManager.showNotification('Error saving configuration', 'error');
+        }
+    }
+
+    resetFormConfiguration() {
+        if (confirm('Are you sure you want to reset the form configuration to default? This will lose all your customizations.')) {
+            // Reset to default configuration
+            this.initializeBookingFormConfiguration();
+            
+            // Repopulate UI
+            this.populateFormConfiguration();
+            this.updateFormPreview();
+            
+            this.uiManager.showNotification('Form configuration reset to default', 'info');
+        }
+    }
+
+    showFullFormPreview() {
+        // Create a modal with full form preview
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 800px;">
+                <div class="modal-header">
+                    <h3><i class="fas fa-eye"></i> Booking Form Preview</h3>
+                    <span class="close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="booking-form-preview" id="full-form-preview">
+                        <!-- Full form will be populated here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary">Close Preview</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Populate full preview
+        const fullPreview = modal.querySelector('#full-form-preview');
+        const enabledSections = this.bookingFormConfig.sections
+            .filter(section => section.enabled)
+            .sort((a, b) => a.order - b.order);
+
+        enabledSections.forEach(section => {
+            const sectionDiv = this.createPreviewSection(section);
+            fullPreview.appendChild(sectionDiv);
+        });
+
+        // Setup close handlers
+        const closeButtons = modal.querySelectorAll('.close, .btn-secondary');
+        closeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                modal.remove();
+            });
+        });
+
+        // Close on backdrop click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+
+    loadFormConfiguration() {
+        try {
+            const saved = localStorage.getItem('vanlife_booking_form_config');
+            if (saved) {
+                this.bookingFormConfig = JSON.parse(saved);
+                console.log('Loaded saved form configuration');
+                return true;
+            }
+        } catch (error) {
+            console.error('Error loading form configuration:', error);
+        }
+        return false;
+    }
+
+    setupSettingsNavigation() {
+        // Setup navigation to settings section with form configuration initialization
+        const settingsNavLink = document.querySelector('[data-section="settings"]');
+        if (settingsNavLink) {
+            settingsNavLink.addEventListener('click', () => {
+                // Delay initialization until the section is visible
+                setTimeout(() => {
+                    this.initializeFormConfigurationUI();
+                }, 100);
+            });
+        }
+    }
+
+    setupBookingProfiles() {
+        console.log('Setting up booking profiles UI...');
+        
+        // The BookingProfileUIManager handles its own initialization
+        // We just need to make sure navigation works
+        this.setupBookingProfilesNavigation();
+    }
+
+    setupBookingProfilesNavigation() {
+        // Handle navigation to booking profiles section
+        const profilesNavLink = document.querySelector('[data-section="booking-profiles"]');
+        if (profilesNavLink) {
+            profilesNavLink.addEventListener('click', () => {
+                // Ensure the profile UI manager is initialized when the section is accessed
+                if (this.profileUIManager && this.profileUIManager.currentTab) {
+                    this.profileUIManager.switchTab(this.profileUIManager.currentTab);
+                }
+            });
+        }
+    }
+
+    // Method to get profile for a specific van (used by other components)
+    getVanProfile(vanId) {
+        return this.profileManager.getProfileForVan(vanId);
+    }
+
+    // Method to update van profile association (used by van management)
+    updateVanProfile(vanId, profileName) {
+        try {
+            // Remove van from all profiles first
+            this.profileManager.getAllProfiles().forEach(profile => {
+                this.profileManager.removeVanFromProfile(vanId, profile.name);
+            });
+
+            // Associate with new profile if specified
+            if (profileName) {
+                this.profileManager.associateVanWithProfile(vanId, profileName);
+            }
+
+            // Save changes
+            this.profileManager.saveProfiles();
+            
+            // Update UI if profile manager is active
+            if (this.profileUIManager && this.profileUIManager.currentTab === 'van-associations') {
+                this.profileUIManager.loadVanAssociations();
+            }
+
+            return true;
+        } catch (error) {
+            console.error('Failed to update van profile:', error);
+            return false;
         }
     }
 }

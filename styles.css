@@ -459,6 +459,671 @@ body {
     background: #f59e0b;
 }
 
+/* Van selection styling - smaller cards */
+.van-selection-section {
+    margin-bottom: 1.5rem;
+}
+
+.van-selection-section h3 {
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+}
+
+.van-selection-section .van-selection-subtitle {
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+/* Override van card styling to make them smaller */
+.van-selection-grid .van-card {
+    padding: 0.75rem;
+    border-radius: 8px;
+}
+
+.van-selection-grid .van-header {
+    margin-bottom: 0.5rem;
+}
+
+.van-selection-grid .van-header h4 {
+    font-size: 0.95rem;
+}
+
+.van-selection-grid .van-price {
+    padding: 0.2rem 0.6rem;
+    border-radius: 16px;
+    font-size: 0.8rem;
+}
+
+.van-selection-grid .van-details {
+    font-size: 0.8rem;
+}
+
+/* Booking Section */
+.booking-section {
+    padding: 5rem 0;
+    background: #f8fafc;
+}
+
+.booking-section h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    color: #1e293b;
+}
+
+.booking-form {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 3rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.form-group input,
+.form-group select {
+    padding: 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    background: white;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.price-summary {
+    background: #f1f5f9;
+    padding: 2rem;
+    border-radius: 15px;
+    margin: 2rem 0;
+    border-left: 4px solid #2563eb;
+}
+
+.price-summary h3 {
+    color: #1e293b;
+    margin-bottom: 1rem;
+}
+
+.price-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+}
+
+.price-row.total {
+    border-top: 2px solid #e5e7eb;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #2563eb;
+}
+
+.submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    padding: 1.2rem 2rem;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+}
+
+/* Advantages Section */
+.advantages-section {
+    padding: 5rem 0;
+    background: white;
+}
+
+.advantages-section h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    color: #1e293b;
+}
+
+.advantages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.advantage-card {
+    text-align: center;
+    padding: 2rem;
+    border-radius: 20px;
+    background: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border: 1px solid #f1f5f9;
+}
+
+.advantage-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.advantage-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: white;
+    font-size: 2rem;
+}
+
+.advantage-card h3 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    color: #1e293b;
+}
+
+.advantage-card p {
+    color: #64748b;
+    line-height: 1.6;
+}
+
+/* Gallery Section */
+.gallery-section {
+    padding: 5rem 0;
+    background: #f8fafc;
+}
+
+.gallery-section h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    color: #1e293b;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.van-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.van-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    transform: translateY(-2px);
+}
+
+.van-card.selected {
+    border-color: #2563eb;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.2);
+}
+
+.van-card.selected::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+}
+
+.van-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.van-header h4 {
+    margin: 0;
+    color: #1f2937;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.van-price {
+    background: #10b981;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.van-details {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.van-type {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Van type color indicators */
+.van-card[data-van-type="compact"] .van-price {
+    background: #10b981;
+}
+
+.van-card[data-van-type="standard"] .van-price {
+    background: #3b82f6;
+}
+
+.van-card[data-van-type="luxury"] .van-price {
+    background: #8b5cf6;
+}
+
+.van-card[data-van-type="family"] .van-price {
+    background: #f59e0b;
+}
+
+/* Van selection styling - smaller cards */
+.van-selection-section {
+    margin-bottom: 1.5rem;
+}
+
+.van-selection-section h3 {
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+}
+
+.van-selection-section .van-selection-subtitle {
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+/* Override van card styling to make them smaller */
+.van-selection-grid .van-card {
+    padding: 0.75rem;
+    border-radius: 8px;
+}
+
+.van-selection-grid .van-header {
+    margin-bottom: 0.5rem;
+}
+
+.van-selection-grid .van-header h4 {
+    font-size: 0.95rem;
+}
+
+.van-selection-grid .van-price {
+    padding: 0.2rem 0.6rem;
+    border-radius: 16px;
+    font-size: 0.8rem;
+}
+
+.van-selection-grid .van-details {
+    font-size: 0.8rem;
+}
+
+/* Booking Section */
+.booking-section {
+    padding: 5rem 0;
+    background: #f8fafc;
+}
+
+.booking-section h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    color: #1e293b;
+}
+
+.booking-form {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 3rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.form-group input,
+.form-group select {
+    padding: 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    background: white;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.price-summary {
+    background: #f1f5f9;
+    padding: 2rem;
+    border-radius: 15px;
+    margin: 2rem 0;
+    border-left: 4px solid #2563eb;
+}
+
+.price-summary h3 {
+    color: #1e293b;
+    margin-bottom: 1rem;
+}
+
+.price-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+}
+
+.price-row.total {
+    border-top: 2px solid #e5e7eb;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #2563eb;
+}
+
+.submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    padding: 1.2rem 2rem;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+}
+
+/* Advantages Section */
+.advantages-section {
+    padding: 5rem 0;
+    background: white;
+}
+
+.advantages-section h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    color: #1e293b;
+}
+
+.advantages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.advantage-card {
+    text-align: center;
+    padding: 2rem;
+    border-radius: 20px;
+    background: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border: 1px solid #f1f5f9;
+}
+
+.advantage-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.advantage-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: white;
+    font-size: 2rem;
+}
+
+.advantage-card h3 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    color: #1e293b;
+}
+
+.advantage-card p {
+    color: #64748b;
+    line-height: 1.6;
+}
+
+/* Gallery Section */
+.gallery-section {
+    padding: 5rem 0;
+    background: #f8fafc;
+}
+
+.gallery-section h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    color: #1e293b;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.van-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.van-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    transform: translateY(-2px);
+}
+
+.van-card.selected {
+    border-color: #2563eb;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.2);
+}
+
+.van-card.selected::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+}
+
+.van-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.van-header h4 {
+    margin: 0;
+    color: #1f2937;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.van-price {
+    background: #10b981;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.van-details {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.van-type {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Van type color indicators */
+.van-card[data-van-type="compact"] .van-price {
+    background: #10b981;
+}
+
+.van-card[data-van-type="standard"] .van-price {
+    background: #3b82f6;
+}
+
+.van-card[data-van-type="luxury"] .van-price {
+    background: #8b5cf6;
+}
+
+.van-card[data-van-type="family"] .van-price {
+    background: #f59e0b;
+}
+
+/* Van selection styling - smaller cards */
+.van-selection-section {
+    margin-bottom: 1.5rem;
+}
+
+.van-selection-section h3 {
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+}
+
+.van-selection-section .van-selection-subtitle {
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+/* Override van card styling to make them smaller */
+.van-selection-grid .van-card {
+    padding: 0.75rem;
+    border-radius: 8px;
+}
+
+.van-selection-grid .van-header {
+    margin-bottom: 0.5rem;
+}
+
+.van-selection-grid .van-header h4 {
+    font-size: 0.95rem;
+}
+
+.van-selection-grid .van-price {
+    padding: 0.2rem 0.6rem;
+    border-radius: 16px;
+    font-size: 0.8rem;
+}
+
+.van-selection-grid .van-details {
+    font-size: 0.8rem;
+}
+
 /* Booking Section */
 .booking-section {
     padding: 5rem 0;
@@ -2140,7 +2805,7 @@ body {
         transform: translateX(-50%) translateY(-10px);
     }
     to {
-        opacity: 1;
+        opacity:  1;
         transform: translateX(-50%) translateY(0);
     }
 }
@@ -2272,4 +2937,167 @@ body {
 .time-note i {
     margin-top: 1px;
     flex-shrink: 0;
+}
+
+/* Dynamic Booking Form Styles */
+.dynamic-booking-form {
+    background: white;
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-top: 24px;
+}
+
+.pricing-summary {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 32px;
+}
+
+.price-info p {
+    margin: 8px 0;
+    font-size: 16px;
+}
+
+.price-info p:first-child {
+    margin-top: 0;
+}
+
+.price-info p:last-child {
+    margin-bottom: 0;
+}
+
+.dynamic-booking-form .form-section {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.dynamic-booking-form .form-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 24px;
+}
+
+.dynamic-booking-form .form-section h4 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dynamic-booking-form .form-section h4::before {
+    content: '';
+    width: 4px;
+    height: 20px;
+    background: #3b82f6;
+    border-radius: 2px;
+}
+
+.dynamic-booking-form .form-group {
+    margin-bottom: 20px;
+}
+
+.dynamic-booking-form .form-group:last-child {
+    margin-bottom: 0;
+}
+
+.dynamic-booking-form label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.dynamic-booking-form input[type="text"],
+.dynamic-booking-form input[type="email"],
+.dynamic-booking-form input[type="tel"],
+.dynamic-booking-form select,
+.dynamic-booking-form textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    transition: all 0.2s ease;
+}
+
+.dynamic-booking-form input:focus,
+.dynamic-booking-form select:focus,
+.dynamic-booking-form textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.dynamic-booking-form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Submit Section */
+.form-submit-section {
+    text-align: center;
+    padding-top: 32px;
+    border-top: 2px solid #e2e8f0;
+}
+
+.submit-button {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 220px;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.submit-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
+
+.submit-button:active {
+    transform: translateY(0);
+}
+
+.submit-button i {
+    font-size: 18px;
+}
+
+/* Dynamic Booking Container */
+.dynamic-booking-container {
+    margin-top: 24px;
+    display: block;
+}
+
+/* Integration with existing booking section */
+.booking-section .dynamic-booking-container {
+    margin-top: 0;
+}
+
+.booking-section .dynamic-booking-form {
+    margin-top: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+}
+
+/* Show/hide states */
+#bookingForm.replaced {
+    display: none !important;
 }

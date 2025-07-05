@@ -19,18 +19,17 @@ export class APIService {
                     type: 'standard',
                     location: 'San Francisco, CA',
                     base_price: 89.00,
+                    price: 89.00,
                     capacity: 2,
                     status: 'active',
-                    features: {
-                        amenities: ['Kitchen', 'Bed', 'Solar Power', 'Toilet'],
-                        specifications: {
-                            length: '20ft',
-                            height: '8ft',
-                            width: '6.5ft',
-                            engine: 'V6',
-                            transmission: 'Automatic',
-                            fuel_type: 'Gasoline'
-                        }
+                    features: ['Kitchen', 'Bed', 'Solar Power', 'Toilet'],
+                    specifications: {
+                        length: '20ft',
+                        height: '8ft',
+                        width: '6.5ft',
+                        engine: 'V6',
+                        transmission: 'Automatic',
+                        fuel_type: 'Gasoline'
                     },
                     pricing_profile: 'standard',
                     description: 'Perfect for couples and small groups seeking adventure.',

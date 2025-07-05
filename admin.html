@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="admin-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 </head>
 <body>
     <!-- Sidebar -->
@@ -73,6 +74,12 @@
                     <a href="#pricing" class="nav-link" data-section="pricing">
                         <i class="fas fa-tags"></i>
                         <span>Pricing Profiles</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#booking-profiles" class="nav-link" data-section="booking-profiles">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>Booking Form Profiles</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -801,6 +808,333 @@
             </div>
         </section>
 
+        <!-- Booking Form Profiles Section -->
+        <section id="booking-profiles" class="content-section">
+            <div class="section-header">
+                <h3><i class="fas fa-clipboard-list"></i> Booking Form Profiles</h3>
+                <p>Create and manage different booking form configurations for different vans or use cases</p>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="create-profile-btn">
+                        <i class="fas fa-plus"></i>
+                        Create New Profile
+                    </button>
+                    <button class="btn btn-outline" id="import-profile-btn">
+                        <i class="fas fa-upload"></i>
+                        Import Profile
+                    </button>
+                </div>
+            </div>
+
+            <!-- Profile Management Tabs -->
+            <div class="profile-tabs">
+                <button class="tab-btn active" data-tab="manage-profiles">Manage Profiles</button>
+                <button class="tab-btn" data-tab="profile-editor">Profile Editor</button>
+                <button class="tab-btn" data-tab="van-associations">Van Associations</button>
+            </div>
+
+            <!-- Manage Profiles Tab -->
+            <div id="manage-profiles-tab" class="tab-content active">
+                <div class="profiles-header">
+                    <div class="search-filter-bar">
+                        <div class="search-box">
+                            <input type="text" id="profile-search" placeholder="Search profiles..." />
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <select id="profile-filter" class="filter-select">
+                            <option value="all">All Profiles</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="default">Default</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="profiles-grid" id="profiles-grid">
+                    <!-- Profile cards will be populated here -->
+                    <div class="profile-card loading-placeholder">
+                        <div class="loading-spinner"></div>
+                        <p>Loading profiles...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Editor Tab -->
+            <div id="profile-editor-tab" class="tab-content">
+                <div class="editor-container">
+                    <!-- Profile Selection -->
+                    <div class="editor-header">
+                        <div class="profile-selector">
+                            <label for="edit-profile-select">Select Profile to Edit:</label>
+                            <select id="edit-profile-select">
+                                <option value="">Select a profile...</option>
+                            </select>
+                        </div>
+                        <div class="editor-actions">
+                            <button class="btn btn-success" id="save-profile-btn">
+                                <i class="fas fa-save"></i>
+                                Save Profile
+                            </button>
+                            <button class="btn btn-secondary" id="duplicate-profile-btn">
+                                <i class="fas fa-copy"></i>
+                                Duplicate
+                            </button>
+                            <button class="btn btn-danger" id="delete-profile-btn">
+                                <i class="fas fa-trash"></i>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Profile Editor Form -->
+                    <div class="profile-editor-form" id="profile-editor-form">
+                        <div class="editor-grid">
+                            <!-- Basic Information -->
+                            <div class="editor-section">
+                                <h4><i class="fas fa-info-circle"></i> Basic Information</h4>
+                                <div class="form-group">
+                                    <label for="profile-name">Profile Name *</label>
+                                    <input type="text" id="profile-name" placeholder="e.g., Luxury Van Booking" required />
+                                </div>
+                                <div class="form-group">
+                                    <label for="profile-description">Description</label>
+                                    <textarea id="profile-description" placeholder="Describe this profile's purpose and use cases"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" id="profile-is-default" />
+                                        Set as default profile
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" id="profile-is-active" checked />
+                                        Profile is active
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Form Configuration -->
+                            <div class="editor-section">
+                                <h4><i class="fas fa-form"></i> Form Configuration</h4>
+                                <div class="form-sections-editor">
+                                    <!-- Customer Information -->
+                                    <div class="section-config-editor" data-section="customer">
+                                        <div class="section-header">
+                                            <label class="section-toggle">
+                                                <input type="checkbox" id="edit-section-customer" checked>
+                                                <span class="section-title">Customer Information</span>
+                                            </label>
+                                            <button class="section-expand-btn" type="button">
+                                                <i class="fas fa-chevron-down"></i>
+                                            </button>
+                                        </div>
+                                        <div class="section-fields-editor" id="edit-fields-customer">
+                                            <div class="fields-list sortable-fields" data-section="customer">
+                                                <!-- Fields will be populated by JavaScript -->
+                                            </div>
+                                            <button class="btn btn-sm btn-outline add-field-btn" data-section="customer">
+                                                <i class="fas fa-plus"></i> Add Field
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Booking Details -->
+                                    <div class="section-config-editor" data-section="booking">
+                                        <div class="section-header">
+                                            <label class="section-toggle">
+                                                <input type="checkbox" id="edit-section-booking" checked>
+                                                <span class="section-title">Booking Details</span>
+                                            </label>
+                                            <button class="section-expand-btn" type="button">
+                                                <i class="fas fa-chevron-down"></i>
+                                            </button>
+                                        </div>
+                                        <div class="section-fields-editor" id="edit-fields-booking">
+                                            <div class="fields-list sortable-fields" data-section="booking">
+                                                <!-- Fields will be populated by JavaScript -->
+                                            </div>
+                                            <button class="btn btn-sm btn-outline add-field-btn" data-section="booking">
+                                                <i class="fas fa-plus"></i> Add Field
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Van Preferences -->
+                                    <div class="section-config-editor" data-section="preferences">
+                                        <div class="section-header">
+                                            <label class="section-toggle">
+                                                <input type="checkbox" id="edit-section-preferences" checked>
+                                                <span class="section-title">Van Preferences</span>
+                                            </label>
+                                            <button class="section-expand-btn" type="button">
+                                                <i class="fas fa-chevron-down"></i>
+                                            </button>
+                                        </div>
+                                        <div class="section-fields-editor" id="edit-fields-preferences">
+                                            <div class="fields-list sortable-fields" data-section="preferences">
+                                                <!-- Fields will be populated by JavaScript -->
+                                            </div>
+                                            <button class="btn btn-sm btn-outline add-field-btn" data-section="preferences">
+                                                <i class="fas fa-plus"></i> Add Field
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Additional Information -->
+                                    <div class="section-config-editor" data-section="additional">
+                                        <div class="section-header">
+                                            <label class="section-toggle">
+                                                <input type="checkbox" id="edit-section-additional" checked>
+                                                <span class="section-title">Additional Information</span>
+                                            </label>
+                                            <button class="section-expand-btn" type="button">
+                                                <i class="fas fa-chevron-down"></i>
+                                            </button>
+                                        </div>
+                                        <div class="section-fields-editor" id="edit-fields-additional">
+                                            <div class="fields-list sortable-fields" data-section="additional">
+                                                <!-- Fields will be populated by JavaScript -->
+                                            </div>
+                                            <button class="btn btn-sm btn-outline add-field-btn" data-section="additional">
+                                                <i class="fas fa-plus"></i> Add Field
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Pricing Configuration -->
+                            <div class="editor-section">
+                                <h4><i class="fas fa-dollar-sign"></i> Pricing Configuration</h4>
+                                <div class="pricing-config">
+                                    <div class="form-group">
+                                        <label for="base-price">Base Price per Day (CHF)</label>
+                                        <input type="number" id="base-price" min="0" step="0.01" placeholder="0.00" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="cleaning-fee">Cleaning Fee (CHF)</label>
+                                        <input type="number" id="cleaning-fee" min="0" step="0.01" placeholder="0.00" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="security-deposit">Security Deposit (CHF)</label>
+                                        <input type="number" id="security-deposit" min="0" step="0.01" placeholder="0.00" />
+                                    </div>
+                                    
+                                    <!-- Extras/Add-ons -->
+                                    <div class="extras-section">
+                                        <h5>Available Extras</h5>
+                                        <div class="extras-list" id="profile-extras-list">
+                                            <!-- Extras will be populated here -->
+                                        </div>
+                                        <button class="btn btn-sm btn-outline" id="add-extra-btn">
+                                            <i class="fas fa-plus"></i> Add Extra
+                                        </button>
+                                    </div>
+
+                                    <!-- Discounts -->
+                                    <div class="discounts-section">
+                                        <h5>Discounts</h5>
+                                        <div class="discounts-list" id="profile-discounts-list">
+                                            <!-- Discounts will be populated here -->
+                                        </div>
+                                        <button class="btn btn-sm btn-outline" id="add-discount-btn">
+                                            <i class="fas fa-plus"></i> Add Discount Rule
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Form Preview -->
+                            <div class="editor-section">
+                                <h4><i class="fas fa-eye"></i> Live Preview</h4>
+                                <div class="preview-container">
+                                    <div id="profile-form-preview" class="booking-form-preview">
+                                        <!-- Live preview will be generated here -->
+                                    </div>
+                                </div>
+                                <div class="preview-actions">
+                                    <button class="btn btn-outline" id="preview-full-form-btn">
+                                        <i class="fas fa-external-link-alt"></i>
+                                        Preview in New Tab
+                                    </button>
+                                    <button class="btn btn-outline" id="test-form-btn">
+                                        <i class="fas fa-play"></i>
+                                        Test Form
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Van Associations Tab -->
+            <div id="van-associations-tab" class="tab-content">
+                <div class="associations-container">
+                    <div class="associations-header">
+                        <h4><i class="fas fa-link"></i> Van-Profile Associations</h4>
+                        <p>Associate booking form profiles with specific vans</p>
+                    </div>
+
+                    <div class="associations-grid">
+                        <!-- Default Profile Assignment -->
+                        <div class="association-section">
+                            <h5>Default Profile</h5>
+                            <div class="form-group">
+                                <label for="default-profile-select">Default profile for new bookings:</label>
+                                <select id="default-profile-select">
+                                    <option value="">Select default profile...</option>
+                                </select>
+                            </div>
+                            <p class="help-text">This profile will be used when no specific van is selected or for vans without assigned profiles.</p>
+                        </div>
+
+                        <!-- Van-Specific Associations -->
+                        <div class="association-section">
+                            <h5>Van-Specific Profiles</h5>
+                            <div class="van-associations-list" id="van-associations-list">
+                                <!-- Van associations will be populated here -->
+                            </div>
+                        </div>
+
+                        <!-- Bulk Actions -->
+                        <div class="association-section">
+                            <h5>Bulk Actions</h5>
+                            <div class="bulk-actions">
+                                <div class="form-group">
+                                    <label for="bulk-profile-select">Assign profile to multiple vans:</label>
+                                    <select id="bulk-profile-select">
+                                        <option value="">Select profile...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Select vans:</label>
+                                    <div class="van-checkboxes" id="bulk-van-checkboxes">
+                                        <!-- Van checkboxes will be populated here -->
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" id="bulk-assign-btn">
+                                    <i class="fas fa-magic"></i>
+                                    Assign to Selected Vans
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="associations-actions">
+                        <button class="btn btn-success" id="save-associations-btn">
+                            <i class="fas fa-save"></i>
+                            Save All Associations
+                        </button>
+                        <button class="btn btn-secondary" id="reset-associations-btn">
+                            <i class="fas fa-undo"></i>
+                            Reset to Saved
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Google Sheets Integration Section -->
         <section id="sheets" class="content-section">
             <div class="section-header">
@@ -945,7 +1279,225 @@
             </div>
         </section>
 
-        <!-- Other sections (customers, reports, settings) would follow similar patterns -->
+        <!-- Settings Section -->
+        <section id="settings" class="content-section">
+            <div class="page-header">
+                <h2><i class="fas fa-cog"></i> Settings</h2>
+                <p>Configure your admin dashboard and booking form settings</p>
+            </div>
+
+            <div class="settings-grid">
+                <!-- Booking Form Configuration -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-form"></i> Booking Form Configuration</h3>
+                        <p>Customize which fields appear in your booking form and their order</p>
+                    </div>
+                    
+                    <div class="form-config-container">
+                        <div class="form-sections">
+                            <h4>Form Sections</h4>
+                            
+                            <!-- Customer Information Section -->
+                            <div class="section-config" data-section="customer">
+                                <div class="section-header">
+                                    <label class="section-toggle">
+                                        <input type="checkbox" id="section-customer" checked>
+                                        <span class="section-title">Customer Information</span>
+                                    </label>
+                                    <button class="section-expand-btn" type="button">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="section-fields" id="fields-customer">
+                                    <div class="fields-list sortable-fields" data-section="customer">
+                                        <!-- Fields will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Booking Details Section -->
+                            <div class="section-config" data-section="booking">
+                                <div class="section-header">
+                                    <label class="section-toggle">
+                                        <input type="checkbox" id="section-booking" checked>
+                                        <span class="section-title">Booking Details</span>
+                                    </label>
+                                    <button class="section-expand-btn" type="button">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="section-fields" id="fields-booking">
+                                    <div class="fields-list sortable-fields" data-section="booking">
+                                        <!-- Fields will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Van Preferences Section -->
+                            <div class="section-config" data-section="preferences">
+                                <div class="section-header">
+                                    <label class="section-toggle">
+                                        <input type="checkbox" id="section-preferences" checked>
+                                        <span class="section-title">Van Preferences</span>
+                                    </label>
+                                    <button class="section-expand-btn" type="button">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="section-fields" id="fields-preferences">
+                                    <div class="fields-list sortable-fields" data-section="preferences">
+                                        <!-- Fields will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Additional Information Section -->
+                            <div class="section-config" data-section="additional">
+                                <div class="section-header">
+                                    <label class="section-toggle">
+                                        <input type="checkbox" id="section-additional" checked>
+                                        <span class="section-title">Additional Information</span>
+                                    </label>
+                                    <button class="section-expand-btn" type="button">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="section-fields" id="fields-additional">
+                                    <div class="fields-list sortable-fields" data-section="additional">
+                                        <!-- Fields will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-preview">
+                            <h4>Form Preview</h4>
+                            <div class="preview-container">
+                                <div id="form-preview" class="booking-form-preview">
+                                    <!-- Live preview will be generated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-config-actions">
+                        <button class="btn btn-primary" id="save-form-config">
+                            <i class="fas fa-save"></i>
+                            Save Configuration
+                        </button>
+                        <button class="btn btn-secondary" id="reset-form-config">
+                            <i class="fas fa-undo"></i>
+                            Reset to Default
+                        </button>
+                        <button class="btn btn-outline" id="preview-form-config">
+                            <i class="fas fa-eye"></i>
+                            Preview Full Form
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Other Settings Cards -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-palette"></i> UI Preferences</h3>
+                        <p>Customize the appearance of your admin dashboard</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="theme-select">Theme:</label>
+                        <select id="theme-select">
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                            <option value="auto">Auto (System)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="items-per-page">Items per page:</label>
+                        <select id="items-per-page">
+                            <option value="10">10</option>
+                            <option value="25" selected>25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-bell"></i> Notifications</h3>
+                        <p>Configure notification preferences</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="notify-new-bookings" checked>
+                            <span>Notify on new bookings</span>
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="notify-cancellations" checked>
+                            <span>Notify on booking cancellations</span>
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="notify-upcoming-trips">
+                            <span>Notify about upcoming trips</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Customers Section -->
+        <section id="customers" class="content-section">
+            <div class="page-header">
+                <h2><i class="fas fa-users"></i> Customer Management</h2>
+                <p>Manage customer information and booking history</p>
+            </div>
+            <div class="coming-soon">
+                <i class="fas fa-users"></i>
+                <h3>Coming Soon</h3>
+                <p>Customer management features will be available in a future update.</p>
+            </div>
+        </section>
+
+        <!-- Reports Section -->
+        <section id="reports" class="content-section">
+            <div class="page-header">
+                <h2><i class="fas fa-chart-bar"></i> Reports & Analytics</h2>
+                <p>View detailed reports and analytics for your van rental business</p>
+            </div>
+            <div class="coming-soon">
+                <i class="fas fa-chart-bar"></i>
+                <h3>Coming Soon</h3>
+                <p>Reporting and analytics features will be available in a future update.</p>
+            </div>
+        </section>
+
+        <!-- Search Section -->
+        <section id="search" class="content-section">
+            <div class="page-header">
+                <h2><i class="fas fa-search"></i> Van Search</h2>
+                <p>Search and filter available vans</p>
+            </div>
+            <div class="coming-soon">
+                <i class="fas fa-search"></i>
+                <h3>Coming Soon</h3>
+                <p>Advanced search features will be available in a future update.</p>
+            </div>
+        </section>
+
+        <!-- Other sections (customers, reports) would follow similar patterns -->
     </div>
 
     <!-- Modals -->
