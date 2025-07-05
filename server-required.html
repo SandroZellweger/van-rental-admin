@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VanLife Admin - Server Required</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 600px;
+            margin: 20px;
+        }
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .error-box {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .solution-box {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .btn-success {
+            background: #28a745;
+        }
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+        code {
+            background: #f1f1f1;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        .auto-redirect {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+    </style>
+    <script>
+        // Check if we're on localhost HTTP, if so redirect
+        if (window.location.protocol === 'http:' && window.location.hostname === 'localhost') {
+            window.location.href = 'admin-index.html';
+        }
+        
+        // Auto-redirect timer
+        let countdown = 10;
+        function updateCountdown() {
+            const element = document.getElementById('countdown');
+            if (element) {
+                element.textContent = countdown;
+                countdown--;
+                if (countdown < 0) {
+                    // Try to redirect to localhost
+                    window.location.href = 'http://localhost:8000/admin-index.html';
+                }
+            }
+        }
+        
+        // Start countdown when page loads
+        window.addEventListener('load', () => {
+            setInterval(updateCountdown, 1000);
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🚐⚠️</div>
+        <h1>HTTP Server Required</h1>
+        
+        <div class="error-box">
+            <strong>CORS Error Detected!</strong><br>
+            ES6 modules cannot be loaded from <code>file://</code> protocol due to browser security restrictions.
+        </div>
+        
+        <div class="solution-box">
+            <h3>🔧 Quick Fix:</h3>
+            <ol>
+                <li><strong>Start the development server:</strong>
+                    <br>Double-click <code>start-server.bat</code> or run <code>python -m http.server 8000</code>
+                </li>
+                <li><strong>Access via HTTP:</strong>
+                    <br>Use <code>http://localhost:8000/admin-index.html</code> instead of file://
+                </li>
+            </ol>
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <a href="http://localhost:8000/admin-index.html" class="btn btn-success">
+                🚀 Open Dashboard (HTTP)
+            </a>
+            <a href="start-server.bat" class="btn">
+                🔧 Start Server
+            </a>
+        </div>
+        
+        <div class="auto-redirect">
+            <strong>Auto-redirecting in <span id="countdown">10</span> seconds...</strong><br>
+            <small>If the server is already running, you'll be redirected automatically.</small>
+        </div>
+        
+        <div style="margin-top: 30px; font-size: 0.9rem; color: #666;">
+            <strong>Alternative Solutions:</strong><br>
+            • Use VS Code Live Server extension<br>
+            • Use any other local HTTP server<br>
+            • Deploy to a web server for production use
+        </div>
+    </div>
+</body>
+</html>
