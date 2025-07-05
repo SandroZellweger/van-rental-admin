@@ -123,8 +123,46 @@ The VanLife Admin Dashboard has been successfully refactored from a monolithic J
 
 ## 🚀 Getting Started
 
-### Quick Start
-1. Open `admin-index.html` to access the dashboard selection page
+### Important: Development Server Required
+⚠️ **ES6 modules require an HTTP server** - they cannot be loaded directly from `file://` protocol due to CORS restrictions.
+
+### Quick Start Options
+
+#### Option 1: Use the Included Server Scripts
+```bash
+# Windows Batch
+start-server.bat
+
+# Windows PowerShell
+.\start-server.ps1
+```
+
+#### Option 2: Manual Server Start
+```bash
+# Using Python (recommended)
+cd "c:\Users\sandr\New Website"
+python -m http.server 8000
+
+# Using Node.js (if available)
+npx http-server -p 8000
+
+# Using PHP (if available)
+php -S localhost:8000
+```
+
+#### Option 3: Use VS Code Live Server Extension
+1. Install "Live Server" extension in VS Code
+2. Right-click on `admin-index.html`
+3. Select "Open with Live Server"
+
+### Access Points (via HTTP server)
+- **Main Landing**: `http://localhost:8000/admin-index.html`
+- **Modular Dashboard**: `http://localhost:8000/admin.html`
+- **Legacy Dashboard**: `http://localhost:8000/admin-legacy.html`
+- **Testing Suite**: `http://localhost:8000/test-modular-dashboard.html`
+
+### Dashboard Selection Process
+1. Open `http://localhost:8000/admin-index.html` 
 2. Click "Modular Admin Dashboard (NEW)" to use the new architecture
 3. Use "Legacy Admin Dashboard" for backward compatibility
 
@@ -293,10 +331,16 @@ document.addEventListener('click', (e) => {
 
 ### Common Issues & Solutions
 
+**CORS Error: "Cross origin requests are only supported for protocol schemes"**
+- **Cause**: ES6 modules cannot be loaded from `file://` protocol
+- **Solution**: Use an HTTP server (see Getting Started section)
+- **Quick Fix**: Run `python -m http.server 8000` and use `http://localhost:8000`
+
 **Module Not Loading**
 - Check file paths in import statements
-- Ensure server supports ES6 modules (file:// protocol works)
+- Ensure HTTP server is running (not using file:// protocol)
 - Verify CSP headers allow module loading
+- Check browser console for specific error messages
 
 **Storage Quota Exceeded**
 - Use MediaManager's cleanup functions
