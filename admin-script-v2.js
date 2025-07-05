@@ -942,7 +942,7 @@ class AdminDashboard {
             const pricingProfile = this.pricingProfiles.find(p => p.id === van.pricingProfile);
 
             return `
-                <div class="professional-van-card ${!van.enabled ? 'van-disabled' : ''}">
+                <div class="professional-van-card ${!van.enabled ? 'van-disabled' : ''}" data-van-id="${van.id}">
                     <!-- Card Header -->
                     <div class="van-card-header">
                         <div class="van-header-left">
@@ -2849,13 +2849,46 @@ function renderVanCollection(vans) {
     }
 
     setupVanImagePlaceholderListeners() {
-        // Add click handlers for van image placeholders
+        // Add click handlers for van image placeholders that don't already have onclick handlers
         document.querySelectorAll('.van-image-placeholder, .van-thumb-placeholder').forEach(placeholder => {
+            // Skip if this placeholder already has an onclick handler
+            if (placeholder.getAttribute('onclick')) {
+                return;
+            }
+            
             placeholder.addEventListener('click', (e) => {
-                const vanId = parseInt(e.target.getAttribute('data-van-id'));
-                const imageType = e.target.getAttribute('data-image-type');
-                console.log('Image placeholder clicked:', { vanId, imageType });
-                this.openImageSelector(vanId, imageType);
+                let vanId = e.target.getAttribute('data-van-id');
+                let imageType = e.target.getAttribute('data-image-type');
+                
+                // If data attributes are missing, try to find them from parent elements or siblings
+                if (!vanId || !imageType) {
+                    const vanCard = e.target.closest('.van-card');
+                    if (vanCard) {
+                        vanId = vanCard.getAttribute('data-van-id');
+                        
+                        // Determine image type based on class
+                        if (e.target.classList.contains('van-image-placeholder')) {
+                            imageType = 'primary';
+                        } else if (e.target.classList.contains('van-thumb-placeholder')) {
+                            imageType = 'interior'; // Default for thumbnails
+                        }
+                    }
+                }
+                
+                // Convert vanId to integer
+                const parsedVanId = parseInt(vanId);
+                
+                // Only proceed if we have valid parameters
+                if (!isNaN(parsedVanId) && imageType) {
+                    console.log('Image placeholder clicked:', { vanId: parsedVanId, imageType });
+                    this.openImageSelector(parsedVanId, imageType);
+                } else {
+                    console.warn('Image placeholder clicked but missing required data:', { 
+                        vanId: parsedVanId, 
+                        imageType, 
+                        element: e.target 
+                    });
+                }
             });
         });
     }
