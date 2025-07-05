@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swiss Van Database Import Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .section { background: #f8f9fa; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .btn { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .van-preview { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .tech-specs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 12px; color: #666; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🇨🇭 Swiss Van Database Import Test</h1>
+        
+        <div class="section">
+            <h3>📊 Database Preview</h3>
+            <p>Your CSV contains <strong>11 Swiss vans</strong> from Ticino (TI) with complete technical specifications.</p>
+            
+            <div class="van-preview">
+                <strong>N01 - Opel Vivaro (Losone)</strong><br>
+                📍 Via dei Patrizi 1, 6616 Losone - Posteggio No 2<br>
+                🚗 License: TI 148877<br>
+                <div class="tech-specs">
+                    <div>Ext: 5.2m × 2.24m × 1.97m</div>
+                    <div>Int: 2.8m × 1.27m × 1.38m</div>
+                    <div>📅 Calendar ID: noleggiosemplice23@gmail.com</div>
+                </div>
+            </div>
+            
+            <p><em>+ 10 more vans with similar detailed specifications...</em></p>
+        </div>
+
+        <div class="section">
+            <h3>🚀 Import Actions</h3>
+            <button class="btn btn-primary" onclick="testImport()">
+                📥 Import Swiss Van Database
+            </button>
+            <button class="btn btn-success" onclick="showCurrentVans()">
+                🔍 Show Current Vans
+            </button>
+            <button class="btn" onclick="clearVans()" style="background: #dc3545; color: white;">
+                🗑️ Clear All Vans
+            </button>
+        </div>
+
+        <div id="status"></div>
+        <div id="results"></div>
+    </div>
+
+    <script src="admin-script-v2.js?v=2025-07-05-10-10-54"></script>
+    <script>
+        let dashboard;
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                dashboard = new AdminDashboard();
+                addStatus('✅ Admin Dashboard initialized successfully', 'success');
+            } catch (error) {
+                addStatus(`❌ Failed to initialize: ${error.message}`, 'error');
+            }
+        });
+
+        function addStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = `${new Date().toLocaleTimeString()}: ${message}`;
+            statusDiv.appendChild(div);
+        }
+
+        async function testImport() {
+            try {
+                addStatus('🔄 Starting CSV import...', 'info');
+                await dashboard.importFromYourCSV();
+                
+                // Show imported vans
+                setTimeout(() => {
+                    showCurrentVans();
+                }, 500);
+            } catch (error) {
+                addStatus(`❌ Import failed: ${error.message}`, 'error');
+            }
+        }
+
+        function showCurrentVans() {
+            const resultsDiv = document.getElementById('results');
+            const vans = dashboard.vans;
+            
+            if (vans.length === 0) {
+                resultsDiv.innerHTML = '<div class="status info">No vans loaded. Try importing first.</div>';
+                return;
+            }
+
+            let html = `<div class="section"><h3>📋 Loaded Vans (${vans.length})</h3>`;
+            
+            vans.forEach(van => {
+                html += `
+                    <div class="van-preview">
+                        <strong>${van.VehicleID} - ${van.name}</strong><br>
+                        📍 ${van.address || 'No address'}<br>
+                        🚗 License: ${van.LicencePlate || 'No plate'}<br>
+                        <div class="tech-specs">
+                            <div>Ext: ${van.extLength}m × ${van.extWidth}m × ${van.extHeight}m</div>
+                            <div>Int: ${van.intLength}m × ${van.intWidth}m × ${van.intHeight}m</div>
+                            <div>📍 ${van.location} (${van.canton})</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+            
+            addStatus(`✅ Displaying ${vans.length} imported vans`, 'success');
+        }
+
+        function clearVans() {
+            dashboard.vans = [];
+            localStorage.removeItem('vanRentalVans');
+            document.getElementById('results').innerHTML = '';
+            addStatus('🗑️ All vans cleared', 'info');
+        }
+    </script>
+</body>
+</html>

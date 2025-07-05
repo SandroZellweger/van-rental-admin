@@ -1290,6 +1290,128 @@ class AdminDashboard {
         this.showNotification('Google Sheets sync feature coming soon', 'info');
     }
 
+    async importFromYourCSV() {
+        try {
+            // Fetch the CSV file from the project directory
+            const response = await fetch('real-van-database.csv');
+            if (!response.ok) {
+                throw new Error('CSV file not found. Please ensure real-van-database.csv is in the project directory.');
+            }
+            
+            const csvText = await response.text();
+            const importedVans = this.parseSwissVanCSV(csvText);
+            
+            if (importedVans.length > 0) {
+                // Replace current vans with imported data
+                this.vans = importedVans;
+                
+                // Save to localStorage
+                localStorage.setItem('vanRentalVans', JSON.stringify(this.vans));
+                
+                // Re-render the vans grid
+                this.renderVansGrid();
+                
+                this.showNotification(`Successfully imported ${importedVans.length} vans from your Swiss database!`, 'success');
+            } else {
+                this.showNotification('No valid van data found in CSV file', 'warning');
+            }
+        } catch (error) {
+            console.error('CSV import error:', error);
+            this.showNotification(`Import failed: ${error.message}`, 'error');
+        }
+    }
+
+    parseSwissVanCSV(csvText) {
+        const lines = csvText.split('\n');
+        const headers = lines[0].split(',');
+        const vans = [];
+        
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            
+            const values = this.parseCSVLine(line);
+            if (values.length < headers.length) continue;
+            
+            const van = {
+                id: i, // Sequential ID
+                VehicleID: values[0] || `N${i.toString().padStart(2, '0')}`,
+                name: values[1] || `Unknown Van ${i}`,
+                CalendarID: values[2] || '',
+                address: values[3] || '',
+                LicencePlate: values[4] || '',
+                
+                // Technical specifications
+                extHeight: this.parseNumber(values[5]) || 2.0,
+                extLength: this.parseNumber(values[6]) || 5.0,
+                extWidth: this.parseNumber(values[7]) || 2.0,
+                intHeight: this.parseNumber(values[8]) || 1.8,
+                intLength: this.parseNumber(values[9]) || 3.0,
+                intWidth: this.parseNumber(values[10]) || 1.5,
+                
+                // Standard fields for admin system
+                type: 'Van',
+                capacity: 2,
+                pricePerDay: 100,
+                status: 'available',
+                enabled: true,
+                description: `${values[1]} located at ${values[3]}`,
+                features: ['GPS Navigation', 'Air Conditioning', 'Bluetooth'],
+                pricingProfile: 1,
+                
+                // Swiss specific data
+                location: this.extractLocationFromAddress(values[3]),
+                canton: 'TI', // Ticino from license plates
+                
+                // Media placeholders
+                primaryImage: null,
+                images: []
+            };
+            
+            vans.push(van);
+        }
+        
+        return vans;
+    }
+
+    parseCSVLine(line) {
+        const values = [];
+        let current = '';
+        let inQuotes = false;
+        
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            
+            if (char === '"') {
+                inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+                values.push(current.trim());
+                current = '';
+            } else {
+                current += char;
+            }
+        }
+        
+        values.push(current.trim());
+        return values;
+    }
+
+    parseNumber(value) {
+        if (!value) return null;
+        // Handle European decimal notation (comma as decimal separator)
+        const cleaned = value.toString().replace(',', '.');
+        const num = parseFloat(cleaned);
+        return isNaN(num) ? null : num;
+    }
+
+    extractLocationFromAddress(address) {
+        if (!address) return 'Unknown';
+        
+        // Extract city name from Swiss address format
+        const match = address.match(/\d{4}\s+([^-,]+)/);
+        return match ? match[1].trim() : 'Switzerland';
+    }
+
     toggleVanStatus(vanId) {
         const van = this.vans.find(v => v.id === vanId);
         if (van) {
