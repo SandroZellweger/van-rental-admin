@@ -42,6 +42,12 @@ export class AdminDashboard {
                 this.mediaManager.loadMediaItems()
             ]);
             
+            // Check if we're running in mock mode
+            if (this.vanManager.api.useMockData) {
+                this.uiManager.showNotification('⚠️ Running in Mock Mode - Backend not available', 'warning', 5000);
+                console.warn('🔄 Admin Dashboard running in mock mode - backend server not available');
+            }
+            
             // Setup all components with loaded data
             this.renderDashboard();
             this.renderAvailabilityCalendar();
