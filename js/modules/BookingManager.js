@@ -1,92 +1,33 @@
 // BookingManager.js - Handles booking data and operations
+import { APIService } from '../services/APIService.js';
+
 export class BookingManager {
     constructor() {
-        this.bookings = this.initializeBookingData();
+        this.api = new APIService();
+        this.bookings = [];
+        this.isLoading = false;
+        this.error = null;
     }
 
-    initializeBookingData() {
-        return [
-            {
-                id: 'BK001',
-                vanId: 1,
-                vanName: 'Compact Van #1',
-                customerName: 'John Smith',
-                customerEmail: 'john.smith@email.com',
-                customerPhone: '+1 (555) 123-4567',
-                checkinDate: '2024-01-15',
-                checkoutDate: '2024-01-20',
-                status: 'confirmed',
-                totalAmount: 400,
-                depositAmount: 120,
-                notes: 'First-time customer, pickup at airport',
-                bookingDate: '2024-01-10',
-                specialRequests: 'Child seat needed'
-            },
-            {
-                id: 'BK002',
-                vanId: 3,
-                vanName: 'Standard Van #1',
-                customerName: 'Sarah Johnson',
-                customerEmail: 'sarah.j@email.com',
-                customerPhone: '+1 (555) 987-6543',
-                checkinDate: '2024-01-18',
-                checkoutDate: '2024-01-25',
-                status: 'confirmed',
-                totalAmount: 840,
-                depositAmount: 252,
-                notes: 'Regular customer, premium insurance',
-                bookingDate: '2024-01-12',
-                specialRequests: 'GPS navigation required'
-            },
-            {
-                id: 'BK003',
-                vanId: 2,
-                vanName: 'Compact Van #2',
-                customerName: 'Mike Davis',
-                customerEmail: 'mike.davis@email.com',
-                customerPhone: '+1 (555) 456-7890',
-                checkinDate: '2024-01-22',
-                checkoutDate: '2024-01-24',
-                status: 'pending',
-                totalAmount: 160,
-                depositAmount: 48,
-                notes: 'Pending payment confirmation',
-                bookingDate: '2024-01-20',
-                specialRequests: 'Early pickup requested'
-            },
-            {
-                id: 'BK004',
-                vanId: 6,
-                vanName: 'Luxury Van #1',
-                customerName: 'Emma Wilson',
-                customerEmail: 'emma.wilson@email.com',
-                customerPhone: '+1 (555) 321-0987',
-                checkinDate: '2024-01-28',
-                checkoutDate: '2024-02-05',
-                status: 'confirmed',
-                totalAmount: 1600,
-                depositAmount: 480,
-                notes: 'Anniversary trip, VIP treatment',
-                bookingDate: '2024-01-15',
-                specialRequests: 'Champagne and flowers setup'
-            },
-            {
-                id: 'BK005',
-                vanId: 5,
-                vanName: 'Standard Van #3',
-                customerName: 'David Brown',
-                customerEmail: 'david.brown@email.com',
-                customerPhone: '+1 (555) 654-3210',
-                checkinDate: '2024-02-10',
-                checkoutDate: '2024-02-17',
-                status: 'confirmed',
-                totalAmount: 840,
-                depositAmount: 252,
-                notes: 'Business trip, require receipt',
-                bookingDate: '2024-01-25',
-                specialRequests: 'Mobile wifi needed'
-            }
-        ];
+    async loadBookings(filters = {}) {
+        try {
+            this.isLoading = true;
+            this.error = null;
+            const response = await this.api.getBookings(filters);
+            this.bookings = response.data || [];
+            return this.bookings;
+        } catch (error) {
+            this.error = error.message;
+            console.error('Failed to load bookings:', error);
+            this.bookings = [];
+            return this.bookings;
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    async refreshBookings() {
+        return await this.loadBookings();
     }
 
     getBookingById(bookingId) {

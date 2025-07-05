@@ -1,7 +1,44 @@
 // CalendarManager.js - Handles calendar rendering and availability
+import { APIService } from '../services/APIService.js';
+
 export class CalendarManager {
     constructor() {
+        this.api = new APIService();
         this.currentDate = new Date();
+        this.availabilityData = {};
+        this.isLoading = false;
+        this.error = null;
+    }
+
+    async loadAvailabilityCalendar(vanId, year, month) {
+        try {
+            this.isLoading = true;
+            this.error = null;
+            const response = await this.api.getAvailabilityCalendar(vanId, year, month);
+            const key = `${vanId}-${year}-${month}`;
+            this.availabilityData[key] = response.data;
+            return response.data;
+        } catch (error) {
+            this.error = error.message;
+            console.error('Failed to load availability calendar:', error);
+            return null;
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    async checkAvailability(availabilityData) {
+        try {
+            this.isLoading = true;
+            const response = await this.api.checkAvailability(availabilityData);
+            return response.data;
+        } catch (error) {
+            this.error = error.message;
+            console.error('Failed to check availability:', error);
+            throw error;
+        } finally {
+            this.isLoading = false;
+        }
     }
 
     renderAvailabilityCalendar() {

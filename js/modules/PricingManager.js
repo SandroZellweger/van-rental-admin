@@ -1,12 +1,49 @@
 // PricingManager.js - Handles pricing profiles, rules, and seasonal pricing
+import { APIService } from '../services/APIService.js';
+
 export class PricingManager {
     constructor() {
-        this.pricingProfiles = this.initializePricingProfiles();
-        this.pricingRules = this.initializePricingRules();
-        this.seasonalPricing = this.initializeSeasonalPricing();
+        this.api = new APIService();
+        this.pricingProfiles = [];
+        this.pricingRules = [];
+        this.seasonalPricing = [];
+        this.isLoading = false;
+        this.error = null;
     }
 
-    initializePricingProfiles() {
+    async loadPricingProfiles() {
+        try {
+            this.isLoading = true;
+            this.error = null;
+            const response = await this.api.getPricingProfiles();
+            this.pricingProfiles = response.data || [];
+            return this.pricingProfiles;
+        } catch (error) {
+            this.error = error.message;
+            console.error('Failed to load pricing profiles:', error);
+            // Fallback to default profiles
+            this.pricingProfiles = this.getDefaultPricingProfiles();
+            return this.pricingProfiles;
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    async calculatePricing(pricingData) {
+        try {
+            this.isLoading = true;
+            const response = await this.api.calculatePricing(pricingData);
+            return response.data;
+        } catch (error) {
+            this.error = error.message;
+            console.error('Failed to calculate pricing:', error);
+            throw error;
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    getDefaultPricingProfiles() {
         return [
             {
                 id: 'standard',

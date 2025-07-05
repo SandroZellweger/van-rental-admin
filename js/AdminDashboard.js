@@ -24,34 +24,45 @@ export class AdminDashboard {
         this.init();
     }
 
-    init() {
+    async init() {
         console.log('Setting up Admin Dashboard...');
         
         // Initialize UI manager first
         this.uiManager.init();
         
-        // Setup all components
-        this.renderDashboard();
-        this.renderAvailabilityCalendar();
-        this.renderBookingsTable();
-        this.renderVansGrid();
-        this.setupSearch();
-        this.setupGlobalSearch();
-        this.renderPricingProfiles();
-        this.setupPricingTabs();
-        this.renderGoogleSheetsSection();
-        this.setupGoogleSheetsHandlers();
-        this.setupVanManagementTabs();
-        this.setupMediaManager();
-        this.setupVanImagePlaceholderListeners();
+        // Show loading state
+        this.uiManager.showNotification('Loading data from backend...', 'info', 2000);
         
-        // Show welcome notification
-        setTimeout(() => {
-            this.uiManager.showNotification('Admin Dashboard loaded successfully!', 'success', 3000);
-        }, 1000);
-        
-        // Setup global search
-        this.setupGlobalSearch();
+        try {
+            // Load data from backend in parallel
+            await Promise.all([
+                this.vanManager.loadVans(),
+                this.bookingManager.loadBookings(),
+                this.pricingManager.loadPricingProfiles(),
+                this.mediaManager.loadMediaItems()
+            ]);
+            
+            // Setup all components with loaded data
+            this.renderDashboard();
+            this.renderAvailabilityCalendar();
+            this.renderBookingsTable();
+            this.renderVansGrid();
+            this.setupSearch();
+            this.setupGlobalSearch();
+            this.renderPricingProfiles();
+            this.setupPricingTabs();
+            this.renderGoogleSheetsSection();
+            this.setupGoogleSheetsHandlers();
+            this.setupVanManagementTabs();
+            this.setupMediaManager();
+            this.setupVanImagePlaceholderListeners();
+            
+            // Show success notification
+            this.uiManager.showNotification('Admin Dashboard loaded successfully with live backend data!', 'success', 3000);
+        } catch (error) {
+            console.error('Failed to initialize dashboard:', error);
+            this.uiManager.showNotification('Failed to load dashboard data. Check backend connection.', 'error', 5000);
+        }
         
         console.log('Admin Dashboard initialization complete!');
     }

@@ -8,6 +8,8 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
+const database = require('./config/database');
+const { Van, Booking, User, Pricing } = require('./models');
 require('dotenv').config();
 
 const app = express();
@@ -48,12 +50,15 @@ app.use('/api/v1/admin', require('./api/v1/admin'));
 app.use('/api/v1/analytics', require('./api/v1/analytics'));
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', async (req, res) => {
+  const dbStatus = await database.healthCheck();
+  
   res.status(200).json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
     version: '1.0.0',
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    database: dbStatus
   });
 });
 
@@ -102,9 +107,20 @@ app.use('*', (req, res) => {
   });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`
+// Database connection and server startup
+async function startServer() {
+  try {
+    // Try to connect to database
+    await database.connect();
+    
+    // Create default admin user if database is connected
+    if (database.isConnected) {
+      await User.createDefaultAdmin();
+    }
+    
+    // Start server regardless of database connection
+    app.listen(PORT, () => {
+      console.log(`
 🚐 VanLife Admin Backend Server
 ================================
 🌐 Server running on port ${PORT}
@@ -113,8 +129,47 @@ app.listen(PORT, () => {
 💚 Health Check: http://localhost:${PORT}/health
 🏠 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:8000'}
 📊 Environment: ${process.env.NODE_ENV || 'development'}
+🗄️ Database: ${database.isConnected ? 'Connected ✅' : 'Mock Mode ⚠️'}
+
+${!database.isConnected ? `
+⚠️  RUNNING WITH MOCK DATA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📝 To use real database:
+   1. Install MongoDB: https://www.mongodb.com/try/download/community
+   2. Start MongoDB service
+   3. Restart this server
+   
+🔄 OR use MongoDB Atlas:
+   1. Update MONGODB_URI in .env file
+   2. Restart this server
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+` : ''}
 ================================
-  `);
-});
+      `);
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    
+    // Try to start server without database in development mode
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔄 Attempting to start server without database...');
+      app.listen(PORT, () => {
+        console.log(`
+🚐 VanLife Admin Backend Server (Mock Mode)
+================================
+🌐 Server running on port ${PORT}
+⚠️  Database: Mock data only
+🔗 API Base URL: http://localhost:${PORT}/api/v1
+================================
+        `);
+      });
+    } else {
+      process.exit(1);
+    }
+  }
+}
+
+// Start the server
+startServer();
 
 module.exports = app;

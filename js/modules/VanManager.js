@@ -1,111 +1,35 @@
 // VanManager.js - Handles van data, operations, and management
+import { APIService } from '../services/APIService.js';
+
 export class VanManager {
     constructor() {
-        this.vans = this.initializeVanData();
+        this.api = new APIService();
+        this.vans = [];
         this.displayConfig = this.initializeDisplayConfiguration();
+        this.isLoading = false;
+        this.error = null;
     }
 
-    initializeVanData() {
-        return [
-            { 
-                id: 1, 
-                name: 'Compact Van #1', 
-                type: 'compact', 
-                status: 'available', 
-                enabled: true,
-                location: 'City Center', 
-                price: 80, 
-                capacity: 2, 
-                pricingProfile: 'standard',
-                calendarId: 'compact-van-1@example.com',
-                features: ['GPS', 'AC', 'Bluetooth'],
-                description: 'Perfect for city trips and short getaways'
-            },
-            { 
-                id: 2, 
-                name: 'Compact Van #2', 
-                type: 'compact', 
-                status: 'available', 
-                enabled: true,
-                location: 'Airport', 
-                price: 80, 
-                capacity: 2, 
-                pricingProfile: 'standard',
-                calendarId: 'compact-van-2@example.com',
-                features: ['GPS', 'AC', 'Bluetooth'],
-                description: 'Perfect for city trips and short getaways'
-            },
-            { 
-                id: 3, 
-                name: 'Standard Van #1', 
-                type: 'standard', 
-                status: 'rented', 
-                enabled: true,
-                location: 'Downtown', 
-                price: 120, 
-                capacity: 4, 
-                pricingProfile: 'premium',
-                calendarId: 'standard-van-1@example.com',
-                features: ['GPS', 'AC', 'Bluetooth', 'Kitchen', 'Bed'],
-                description: 'Great for family adventures and weekend trips'
-            },
-            { 
-                id: 4, 
-                name: 'Standard Van #2', 
-                type: 'standard', 
-                status: 'maintenance', 
-                enabled: false,
-                location: 'Workshop', 
-                price: 120, 
-                capacity: 4, 
-                pricingProfile: 'premium',
-                calendarId: 'standard-van-2@example.com',
-                features: ['GPS', 'AC', 'Bluetooth', 'Kitchen', 'Bed'],
-                description: 'Great for family adventures and weekend trips'
-            },
-            { 
-                id: 5, 
-                name: 'Standard Van #3', 
-                type: 'standard', 
-                status: 'available', 
-                enabled: true,
-                location: 'Train Station', 
-                price: 120, 
-                capacity: 4, 
-                pricingProfile: 'premium',
-                calendarId: 'standard-van-3@example.com',
-                features: ['GPS', 'AC', 'Bluetooth', 'Kitchen', 'Bed'],
-                description: 'Great for family adventures and weekend trips'
-            },
-            { 
-                id: 6, 
-                name: 'Luxury Van #1', 
-                type: 'luxury', 
-                status: 'available', 
-                enabled: true,
-                location: 'Marina', 
-                price: 200, 
-                capacity: 6, 
-                pricingProfile: 'luxury',
-                calendarId: 'luxury-van-1@example.com',
-                features: ['GPS', 'AC', 'Bluetooth', 'Kitchen', 'Bed', 'Shower', 'Solar Panels'],
-                description: 'Ultimate luxury experience for unforgettable journeys'
-            },
-            { 
-                id: 7, 
-                name: 'Luxury Van #2', 
-                type: 'luxury', 
-                status: 'available', 
-                enabled: true,
-                location: 'Resort Area', 
-                price: 200, 
-                capacity: 6, 
-                pricingProfile: 'luxury',
-                calendarId: 'luxury-van-2@example.com',
-                features: ['GPS', 'AC', 'Bluetooth', 'Kitchen', 'Bed', 'Shower', 'Solar Panels'],
-                description: 'Ultimate luxury experience for unforgettable journeys'
-            }
-        ];
+    async loadVans(filters = {}) {
+        try {
+            this.isLoading = true;
+            this.error = null;
+            const response = await this.api.getVans(filters);
+            this.vans = response.data || [];
+            return this.vans;
+        } catch (error) {
+            this.error = error.message;
+            console.error('Failed to load vans:', error);
+            // Return empty array as fallback
+            this.vans = [];
+            return this.vans;
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    async refreshVans() {
+        return await this.loadVans();
     }
 
     initializeDisplayConfiguration() {
@@ -188,34 +112,85 @@ export class VanManager {
         // Implementation would connect to website API
     }
 
-    addVan(vanData) {
-        const newId = Math.max(...this.vans.map(v => v.id)) + 1;
-        const newVan = {
-            id: newId,
-            ...vanData,
-            status: 'available',
-            enabled: true
-        };
-        this.vans.push(newVan);
-        return newVan;
+    async addVan(vanData) {
+        try {
+            this.isLoading = true;
+            const response = await this.api.createVan(vanData);
+            const newVan = response.data;
+            this.vans.push(newVan);
+            return newVan;
+        } catch (error) {
+            this.error = error.message;
+            console.error('Failed to add van:', error);
+            throw error;
+        } finally {
+            this.isLoading = false;
+        }
     }
 
-    updateVan(vanId, updateData) {
-        const van = this.getVanById(vanId);
-        if (van) {
-            Object.assign(van, updateData);
-            return van;
+    async updateVan(vanId, updateData) {
+        try {
+            this.isLoading = true;
+            const response = await this.api.updateVan(vanId, updateData);
+            const updatedVan = response.data;
+            
+            // Update local cache
+            const index = this.vans.findIndex(van => van.id === vanId);
+            if (index !== -1) {
+                this.vans[index] = updatedVan;
+            }
+            
+            return updatedVan;
+        } catch (error) {
+            this.error = error.message;
+            console.error('Failed to update van:', error);
+            throw error;
+        } finally {
+            this.isLoading = false;
         }
-        return null;
     }
 
-    deleteVan(vanId) {
-        const index = this.vans.findIndex(van => van.id === vanId);
-        if (index !== -1) {
-            const deletedVan = this.vans.splice(index, 1)[0];
-            return deletedVan;
+    async deleteVan(vanId) {
+        try {
+            this.isLoading = true;
+            await this.api.deleteVan(vanId);
+            
+            // Remove from local cache
+            const index = this.vans.findIndex(van => van.id === vanId);
+            if (index !== -1) {
+                const deletedVan = this.vans.splice(index, 1)[0];
+                return deletedVan;
+            }
+            return null;
+        } catch (error) {
+            this.error = error.message;
+            console.error('Failed to delete van:', error);
+            throw error;
+        } finally {
+            this.isLoading = false;
         }
-        return null;
+    }
+
+    async updateVanStatus(vanId, status) {
+        try {
+            this.isLoading = true;
+            const response = await this.api.updateVanStatus(vanId, status);
+            const updatedVan = response.data;
+            
+            // Update local cache
+            const index = this.vans.findIndex(van => van.id === vanId);
+            if (index !== -1) {
+                this.vans[index] = updatedVan;
+            }
+            
+            return updatedVan;
+        } catch (error) {
+            this.error = error.message;
+            console.error('Failed to update van status:', error);
+            throw error;
+        } finally {
+            this.isLoading = false;
+        }
     }
 
     generatePreviewVanCard(van) {

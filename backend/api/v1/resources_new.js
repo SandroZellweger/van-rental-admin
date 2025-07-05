@@ -38,84 +38,6 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-// Mock data fallback when database is not available
-const mockVans = [
-  {
-    _id: '60f1b2b3c4e5f6789abcdef0',
-    name: 'Adventure Seeker',
-    type: 'standard',
-    location: 'San Francisco, CA',
-    base_price: 89.00,
-    capacity: 2,
-    status: 'active',
-    features: {
-      amenities: ['Kitchen', 'Bed', 'Solar Power', 'Toilet'],
-      specifications: {
-        length: '20ft',
-        height: '8ft',
-        width: '6.5ft',
-        engine: 'V6',
-        transmission: 'Automatic',
-        fuel_type: 'Gasoline'
-      }
-    },
-    images: [
-      {
-        url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800',
-        caption: 'Exterior view',
-        type: 'exterior',
-        order: 1
-      }
-    ],
-    pricing_profile: 'standard',
-    calendar_id: 'adventure-seeker@vanlife.com',
-    description: 'Perfect for couples and small groups seeking adventure.',
-    enabled: true,
-    created_at: new Date('2025-07-01'),
-    updated_at: new Date('2025-07-01')
-  },
-  {
-    _id: '60f1b2b3c4e5f6789abcdef1',
-    name: 'Luxury Explorer',
-    type: 'premium',
-    location: 'Los Angeles, CA',
-    base_price: 149.00,
-    capacity: 4,
-    status: 'active',
-    features: {
-      amenities: ['Full Kitchen', 'Queen Bed', 'Solar Power', 'Bathroom', 'AC/Heating'],
-      specifications: {
-        length: '24ft',
-        height: '9ft',
-        width: '7ft',
-        engine: 'V8',
-        transmission: 'Automatic',
-        fuel_type: 'Gasoline'
-      }
-    },
-    images: [
-      {
-        url: 'https://images.unsplash.com/photo-1520587440788-a5f7b70b9c9a?w=800',
-        caption: 'Luxury interior',
-        type: 'interior',
-        order: 1
-      }
-    ],
-    pricing_profile: 'premium',
-    calendar_id: 'luxury-explorer@vanlife.com',
-    description: 'Premium comfort for discerning travelers.',
-    enabled: true,
-    created_at: new Date('2025-07-01'),
-    updated_at: new Date('2025-07-01')
-  }
-];
-
-// Helper function to check if database is connected
-const isDatabaseConnected = () => {
-  const mongoose = require('mongoose');
-  return mongoose.connection.readyState === 1;
-};
-
 // GET /api/v1/resources/vans - List all vans with filtering and pagination
 router.get('/vans', [
   query('status').optional().isIn(['active', 'inactive', 'maintenance']),
@@ -129,22 +51,6 @@ router.get('/vans', [
   query('sort_by').optional().isIn(['name', 'base_price', 'capacity', 'created_at']),
   query('sort_order').optional().isIn(['asc', 'desc'])
 ], handleValidationErrors, asyncHandler(async (req, res) => {
-  // Check if database is connected
-  if (!isDatabaseConnected()) {
-    return res.json({
-      data: mockVans,
-      meta: {
-        total: mockVans.length,
-        page: 1,
-        limit: mockVans.length,
-        total_pages: 1,
-        has_next: false,
-        has_prev: false
-      },
-      timestamp: new Date().toISOString()
-    });
-  }
-  
   // Build query
   const query = {};
   
@@ -203,26 +109,6 @@ router.get('/vans', [
 router.get('/vans/:id', [
   param('id').isMongoId().withMessage('Invalid van ID')
 ], handleValidationErrors, asyncHandler(async (req, res) => {
-  // Check if database is connected
-  if (!isDatabaseConnected()) {
-    const van = mockVans.find(v => v._id === req.params.id);
-    
-    if (!van) {
-      return res.status(404).json({
-        error: {
-          message: 'Van not found',
-          status: 404,
-          timestamp: new Date().toISOString()
-        }
-      });
-    }
-    
-    return res.json({
-      data: van,
-      timestamp: new Date().toISOString()
-    });
-  }
-  
   const van = await Van.findById(req.params.id);
   
   if (!van) {

@@ -1,17 +1,60 @@
 // MediaManager.js - Handles image upload, compression, and gallery management
+import { APIService } from '../services/APIService.js';
+
 export class MediaManager {
     constructor() {
-        this.mediaItems = this.initializeMediaData();
+        this.api = new APIService();
+        this.mediaItems = [];
         this.compressionSettings = { quality: 0.7, maxWidth: 1200, enabled: true };
+        this.isLoading = false;
+        this.error = null;
     }
 
-    initializeMediaData() {
+    async loadMediaItems() {
         try {
+            this.isLoading = true;
+            this.error = null;
+            // For now, load from localStorage as fallback until media API is fully implemented
             const saved = localStorage.getItem('adminDashboard_mediaItems');
-            return saved ? JSON.parse(saved) : [];
+            this.mediaItems = saved ? JSON.parse(saved) : [];
+            return this.mediaItems;
         } catch (error) {
+            this.error = error.message;
             console.warn('Error loading media data:', error);
-            return [];
+            this.mediaItems = [];
+            return this.mediaItems;
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    async uploadImage(file, metadata = {}) {
+        try {
+            this.isLoading = true;
+            this.error = null;
+            
+            // For now, use localStorage with plans to migrate to backend
+            const compressedFile = await this.compressImage(file);
+            const mediaItem = {
+                id: Date.now().toString(),
+                name: file.name,
+                size: compressedFile.size,
+                type: file.type,
+                url: compressedFile.dataURL,
+                uploadedAt: new Date().toISOString(),
+                ...metadata
+            };
+            
+            this.mediaItems.push(mediaItem);
+            this.saveMediaData();
+            
+            return mediaItem;
+        } catch (error) {
+            this.error = error.message;
+            console.error('Failed to upload image:', error);
+            throw error;
+        } finally {
+            this.isLoading = false;
         }
     }
 

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Integration Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            background: #f5f5f5; 
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+        }
+        .test-section { 
+            margin: 20px 0; 
+            padding: 20px; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
+        }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+        .loading { background: #fff3cd; border-color: #ffeaa7; }
+        .test-button { 
+            padding: 10px 20px; 
+            margin: 5px; 
+            border: none; 
+            border-radius: 4px; 
+            background: #007bff; 
+            color: white; 
+            cursor: pointer; 
+        }
+        .test-button:hover { background: #0056b3; }
+        .results { 
+            margin-top: 15px; 
+            padding: 10px; 
+            background: #f8f9fa; 
+            border-radius: 4px; 
+            font-family: monospace; 
+            white-space: pre-wrap; 
+        }
+        h1 { color: #333; }
+        h2 { color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚐 VanLife Backend Integration Test</h1>
+        <p>This page tests the integration between the frontend modules and the backend API.</p>
+        
+        <div class="test-section">
+            <h2>API Service Tests</h2>
+            <button class="test-button" onclick="testHealthCheck()">Test Health Check</button>
+            <button class="test-button" onclick="testVansAPI()">Test Vans API</button>
+            <button class="test-button" onclick="testBookingsAPI()">Test Bookings API</button>
+            <button class="test-button" onclick="testSearchAPI()">Test Search API</button>
+            <div id="api-results" class="results">Click buttons above to test API endpoints...</div>
+        </div>
+
+        <div class="test-section">
+            <h2>Module Tests</h2>
+            <button class="test-button" onclick="testVanManager()">Test Van Manager</button>
+            <button class="test-button" onclick="testBookingManager()">Test Booking Manager</button>
+            <div id="module-results" class="results">Click buttons above to test modules...</div>
+        </div>
+
+        <div class="test-section">
+            <h2>Data Display</h2>
+            <button class="test-button" onclick="loadAndDisplayVans()">Load & Display Vans</button>
+            <button class="test-button" onclick="loadAndDisplayBookings()">Load & Display Bookings</button>
+            <div id="data-results" class="results">Data will be displayed here...</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { APIService } from './js/services/APIService.js';
+        import { VanManager } from './js/modules/VanManager.js';
+        import { BookingManager } from './js/modules/BookingManager.js';
+
+        // Make these globally available for button clicks
+        window.api = new APIService();
+        window.vanManager = new VanManager();
+        window.bookingManager = new BookingManager();
+
+        // API Tests
+        window.testHealthCheck = async function() {
+            const results = document.getElementById('api-results');
+            results.textContent = 'Testing health check...';
+            
+            try {
+                const response = await fetch('http://localhost:3000/health');
+                const data = await response.json();
+                results.textContent = `✅ Health Check Success!\nResponse: ${JSON.stringify(data, null, 2)}`;
+                results.parentElement.className = 'test-section success';
+            } catch (error) {
+                results.textContent = `❌ Health Check Failed!\nError: ${error.message}`;
+                results.parentElement.className = 'test-section error';
+            }
+        };
+
+        window.testVansAPI = async function() {
+            const results = document.getElementById('api-results');
+            results.textContent = 'Testing vans API...';
+            
+            try {
+                const data = await window.api.getVans();
+                results.textContent = `✅ Vans API Success!\nFound ${data.data.length} vans:\n${JSON.stringify(data, null, 2)}`;
+                results.parentElement.className = 'test-section success';
+            } catch (error) {
+                results.textContent = `❌ Vans API Failed!\nError: ${error.message}`;
+                results.parentElement.className = 'test-section error';
+            }
+        };
+
+        window.testBookingsAPI = async function() {
+            const results = document.getElementById('api-results');
+            results.textContent = 'Testing bookings API...';
+            
+            try {
+                const data = await window.api.getBookings();
+                results.textContent = `✅ Bookings API Success!\nFound ${data.data.length} bookings:\n${JSON.stringify(data, null, 2)}`;
+                results.parentElement.className = 'test-section success';
+            } catch (error) {
+                results.textContent = `❌ Bookings API Failed!\nError: ${error.message}`;
+                results.parentElement.className = 'test-section error';
+            }
+        };
+
+        window.testSearchAPI = async function() {
+            const results = document.getElementById('api-results');
+            results.textContent = 'Testing search API...';
+            
+            try {
+                const searchData = {
+                    checkin_date: '2025-08-01',
+                    checkout_date: '2025-08-07',
+                    location: 'San Francisco, CA',
+                    capacity: 2
+                };
+                const data = await window.api.searchAvailability(searchData);
+                results.textContent = `✅ Search API Success!\nFound ${data.data.results.length} results:\n${JSON.stringify(data, null, 2)}`;
+                results.parentElement.className = 'test-section success';
+            } catch (error) {
+                results.textContent = `❌ Search API Failed!\nError: ${error.message}`;
+                results.parentElement.className = 'test-section error';
+            }
+        };
+
+        // Module Tests
+        window.testVanManager = async function() {
+            const results = document.getElementById('module-results');
+            results.textContent = 'Testing Van Manager...';
+            
+            try {
+                const vans = await window.vanManager.loadVans();
+                results.textContent = `✅ Van Manager Success!\nLoaded ${vans.length} vans:\n${JSON.stringify(vans, null, 2)}`;
+                results.parentElement.className = 'test-section success';
+            } catch (error) {
+                results.textContent = `❌ Van Manager Failed!\nError: ${error.message}`;
+                results.parentElement.className = 'test-section error';
+            }
+        };
+
+        window.testBookingManager = async function() {
+            const results = document.getElementById('module-results');
+            results.textContent = 'Testing Booking Manager...';
+            
+            try {
+                const bookings = await window.bookingManager.loadBookings();
+                results.textContent = `✅ Booking Manager Success!\nLoaded ${bookings.length} bookings:\n${JSON.stringify(bookings, null, 2)}`;
+                results.parentElement.className = 'test-section success';
+            } catch (error) {
+                results.textContent = `❌ Booking Manager Failed!\nError: ${error.message}`;
+                results.parentElement.className = 'test-section error';
+            }
+        };
+
+        // Data Display
+        window.loadAndDisplayVans = async function() {
+            const results = document.getElementById('data-results');
+            results.textContent = 'Loading vans data...';
+            
+            try {
+                const vans = await window.vanManager.loadVans();
+                let displayText = `📊 VANS DATA (${vans.length} total)\n\n`;
+                
+                vans.forEach(van => {
+                    displayText += `🚐 ${van.name}\n`;
+                    displayText += `   Type: ${van.type}\n`;
+                    displayText += `   Status: ${van.status}\n`;
+                    displayText += `   Location: ${van.location}\n`;
+                    displayText += `   Base Price: $${van.base_price}/night\n`;
+                    displayText += `   Capacity: ${van.capacity} people\n`;
+                    displayText += `   Amenities: ${van.features?.amenities?.join(', ') || 'N/A'}\n\n`;
+                });
+                
+                results.textContent = displayText;
+                results.parentElement.className = 'test-section success';
+            } catch (error) {
+                results.textContent = `❌ Failed to load vans!\nError: ${error.message}`;
+                results.parentElement.className = 'test-section error';
+            }
+        };
+
+        window.loadAndDisplayBookings = async function() {
+            const results = document.getElementById('data-results');
+            results.textContent = 'Loading bookings data...';
+            
+            try {
+                const bookings = await window.bookingManager.loadBookings();
+                let displayText = `📅 BOOKINGS DATA (${bookings.length} total)\n\n`;
+                
+                bookings.forEach(booking => {
+                    displayText += `📋 Booking #${booking.id}\n`;
+                    displayText += `   Customer: ${booking.customer_name}\n`;
+                    displayText += `   Van ID: ${booking.van_id}\n`;
+                    displayText += `   Check-in: ${booking.checkin_date}\n`;
+                    displayText += `   Check-out: ${booking.checkout_date}\n`;
+                    displayText += `   Status: ${booking.status}\n`;
+                    displayText += `   Total: $${booking.total_price}\n\n`;
+                });
+                
+                results.textContent = displayText;
+                results.parentElement.className = 'test-section success';
+            } catch (error) {
+                results.textContent = `❌ Failed to load bookings!\nError: ${error.message}`;
+                results.parentElement.className = 'test-section error';
+            }
+        };
+
+        // Auto-run basic tests on page load
+        setTimeout(() => {
+            console.log('Running initial tests...');
+            testHealthCheck();
+        }, 1000);
+    </script>
+</body>
+</html>
