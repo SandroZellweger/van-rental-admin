@@ -519,6 +519,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // Make it globally accessible for onclick handlers
     window.adminDashboard = adminDashboard;
 });
-
-// Export for module use
-export { AdminDashboard };
