@@ -1,43 +1,13 @@
 // APIService.js - Backend API integration service
 export class APIService {
     constructor() {
-        // Try multiple ports to find working backend
-        this.possiblePorts = [3003, 3002, 3001, 3000];
-        this.baseURL = 'http://localhost:3000/api/v1'; // Start with 3000
+        this.baseURL = 'http://localhost:3005/api/v1';
         this.headers = {
             'Content-Type': 'application/json',
         };
-        this.workingPort = null;
-    }
-
-    async findWorkingPort() {
-        if (this.workingPort) return this.workingPort;
-        
-        for (const port of this.possiblePorts) {
-            try {
-                const testUrl = `http://localhost:${port}/api/v1/admin/health`;
-                const response = await fetch(testUrl);
-                if (response.ok) {
-                    this.workingPort = port;
-                    this.baseURL = `http://localhost:${port}/api/v1`;
-                    console.log(`✅ Found working backend on port ${port}`);
-                    return port;
-                }
-            } catch (error) {
-                continue;
-            }
-        }
-        throw new Error('No backend server found on any port');
     }
 
     async request(endpoint, options = {}) {
-        // Try to find working port first
-        try {
-            await this.findWorkingPort();
-        } catch (error) {
-            console.warn('No backend found, using fallback port 3000');
-        }
-        
         const url = `${this.baseURL}${endpoint}`;
         const config = {
             headers: this.headers,

@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Backend Integration Test</title>
+    
+    <!-- Content Security Policy for Local Development -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self'; 
+        script-src 'self' 'unsafe-inline' 'unsafe-eval'; 
+        style-src 'self' 'unsafe-inline'; 
+        connect-src 'self' http://localhost:*; 
+        img-src 'self' data: blob: https:;
+        object-src 'none';
+    ">
+    
     <style>
         body { 
             font-family: Arial, sans-serif; 
