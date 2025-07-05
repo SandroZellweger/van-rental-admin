@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Script Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Admin Script Test</h1>
+    <div id="test-results"></div>
+
+    <script src="admin-script-v2.js?v=2025-07-05-09-04-30"></script>
+    <script>
+        function addResult(message, isSuccess) {
+            const div = document.createElement('div');
+            div.className = `test-result ${isSuccess ? 'success' : 'error'}`;
+            div.innerHTML = message;
+            document.getElementById('test-results').appendChild(div);
+        }
+
+        // Test if AdminDashboard class exists
+        try {
+            if (typeof AdminDashboard === 'function') {
+                addResult('✅ AdminDashboard class exists', true);
+                
+                // Test if we can create an instance (but don't initialize it)
+                const testInstance = Object.create(AdminDashboard.prototype);
+                
+                // Check if setupPricingTabs method exists
+                if (typeof testInstance.setupPricingTabs === 'function') {
+                    addResult('✅ setupPricingTabs method exists', true);
+                } else {
+                    addResult('❌ setupPricingTabs method is missing', false);
+                }
+                
+                // List all methods for debugging
+                const methods = Object.getOwnPropertyNames(AdminDashboard.prototype)
+                    .filter(name => typeof AdminDashboard.prototype[name] === 'function' && name !== 'constructor')
+                    .sort();
+                
+                addResult(`📋 Found ${methods.length} methods in AdminDashboard: ${methods.slice(0, 10).join(', ')}${methods.length > 10 ? '...' : ''}`, true);
+                
+                // Check for setupPricingTabs specifically
+                const hasPricingTabs = methods.includes('setupPricingTabs');
+                addResult(`🎯 setupPricingTabs in method list: ${hasPricingTabs ? 'YES' : 'NO'}`, hasPricingTabs);
+                
+            } else {
+                addResult('❌ AdminDashboard class not found', false);
+            }
+        } catch (error) {
+            addResult(`❌ Error testing AdminDashboard: ${error.message}`, false);
+        }
+
+        // Test script loading
+        addResult(`📄 Script loaded at: ${new Date().toLocaleTimeString()}`, true);
+        addResult(`🔗 Script source: admin-script-v2.js?v=2025-07-05-09-04-30`, true);
+    </script>
+</body>
+</html>
