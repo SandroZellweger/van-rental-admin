@@ -1,7 +1,7 @@
 // APIService.js - Backend API integration service
 export class APIService {
     constructor() {
-        this.baseURL = 'http://localhost:3001/api/v1';
+        this.baseURL = 'http://localhost:3002/api/v1';
         this.headers = {
             'Content-Type': 'application/json',
         };
