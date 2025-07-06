@@ -5,10 +5,11 @@
   "main": "index.html",
   "scripts": {
     "start": "live-server --port=3000 --open=/index.html",
-    "build": "npm run minify-css && npm run minify-js",
+    "build": "vite build",
     "minify-css": "cleancss -o dist/styles.min.css styles.css",
     "minify-js": "uglifyjs script.js -o dist/script.min.js",
-    "dev": "npm run start",
+    "dev": "vite",
+    "preview": "vite preview",
     "deploy": "npm run build && gh-pages -d dist"
   },
   "keywords": [
@@ -22,12 +23,15 @@
   "author": "VanLife Rentals Team",
   "license": "ISC",
   "devDependencies": {
-    "live-server": "^1.2.2",
     "clean-css-cli": "^5.6.2",
+    "gh-pages": "^5.0.0",
+    "live-server": "^1.2.2",
     "uglify-js": "^3.17.4",
-    "gh-pages": "^5.0.0"
+    "vite": "^4.0.0"
   },
   "dependencies": {
+    "ajv": "^8.17.1",
+    "alpinejs": "^3.10.5",
     "stripe": "^12.0.0"
   },
   "repository": {

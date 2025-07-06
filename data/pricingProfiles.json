@@ -1,0 +1,6 @@
+[
+  { "id": "standard", "name": "Standard Pricing", "description": "Default pricing for most vans", "basePrice": 100, "weekendMultiplier": 1.2, "holidayMultiplier": 1.5, "minimumDays": 1, "cancellationPolicy": "24h free cancellation", "active": true },
+  { "id": "premium", "name": "Premium Pricing", "description": "Higher pricing for premium vans", "basePrice": 150, "weekendMultiplier": 1.3, "holidayMultiplier": 1.6, "minimumDays": 2, "cancellationPolicy": "48h free cancellation", "active": true },
+  { "id": "luxury", "name": "Luxury Pricing", "description": "Premium pricing for luxury vans", "basePrice": 200, "weekendMultiplier": 1.4, "holidayMultiplier": 1.8, "minimumDays": 3, "cancellationPolicy": "72h free cancellation", "active": true },
+  { "id": "family", "name": "Family Pricing", "description": "Family-friendly pricing for larger vans", "basePrice": 130, "weekendMultiplier": 1.25, "holidayMultiplier": 1.4, "minimumDays": 2, "cancellationPolicy": "48h free cancellation", "active": true }
+]

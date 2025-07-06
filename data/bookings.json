@@ -1,0 +1,5 @@
+[
+  { "id": "BK001", "customerId": "C001", "customerName": "John Smith", "customerEmail": "john@example.com", "vanId": 3, "startDate": "2025-07-15", "endDate": "2025-07-20", "status": "confirmed", "total": 600, "phone": "+1234567890" },
+  { "id": "BK002", "customerId": "C002", "customerName": "Sarah Johnson", "customerEmail": "sarah@example.com", "vanId": 8, "startDate": "2025-07-22", "endDate": "2025-07-25", "status": "pending", "total": 450, "phone": "+1234567891" },
+  { "id": "BK003", "customerId": "C003", "customerName": "Mike Davis", "customerEmail": "mike@example.com", "vanId": 1, "startDate": "2025-07-18", "endDate": "2025-07-21", "status": "confirmed", "total": 240, "phone": "+1234567892" }
+]

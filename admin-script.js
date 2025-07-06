@@ -1,14 +1,22 @@
 // Admin Dashboard JavaScript
+// Import data models and initializers
+import { getInitialVans, getInitialBookings, getPricingProfiles } from './js/models.js';
+import { getInitialGoogleSheetsConfig, getInitialPricingRules, getInitialSeasonalPricing, getInitialDisplayConfig } from './js/configs.js';
+import { renderAvailabilityCalendar } from './js/calendar.js';
+import { renderBookingsTable } from './js/bookings.js';
+import { renderSearchResults } from './js/search.js';
+import { renderVansGrid } from './js/vansGrid.js';
+
 class AdminDashboard {
     constructor() {
         this.currentDate = new Date();
-        this.vans = this.initializeVanData();
-        this.bookings = this.initializeBookingData();
-        this.pricingProfiles = this.initializePricingProfiles();
-        this.googleSheetsConfig = this.initializeGoogleSheetsConfig();
-        this.pricingRules = this.initializePricingRules();
-        this.seasonalPricing = this.initializeSeasonalPricing();
-        this.displayConfig = this.initializeDisplayConfiguration();
+        this.vans = getInitialVans();
+        this.bookings = getInitialBookings();
+        this.pricingProfiles = getPricingProfiles();
+        this.googleSheetsConfig = getInitialGoogleSheetsConfig();
+        this.pricingRules = getInitialPricingRules();
+        this.seasonalPricing = getInitialSeasonalPricing();
+        this.displayConfig = getInitialDisplayConfig();
         this.mediaItems = this.initializeMediaData();
         this.compressionSettings = { quality: 0.7, maxWidth: 1200, enabled: true };
         this.init();
@@ -18,9 +26,21 @@ class AdminDashboard {
         this.setupNavigation();
         this.setupEventListeners();
         this.renderDashboard();
-        this.renderAvailabilityCalendar();
-        this.renderBookingsTable();
-        this.renderVansGrid();
+
+        // Render availability calendar via module
+        renderAvailabilityCalendar(
+          this.vans,
+          this.currentDate,
+          this.getVanAvailability.bind(this),
+          this.handleCalendarDayClick.bind(this)
+        );
+
+        // Render bookings table via module
+        renderBookingsTable(this.bookings, this.formatDisplayDate.bind(this));
+
+        // Render vans grid via module
+        renderVansGrid(this.vans, this.bookings, this.pricingProfiles);
+
         this.setupSearch();
         this.renderPricingProfiles();
         this.setupPricingTabs();
@@ -837,7 +857,8 @@ class AdminDashboard {
             return this.isVanAvailableForPeriod(van.id, checkin, checkout);
         });
 
-        this.renderSearchResults(availableVans, checkin, checkout);
+        // Render search results via module
+        renderSearchResults(availableVans, checkin, checkout);
     }
 
     isVanAvailableForPeriod(vanId, startDate, endDate) {
@@ -1856,6 +1877,8 @@ function renderVanCollection(vans) {
         `;
         document.body.appendChild(modal);
     }
+
+
 
     viewVanCalendar(vanId) {
         const van = this.vans.find(v => v.id === vanId);
